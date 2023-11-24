@@ -2,7 +2,6 @@ package invoice
 
 type AddInvoiceModel struct {
 	WSPurchaseInvoicePage struct {
-		Text                     string `xml:",chardata" json:"text"`
 		Key                      string `xml:"Key" json:"key"`
 		No                       string `xml:"No" json:"no"`
 		BuyFromVendorNo          string `xml:"Buy_from_Vendor_No" json:"buy_from_vendor_no"`
