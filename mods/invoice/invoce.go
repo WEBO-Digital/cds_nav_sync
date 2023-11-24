@@ -1,25 +1,30 @@
 package invoice
 
 import (
-	"nav_sync/mods"
+	"nav_sync/config"
 	filesystem "nav_sync/mods/afile_system"
 	"nav_sync/mods/amanager"
+	"nav_sync/utils"
 )
 
 func Fetch() {
+	//Path
+	INVOICE_FETCH_URL := config.Config.Invoice.Fetch.URL
+	INVOICE_PENDING_FILE_PATH := utils.INVOICE_PENDING_FILE_PATH
+
 	//Fetch vendor data
-	response, err := amanager.Fetch(mods.INVOICE_FETCH_URL)
+	response, err := amanager.Fetch(INVOICE_FETCH_URL)
 	if err != nil {
-		mods.Console(err.Error())
+		utils.Console(err.Error())
 	}
-	mods.Console(response)
+	utils.Console(response)
 
 	//Save to pending file
-	err = filesystem.Save(mods.INVOICE_PENDING_FILE_PATH, response)
+	err = filesystem.Save(INVOICE_PENDING_FILE_PATH, response)
 	if err != nil {
-		mods.Console(err.Error())
+		utils.Console(err.Error())
 	}
-	mods.Console("Successfully saved invoice to pending file")
+	utils.Console("Successfully saved invoice to pending file")
 }
 
 func Sync() {
@@ -32,10 +37,14 @@ func Sync() {
 	//Then sync one by one
 	//After sync one file then move it to done folder.
 
+	//Path
+	INVOICE_PENDING_FILE_PATH := utils.INVOICE_PENDING_FILE_PATH
+	INVOICE_DONE_FILE_PATH := utils.INVOICE_DONE_FILE_PATH
+
 	//Get All the vendor pending data
-	fileNames, err := filesystem.GetAllFiles(mods.INVOICE_PENDING_FILE_PATH)
+	fileNames, err := filesystem.GetAllFiles(INVOICE_PENDING_FILE_PATH)
 	if err != nil {
-		mods.Console(err.Error())
+		utils.Console(err.Error())
 	}
 
 	//mods.Console(fileNames)
@@ -49,9 +58,9 @@ func Sync() {
 		//We assume here that Data are pushed to NAV
 
 		//Move to done file
-		err = filesystem.MoveFile(fileNames[i], mods.INVOICE_PENDING_FILE_PATH, mods.INVOICE_DONE_FILE_PATH)
+		err = filesystem.MoveFile(fileNames[i], INVOICE_PENDING_FILE_PATH, INVOICE_DONE_FILE_PATH)
 		if err != nil {
-			mods.Console(err.Error())
+			utils.Console(err.Error())
 		}
 	}
 

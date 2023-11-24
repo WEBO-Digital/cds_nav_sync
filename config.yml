@@ -1,0 +1,18 @@
+vendor:
+  fetch:
+    url: https://dummyjson.com/products
+    apikey: sdfjkJ
+  sync:
+    url: https://dummyjson.com/products
+
+invoice:
+  fetch:
+    url: https://jsonplaceholder.typicode.com/posts
+    apikey: sdfjkJ
+  sync:
+    url: https://jsonplaceholder.typicode.com/posts
+
+auth:
+  ntlm:
+    username: rojan.shrestha
+    password: KJjdhJGL

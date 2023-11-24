@@ -1,17 +1,21 @@
 package main
 
 import (
-	"nav_sync/mods/vendor"
+	"nav_sync/config"
 )
 
 func main() {
+	//Load yaml config
+	config.LoadYamlFile()
+
 	//vendor
-	// vendor.Fetch()
+	//vendor.Fetch()
 	// time.Sleep(5 * 1000)
-	vendor.Sync()
+	//vendor.Sync()
 
 	//invoice
 	// invoice.Fetch()
 	// time.Sleep(10 * 1000)
 	// invoice.Sync()
+
 }
