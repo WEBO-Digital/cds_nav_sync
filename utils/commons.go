@@ -5,10 +5,10 @@ import (
 	"log"
 )
 
-func Console(message interface{}) {
+func Console(message ...any) {
 	fmt.Println(message)
 }
 
-func Fatal(message interface{}) {
+func Fatal(message ...any) {
 	log.Fatal(message)
 }

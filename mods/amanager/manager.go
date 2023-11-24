@@ -20,7 +20,7 @@ func Fetch(url string) (interface{}, error) {
 	}
 
 	//convert to json
-	data, err := ParseToJson(body)
+	data, err := ParseByteToJson(body)
 	if err != nil {
 		return nil, err
 	}

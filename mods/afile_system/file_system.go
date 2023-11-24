@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
+	"log"
 	"os"
 	"path/filepath"
 	"time"
@@ -43,6 +44,22 @@ func Save(path string, data interface{}) error {
 		return err
 	}
 	return nil
+}
+
+func ReadFile(path string, fileName string) ([]byte, error) {
+	// Get the current working directory
+	currentDir, err := getCurrentWorkingDirectory()
+	if err != nil {
+		return nil, err
+	}
+	filePath := fmt.Sprintf("%s%s%s", currentDir, path, fileName)
+
+	// Read your JSON data from a file
+	jsonData, err := ioutil.ReadFile(filePath)
+	if err != nil {
+		log.Fatal("Error reading JSON data:", err)
+	}
+	return jsonData, nil
 }
 
 func GetAllFiles(path string) ([]string, error) {
