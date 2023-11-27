@@ -7,6 +7,8 @@ import (
 	"nav_sync/config"
 	filesystem "nav_sync/mods/afile_system"
 	"nav_sync/mods/amanager"
+	normalapi "nav_sync/mods/anormal_api"
+	data_parser "nav_sync/mods/aparser"
 	"nav_sync/utils"
 )
 
@@ -16,7 +18,7 @@ func Fetch() {
 	INVOICE_PENDING_FILE_PATH := utils.INVOICE_PENDING_FILE_PATH
 
 	//Fetch vendor data
-	response, err := amanager.Fetch(INVOICE_FETCH_URL)
+	response, err := amanager.Fetch(INVOICE_FETCH_URL, normalapi.GET)
 	if err != nil {
 		utils.Console(err.Error())
 	}
@@ -72,7 +74,7 @@ func Sync() {
 		//utils.Console(invoice)
 
 		// Map Go struct to XML
-		xmlData, err := amanager.ParseJsonToXml(invoice)
+		xmlData, err := data_parser.ParseJsonToXml(invoice)
 		if err != nil {
 			utils.Fatal("Error mapping to XML: ", err)
 		}

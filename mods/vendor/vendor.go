@@ -1,12 +1,15 @@
 package vendor
 
 import (
-	"bytes"
 	"encoding/json"
 	"fmt"
+	"log"
 	"nav_sync/config"
 	filesystem "nav_sync/mods/afile_system"
 	"nav_sync/mods/amanager"
+	navapi "nav_sync/mods/anav_api"
+	normalapi "nav_sync/mods/anormal_api"
+	data_parser "nav_sync/mods/aparser"
 
 	"nav_sync/utils"
 )
@@ -17,7 +20,7 @@ func Fetch() {
 	VENDOR_PENDING_FILE_PATH := utils.VENDOR_PENDING_FILE_PATH
 
 	//Fetch vendor data
-	response, err := amanager.Fetch(VENDOR_FETCH_URL)
+	response, err := amanager.Fetch(VENDOR_FETCH_URL, normalapi.GET)
 	if err != nil {
 		utils.Console(err.Error())
 	}
@@ -31,19 +34,43 @@ func Fetch() {
 	utils.Console("Successfully saved vendor to pending file")
 }
 
+// func Sync() {
+// 	//Eg.
+// 	NTLM_USERNAME := config.Config.Auth.Ntlm.Username
+// 	NTLM_PASSWORD := config.Config.Auth.Ntlm.Password
+// 	url := config.Config.Vendor.Sync.URL
+// 	xmlPayload := `
+// 		<Envelope
+// 			xmlns="http://schemas.xmlsoap.org/soap/envelope/">
+// 			<Body>
+// 				<Create
+// 					xmlns="urn:microsoft-dynamics-schemas/page/wsvendor">
+// 					<WSVendor>
+// 						<Name>Suman Intuji </Name>
+// 						<Address>From vs code</Address>
+// 						<Weighbridge_Supplier_ID>INJ123</Weighbridge_Supplier_ID>
+// 					</WSVendor>
+// 				</Create>
+// 			</Body>
+// 		</Envelope>
+// 	`
+
+// 	utils.Console(xmlPayload)
+// 	result, err := amanager.Sync(url, navapi.POST, xmlPayload, NTLM_USERNAME, NTLM_PASSWORD)
+// 	if err != nil {
+// 		utils.Console(err)
+// 	} else {
+// 		utils.Console(result)
+// 	}
+// }
+
 func Sync() {
-	//How to access pending directory
-	//Case 1. Do this function run independently
-	//Case 2. Do we run this function after fetch function is called
-
-	//We go through Case 1.
-	//Fetch all the pending files
-	//Then sync one by one
-	//After sync one file then move it to done folder.
-
 	//Path
 	VENDOR_PENDING_FILE_PATH := utils.VENDOR_PENDING_FILE_PATH
 	VENDOR_DONE_FILE_PATH := utils.VENDOR_DONE_FILE_PATH
+	NTLM_USERNAME := config.Config.Auth.Ntlm.Username
+	NTLM_PASSWORD := config.Config.Auth.Ntlm.Password
+	url := config.Config.Vendor.Sync.URL
 
 	//Get All the vendor pending data
 	fileNames, err := filesystem.GetAllFiles(VENDOR_PENDING_FILE_PATH)
@@ -51,7 +78,7 @@ func Sync() {
 		utils.Console(err.Error())
 	}
 
-	//mods.Console(fileNames)
+	utils.Console(fileNames)
 
 	if fileNames == nil || len(fileNames) < 1 {
 		return
@@ -65,7 +92,7 @@ func Sync() {
 		jsonData, err := filesystem.ReadFile(VENDOR_PENDING_FILE_PATH, fileNames[i])
 
 		// Step 2: Unmarshal JSON to struct
-		var vendor AddVendorModel
+		var vendor WSVendor
 		if err := json.Unmarshal([]byte(jsonData), &vendor); err != nil {
 			utils.Console("Error unmarshaling JSON:", err)
 		}
@@ -73,32 +100,63 @@ func Sync() {
 		//utils.Console(vendor)
 
 		// Map Go struct to XML
-		xmlData, err := amanager.ParseJsonToXml(vendor)
+		xmlData, err := data_parser.ParseJsonToXml(vendor)
 		if err != nil {
 			utils.Fatal("Error mapping to XML: ", err)
 		}
 
 		//Add XML envelope and body elements
-		var buffer bytes.Buffer
-		buffer.WriteString(`<?xml version="1.0" encoding="utf-8"?>`)
-		buffer.WriteString(`<Envelope xmlns="http://schemas.xmlsoap.org/soap/envelope/">`)
-		buffer.WriteString(`<Body>`)
-		buffer.WriteString(`<Create xmlns="urn:microsoft-dynamics-schemas/page/wsvendor">`)
-		buffer.Write(xmlData)
-		buffer.WriteString(`</Create>`)
-		buffer.WriteString(`</Body>`)
-		buffer.WriteString(`</Envelope>`)
+		// var buffer bytes.Buffer
+		// //buffer.WriteString(`<?xml version="1.0" encoding="utf-8"?>`)
+		// buffer.WriteString(`<Envelope xmlns="http://schemas.xmlsoap.org/soap/envelope/">`)
+		// buffer.WriteString(`<Body>`)
+		// buffer.WriteString(`<Create xmlns="urn:microsoft-dynamics-schemas/page/wsvendor">`)
+		// buffer.Write(xmlData)
+		// buffer.WriteString(`</Create>`)
+		// buffer.WriteString(`</Body>`)
+		// buffer.WriteString(`</Envelope>`)
+
+		buffer := fmt.Sprintf(
+			`
+				<Envelope xmlns="http://schemas.xmlsoap.org/soap/envelope/">
+					<Body>
+						<Create xmlns="urn:microsoft-dynamics-schemas/page/wsvendor">
+							%s
+						</Create>
+					</Body>
+				</Envelope>
+			`,
+			string(xmlData),
+		)
 
 		//Return the result
-		envolpeData := buffer.Bytes()
-		fmt.Println(string(envolpeData))
+		//envolpeData := buffer.Bytes()
+		xmlPayload := buffer //buffer.String()
+		//utils.Console(xmlPayload)
+		log.Println(xmlPayload)
+		utils.Console("username: ", NTLM_USERNAME)
+		utils.Console("username: ", NTLM_PASSWORD)
+		utils.Console("URL: ", url)
 
 		//Sync to Nav
-
-		//Move to done file
-		err = filesystem.MoveFile(fileNames[i], VENDOR_PENDING_FILE_PATH, VENDOR_DONE_FILE_PATH)
+		isSuccess := false
+		result, err := amanager.Sync(url, navapi.POST, xmlPayload, NTLM_USERNAME, NTLM_PASSWORD)
 		if err != nil {
-			utils.Console(err.Error())
+			utils.Console(err)
+			isSuccess = false
+		} else {
+			utils.Console(result)
+			isSuccess = true
+		}
+
+		if isSuccess {
+			//Move to done file
+			err = filesystem.MoveFile(fileNames[i], VENDOR_PENDING_FILE_PATH, VENDOR_DONE_FILE_PATH)
+			if err != nil {
+				utils.Console(err.Error())
+			} else {
+				utils.Console("File moved successfully")
+			}
 		}
 	}
 }

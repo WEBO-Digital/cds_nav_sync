@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"log"
+	"nav_sync/utils"
 	"os"
 	"path/filepath"
 	"time"
@@ -68,7 +69,9 @@ func GetAllFiles(path string) ([]string, error) {
 	if err != nil {
 		return nil, err
 	}
-	filePath := fmt.Sprintf("%s/%s", currentDir, path)
+	filePath := fmt.Sprintf("%s%s", currentDir, path)
+
+	utils.Console(filePath)
 
 	// Walk the directory and add file names to the slice
 	var fileNames []string
