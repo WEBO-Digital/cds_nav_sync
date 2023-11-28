@@ -1,12 +1,14 @@
 package invoice
 
 import (
-	"bytes"
 	"encoding/json"
+	"encoding/xml"
+	"errors"
 	"fmt"
 	"nav_sync/config"
 	filesystem "nav_sync/mods/afile_system"
 	"nav_sync/mods/amanager"
+	navapi "nav_sync/mods/anav_api"
 	normalapi "nav_sync/mods/anormal_api"
 	data_parser "nav_sync/mods/aparser"
 	"nav_sync/utils"
@@ -32,16 +34,48 @@ func Fetch() {
 	utils.Console("Successfully saved invoice to pending file")
 }
 
+// func Sync() {
+// 	//Eg.
+// 	NTLM_USERNAME := config.Config.Auth.Ntlm.Username
+// 	NTLM_PASSWORD := config.Config.Auth.Ntlm.Password
+// 	url := config.Config.Invoice.Sync.URL
+// 	xmlPayload := `
+// 		<Envelope
+// 			xmlns="http://schemas.xmlsoap.org/soap/envelope/">
+// 			<Body>
+// 				<Create
+// 					xmlns="urn:microsoft-dynamics-schemas/page/wspurchaseinvoicepage">
+// 					<WSPurchaseInvoicePage>
+// 						<Buy_from_Vendor_No>TEST2</Buy_from_Vendor_No>
+// 						<Vendor_Invoice_No>124A</Vendor_Invoice_No>
+// 						<Buy_from_Vendor_Name>intuji 2</Buy_from_Vendor_Name>
+// 						<!-- Optional -->
+// 						<PurchLines>
+// 							<Purch_Invoice_Line>
+// 								<Type>Item</Type>
+// 								<No>250MS-12MTR-006</No>
+// 								<Quantity>1</Quantity>
+// 								<Unit_Price_LCY>10</Unit_Price_LCY>
+// 								<Location_Code>BI</Location_Code>
+// 							</Purch_Invoice_Line>
+// 						</PurchLines>
+// 					</WSPurchaseInvoicePage>
+// 				</Create>
+// 			</Body>
+// 		</Envelope>
+// 	`
+
+// 	utils.Console(url)
+// 	utils.Console(xmlPayload)
+// 	result, err := amanager.Sync(url, navapi.POST, xmlPayload, NTLM_USERNAME, NTLM_PASSWORD)
+// 	if err != nil {
+// 		utils.Console(err)
+// 	} else {
+// 		utils.Console(result)
+// 	}
+// }
+
 func Sync() {
-	//How to access pending directory
-	//Case 1. Do this function run independently
-	//Case 2. Do we run this function after fetch function is called
-
-	//We go through Case 1.
-	//Fetch all the pending files
-	//Then sync one by one
-	//After sync one file then move it to done folder.
-
 	//Path
 	INVOICE_PENDING_FILE_PATH := utils.INVOICE_PENDING_FILE_PATH
 	INVOICE_DONE_FILE_PATH := utils.INVOICE_DONE_FILE_PATH
@@ -65,42 +99,128 @@ func Sync() {
 		//Get Json data from the file
 		jsonData, err := filesystem.ReadFile(INVOICE_PENDING_FILE_PATH, fileNames[i])
 
-		// Step 2: Unmarshal JSON to struct
-		var invoice AddInvoiceModel
-		if err := json.Unmarshal([]byte(jsonData), &invoice); err != nil {
-			utils.Console("Error unmarshaling JSON:", err)
-		}
-
-		//utils.Console(invoice)
-
-		// Map Go struct to XML
-		xmlData, err := data_parser.ParseJsonToXml(invoice)
-		if err != nil {
-			utils.Fatal("Error mapping to XML: ", err)
-		}
-
-		//Add XML envelope and body elements
-		var buffer bytes.Buffer
-		buffer.WriteString(`<?xml version="1.0" encoding="utf-8"?>`)
-		buffer.WriteString(`<Envelope xmlns="http://schemas.xmlsoap.org/soap/envelope/">`)
-		buffer.WriteString(`<Body>`)
-		buffer.WriteString(`<Create xmlns="urn:microsoft-dynamics-schemas/page/wspurchaseinvoicepage">`)
-		buffer.Write(xmlData)
-		buffer.WriteString(`</Create>`)
-		buffer.WriteString(`</Body>`)
-		buffer.WriteString(`</Envelope>`)
-
-		//Return the result
-		envolpeData := buffer.Bytes()
-		fmt.Println(string(envolpeData))
-
-		//Sync to Nav
-
-		//Move to done file
-		err = filesystem.MoveFile(fileNames[i], INVOICE_PENDING_FILE_PATH, INVOICE_DONE_FILE_PATH)
+		//Insert invoice
+		response, err := insertInvoice(jsonData)
+		isSuccessCreation := false
 		if err != nil {
 			utils.Console(err.Error())
+			isSuccessCreation = false
+		} else {
+			utils.Console(response)
+			isSuccessCreation = true
+		}
+
+		isSuccessPost := false
+		if isSuccessCreation {
+			response, err = PostInvoiceAfterCreation(response)
+			if err != nil {
+				utils.Console(err.Error())
+				isSuccessPost = false
+			} else {
+				utils.Console(response)
+				isSuccessPost = true
+			}
+		}
+
+		//Move to done file
+		if isSuccessCreation && isSuccessPost {
+			err = filesystem.MoveFile(fileNames[i], INVOICE_PENDING_FILE_PATH, INVOICE_DONE_FILE_PATH)
+			if err != nil {
+				utils.Console(err.Error())
+			} else {
+				utils.Console("File moved successfully")
+			}
 		}
 	}
+}
 
+func insertInvoice(jsonData []byte) (interface{}, error) {
+	NTLM_USERNAME := config.Config.Auth.Ntlm.Username
+	NTLM_PASSWORD := config.Config.Auth.Ntlm.Password
+	url := config.Config.Invoice.Sync.URL
+
+	// Unmarshal JSON to struct
+	var invoice WSPurchaseInvoicePage
+	if err := json.Unmarshal([]byte(jsonData), &invoice); err != nil {
+		utils.Console("Error unmarshaling JSON:", err)
+	}
+
+	// Map Go struct to XML
+	xmlData, err := data_parser.ParseJsonToXml(invoice)
+	if err != nil {
+		utils.Fatal("Error mapping to XML: ", err)
+	}
+
+	//Add XML envelope and body elements
+	xmlPayload := fmt.Sprintf(
+		`
+			<Envelope xmlns="http://schemas.xmlsoap.org/soap/envelope/">
+				<Body>
+					<Create xmlns="urn:microsoft-dynamics-schemas/page/wspurchaseinvoicepage">
+						%s
+					</Create>
+				</Body>
+			</Envelope>
+		`,
+		string(xmlData),
+	)
+
+	//Return the result
+	utils.Console(xmlPayload)
+	utils.Console("username: ", NTLM_USERNAME)
+	utils.Console("username: ", NTLM_PASSWORD)
+	utils.Console("URL: ", url)
+
+	//Sync to Nav
+	result, err := amanager.Sync(url, navapi.POST, xmlPayload, NTLM_USERNAME, NTLM_PASSWORD)
+	return result, err
+}
+
+func PostInvoiceAfterCreation(stringData interface{}) (interface{}, error) {
+	NTLM_USERNAME := config.Config.Auth.Ntlm.Username
+	NTLM_PASSWORD := config.Config.Auth.Ntlm.Password
+	url := config.Config.Invoice.Post.URL
+
+	// Type assertion to get the underlying string
+	str, ok := stringData.(string)
+	if !ok {
+		return nil, errors.New("Conversion failed: not a string")
+	}
+
+	// Convert the string to a byte slice
+	xmlData := []byte(str)
+
+	// Map Go struct to XML
+	var envelope PostInvoiceEnvelope
+	err := xml.Unmarshal(xmlData, &envelope)
+	if err != nil {
+		errRes := fmt.Sprintf(`Error decoding XML: %s`, err.Error())
+		return nil, errors.New(errRes)
+	}
+
+	//Add XML envelope and body elements
+	xmlPayload := fmt.Sprintf(
+		`
+			<Envelope xmlns="http://schemas.xmlsoap.org/soap/envelope/">
+				<Body>
+					<PostPurchaseInvoice xmlns="urn:microsoft-dynamics-schemas/codeunit/WSPurchaseInvoice">
+						<docNo>%s</docNo>
+						<lastDocumentType>%s</lastDocumentType>
+					</PostPurchaseInvoice>
+				</Body>
+			</Envelope>
+		`,
+		envelope.Body.CreateResult.WSPurchaseInvoicePage.No,
+		"2",
+	)
+
+	//Return the result
+	utils.Console(xmlPayload)
+	utils.Console("username: ", NTLM_USERNAME)
+	utils.Console("username: ", NTLM_PASSWORD)
+	utils.Console("URL: ", url)
+
+	//Sync to Nav
+	result, err := amanager.Sync(url, navapi.POST, xmlPayload, NTLM_USERNAME, NTLM_PASSWORD)
+	return result, err
 }

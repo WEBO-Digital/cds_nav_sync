@@ -2,7 +2,7 @@ package main
 
 import (
 	"nav_sync/config"
-	"nav_sync/mods/vendor"
+	"nav_sync/mods/invoice"
 )
 
 func main() {
@@ -11,9 +11,9 @@ func main() {
 
 	//invoice
 	//invoice.Fetch()
-	//invoice.Sync()
+	invoice.Sync()
 
 	//vendor
 	//vendor.Fetch()
-	vendor.Sync()
+	//vendor.Sync()
 }

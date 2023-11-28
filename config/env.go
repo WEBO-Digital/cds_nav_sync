@@ -17,6 +17,7 @@ type Configuration struct {
 type UrlConfig struct {
 	Fetch FetchConfig `yaml:"fetch"`
 	Sync  SyncConfig  `yaml:"sync"`
+	Post  SyncConfig  `yaml:"post"`
 }
 
 type AuthConfig struct {

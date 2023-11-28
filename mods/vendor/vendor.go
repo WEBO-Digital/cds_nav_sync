@@ -106,16 +106,6 @@ func Sync() {
 		}
 
 		//Add XML envelope and body elements
-		// var buffer bytes.Buffer
-		// //buffer.WriteString(`<?xml version="1.0" encoding="utf-8"?>`)
-		// buffer.WriteString(`<Envelope xmlns="http://schemas.xmlsoap.org/soap/envelope/">`)
-		// buffer.WriteString(`<Body>`)
-		// buffer.WriteString(`<Create xmlns="urn:microsoft-dynamics-schemas/page/wsvendor">`)
-		// buffer.Write(xmlData)
-		// buffer.WriteString(`</Create>`)
-		// buffer.WriteString(`</Body>`)
-		// buffer.WriteString(`</Envelope>`)
-
 		buffer := fmt.Sprintf(
 			`
 				<Envelope xmlns="http://schemas.xmlsoap.org/soap/envelope/">
