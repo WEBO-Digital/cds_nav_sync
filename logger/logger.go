@@ -15,16 +15,6 @@ const (
 )
 
 func LogInvoiceFetch(responseType ResponseType, filePath string, fileName string, savedfileName string, message string, data string) { //data interface{}) {
-	// Type assertion to convert interface to string
-	// str, ok := data.(string)
-	// if ok {
-	// 	// Successfully converted to string
-	// 	fmt.Println("String:", str)
-	// } else {
-	// 	// Conversion failed
-	// 	fmt.Println("Not a string")
-	// }
-
 	//get current timestamp
 	timestamp := utils.GetCurrentTime()
 
