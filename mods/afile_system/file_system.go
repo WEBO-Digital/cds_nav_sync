@@ -8,10 +8,9 @@ import (
 	"nav_sync/utils"
 	"os"
 	"path/filepath"
-	"time"
 )
 
-func Save(path string, data interface{}) error {
+func Save(path string, fileName string, data interface{}) error {
 	//Marshal data to JSON
 	jsonData, err := json.MarshalIndent(data, "", "	")
 	if err != nil {
@@ -24,11 +23,8 @@ func Save(path string, data interface{}) error {
 		return err
 	}
 
-	//get current timestamp
-	timestamp := time.Now().Format("2006-01-02T15-04-05")
-
 	//Specify the file path
-	destinationPath := fmt.Sprintf("%s%s.json", *filePath, timestamp)
+	destinationPath := fmt.Sprintf("%s%s.json", *filePath, fileName)
 
 	//Create File if it does not exists
 	if _, err := os.Stat(destinationPath); os.IsNotExist(err) {
@@ -113,6 +109,43 @@ func MoveFile(sourceFileName string, sourceDirectory string, destinationDirector
 	if err != nil {
 		return err
 	}
+	return nil
+}
+
+func Append(path string, fileName string, data string) error {
+	//Create folder if it does not exists
+	filePath, err := createDirectoryIfNotExists(path)
+	if err != nil {
+		return err
+	}
+
+	//Specify the file path
+	destinationPath := fmt.Sprintf("%s%s", *filePath, fileName)
+
+	utils.Console(destinationPath)
+
+	//Create File if it does not exists
+	if _, err := os.Stat(destinationPath); os.IsNotExist(err) {
+		//Create file
+		_, err := os.Create(destinationPath)
+		if err != nil {
+			return err
+		}
+	}
+
+	file, err := os.OpenFile(destinationPath, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0755)
+	if err != nil {
+		return err
+	}
+
+	// Append data to the file
+	res, err := file.WriteString(data)
+	if err != nil {
+		return err
+	} else {
+		utils.Console(res)
+	}
+
 	return nil
 }
 

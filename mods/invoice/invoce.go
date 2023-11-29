@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"nav_sync/config"
+	"nav_sync/logger"
 	filesystem "nav_sync/mods/afile_system"
 	"nav_sync/mods/amanager"
 	navapi "nav_sync/mods/anav_api"
@@ -18,20 +19,34 @@ func Fetch() {
 	//Path
 	INVOICE_FETCH_URL := config.Config.Invoice.Fetch.URL
 	INVOICE_PENDING_FILE_PATH := utils.INVOICE_PENDING_FILE_PATH
+	INVOICE_PENDING_LOG_FILE_PATH := utils.INVOICE_PENDING_LOG_FILE_PATH
+	INVOICE_PENDING_FAILURE := utils.INVOICE_PENDING_FAILURE
+	INVOICE_PENDING_SUCCESS := utils.INVOICE_PENDING_SUCCESS
 
 	//Fetch vendor data
 	response, err := amanager.Fetch(INVOICE_FETCH_URL, normalapi.GET)
 	if err != nil {
-		utils.Console(err.Error())
+		message := "Failed:Fetch:1 " + err.Error()
+		utils.Console(message)
+		logger.LogInvoiceFetch(logger.SUCCESS, INVOICE_PENDING_LOG_FILE_PATH, INVOICE_PENDING_FAILURE, "", message, "")
 	}
 	utils.Console(response)
 
+	//get current timestamp
+	timestamp := utils.GetCurrentTime()
+
 	//Save to pending file
-	err = filesystem.Save(INVOICE_PENDING_FILE_PATH, response)
+	err = filesystem.Save(INVOICE_PENDING_FILE_PATH, timestamp, response)
 	if err != nil {
-		utils.Console(err.Error())
+		message := "Failed:Fetch:2 " + err.Error()
+		utils.Console(message)
+		logger.LogInvoiceFetch(logger.SUCCESS, INVOICE_PENDING_LOG_FILE_PATH, INVOICE_PENDING_FAILURE, timestamp+".json", message, "")
+	} else {
+		message := "Fetch: Successfully saved invoice to pending file"
+		utils.Console(message)
+		logger.LogInvoiceFetch(logger.SUCCESS, INVOICE_PENDING_LOG_FILE_PATH, INVOICE_PENDING_SUCCESS, timestamp+".json", message, "")
 	}
-	utils.Console("Successfully saved invoice to pending file")
+
 }
 
 // func Sync() {
@@ -79,11 +94,16 @@ func Sync() {
 	//Path
 	INVOICE_PENDING_FILE_PATH := utils.INVOICE_PENDING_FILE_PATH
 	INVOICE_DONE_FILE_PATH := utils.INVOICE_DONE_FILE_PATH
+	INVOICE_DONE_LOG_FILE_PATH := utils.INVOICE_DONE_LOG_FILE_PATH
+	INVOICE_DONE_FAILURE := utils.INVOICE_DONE_FAILURE
+	INVOICE_DONE_SUCCESS := utils.INVOICE_DONE_SUCCESS
 
 	//Get All the vendor pending data
 	fileNames, err := filesystem.GetAllFiles(INVOICE_PENDING_FILE_PATH)
 	if err != nil {
-		utils.Console(err.Error())
+		message := "Failed:Sync:1 " + err.Error()
+		utils.Console(message)
+		logger.LogInvoiceFetch(logger.SUCCESS, INVOICE_DONE_LOG_FILE_PATH, INVOICE_DONE_FAILURE, "", message, "")
 	}
 
 	//mods.Console(fileNames)
@@ -94,8 +114,6 @@ func Sync() {
 
 	for i := 0; i < len(fileNames); i++ {
 		//Sync vendor data to NAV
-		//We assume here that Data are pushed to NAV
-
 		//Get Json data from the file
 		jsonData, err := filesystem.ReadFile(INVOICE_PENDING_FILE_PATH, fileNames[i])
 
@@ -103,8 +121,10 @@ func Sync() {
 		response, err := insertInvoice(jsonData)
 		isSuccessCreation := false
 		if err != nil {
-			utils.Console(err.Error())
 			isSuccessCreation = false
+			message := "Failed:Sync:2 " + err.Error()
+			utils.Console(message)
+			logger.LogInvoiceFetch(logger.SUCCESS, INVOICE_DONE_LOG_FILE_PATH, INVOICE_DONE_FAILURE, fileNames[i], message, "")
 		} else {
 			utils.Console(response)
 			isSuccessCreation = true
@@ -112,10 +132,12 @@ func Sync() {
 
 		isSuccessPost := false
 		if isSuccessCreation {
-			response, err = PostInvoiceAfterCreation(response)
+			response, err = postInvoiceAfterCreation(response)
 			if err != nil {
-				utils.Console(err.Error())
 				isSuccessPost = false
+				message := "Failed:Sync:3 " + err.Error()
+				utils.Console(message)
+				logger.LogInvoiceFetch(logger.SUCCESS, INVOICE_DONE_LOG_FILE_PATH, INVOICE_DONE_FAILURE, fileNames[i], message, "")
 			} else {
 				utils.Console(response)
 				isSuccessPost = true
@@ -126,9 +148,14 @@ func Sync() {
 		if isSuccessCreation && isSuccessPost {
 			err = filesystem.MoveFile(fileNames[i], INVOICE_PENDING_FILE_PATH, INVOICE_DONE_FILE_PATH)
 			if err != nil {
-				utils.Console(err.Error())
+				message := "Failed:Sync:4 " + err.Error()
+				utils.Console(message)
+				logger.LogInvoiceFetch(logger.SUCCESS, INVOICE_DONE_LOG_FILE_PATH, INVOICE_DONE_FAILURE, fileNames[i], message, "")
 			} else {
 				utils.Console("File moved successfully")
+				message := "Sync: File moved successfully"
+				utils.Console(message)
+				logger.LogInvoiceFetch(logger.SUCCESS, INVOICE_DONE_LOG_FILE_PATH, INVOICE_DONE_SUCCESS, fileNames[i], message, "")
 			}
 		}
 	}
@@ -142,13 +169,13 @@ func insertInvoice(jsonData []byte) (interface{}, error) {
 	// Unmarshal JSON to struct
 	var invoice WSPurchaseInvoicePage
 	if err := json.Unmarshal([]byte(jsonData), &invoice); err != nil {
-		utils.Console("Error unmarshaling JSON:", err)
+		return nil, errors.New("insertInvoice: Error unmarshaling JSON -> " + err.Error())
 	}
 
 	// Map Go struct to XML
 	xmlData, err := data_parser.ParseJsonToXml(invoice)
 	if err != nil {
-		utils.Fatal("Error mapping to XML: ", err)
+		return nil, errors.New("insertInvoice: Error mapping to XML -> " + err.Error())
 	}
 
 	//Add XML envelope and body elements
@@ -173,10 +200,13 @@ func insertInvoice(jsonData []byte) (interface{}, error) {
 
 	//Sync to Nav
 	result, err := amanager.Sync(url, navapi.POST, xmlPayload, NTLM_USERNAME, NTLM_PASSWORD)
-	return result, err
+	if err != nil {
+		return nil, errors.New("insertInvoice: " + err.Error())
+	}
+	return result, nil
 }
 
-func PostInvoiceAfterCreation(stringData interface{}) (interface{}, error) {
+func postInvoiceAfterCreation(stringData interface{}) (interface{}, error) {
 	NTLM_USERNAME := config.Config.Auth.Ntlm.Username
 	NTLM_PASSWORD := config.Config.Auth.Ntlm.Password
 	url := config.Config.Invoice.Post.URL
@@ -184,7 +214,7 @@ func PostInvoiceAfterCreation(stringData interface{}) (interface{}, error) {
 	// Type assertion to get the underlying string
 	str, ok := stringData.(string)
 	if !ok {
-		return nil, errors.New("Conversion failed: not a string")
+		return nil, errors.New("postInvoiceAfterCreation: Conversion failed: not a string")
 	}
 
 	// Convert the string to a byte slice
@@ -194,8 +224,7 @@ func PostInvoiceAfterCreation(stringData interface{}) (interface{}, error) {
 	var envelope PostInvoiceEnvelope
 	err := xml.Unmarshal(xmlData, &envelope)
 	if err != nil {
-		errRes := fmt.Sprintf(`Error decoding XML: %s`, err.Error())
-		return nil, errors.New(errRes)
+		return nil, errors.New("postInvoiceAfterCreation: Error decoding XML: " + err.Error())
 	}
 
 	//Add XML envelope and body elements
@@ -222,5 +251,8 @@ func PostInvoiceAfterCreation(stringData interface{}) (interface{}, error) {
 
 	//Sync to Nav
 	result, err := amanager.Sync(url, navapi.POST, xmlPayload, NTLM_USERNAME, NTLM_PASSWORD)
-	return result, err
+	if err != nil {
+		return nil, errors.New("postInvoiceAfterCreation: " + err.Error())
+	}
+	return result, nil
 }

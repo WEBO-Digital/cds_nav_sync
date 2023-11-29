@@ -9,25 +9,7 @@ import (
 )
 
 func Fetch(url string, method normalapi.APIMethod) (interface{}, error) {
-	// //Make response call
-	// response, err := http.Get(url)
-	// if err != nil {
-	// 	return nil, err
-	// }
-	// defer response.Body.Close()
-
-	// //Read the response body
-	// body, err := ioutil.ReadAll(response.Body)
-	// if err != nil {
-	// 	return nil, err
-	// }
-
-	// //convert to json
-	// data, err := ParseByteToJson(body)
-	// if err != nil {
-	// 	return nil, err
-	// }
-
+	//Make response call
 	if method == normalapi.POST {
 		return normalapi.Post()
 	} else if method == normalapi.GET {
@@ -41,6 +23,7 @@ func Fetch(url string, method normalapi.APIMethod) (interface{}, error) {
 }
 
 func Sync(url string, method navapi.NavMethod, xmlPayload string, user string, password string) (interface{}, error) {
+	//Make response call
 	utils.Console("method: ", method)
 	if method == navapi.POST {
 		return navapi.Post(url, xmlPayload, user, password)
