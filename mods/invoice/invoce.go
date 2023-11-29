@@ -135,12 +135,13 @@ func Sync() {
 				logger.LogInvoiceFetch(logger.FAILURE, INVOICE_DONE_LOG_FILE_PATH, INVOICE_DONE_FAILURE, fileNames[i], message, resultStr)
 			}
 			match := utils.MatchRegexExpression(resultStr, `<WSPurchaseInvoicePage[^>]*>`)
+			matchFault := utils.MatchRegexExpression(resultStr, `<faultcode[^>]*>`)
 
 			// Print the result
-			if !match {
+			if !match && matchFault {
 				message := fmt.Sprintf("Failed:Sync:4 XML string does not contain <WSPurchaseInvoicePage> element: ", resultStr)
 				utils.Console(message)
-				logger.LogInvoiceFetch(logger.FAILURE, INVOICE_DONE_LOG_FILE_PATH, INVOICE_DONE_SUCCESS, fileNames[i], message, resultStr)
+				logger.LogInvoiceFetch(logger.FAILURE, INVOICE_DONE_LOG_FILE_PATH, INVOICE_DONE_FAILURE, fileNames[i], message, resultStr)
 			} else {
 				isSuccessCreation = true
 			}
@@ -164,12 +165,13 @@ func Sync() {
 					logger.LogInvoiceFetch(logger.FAILURE, INVOICE_DONE_LOG_FILE_PATH, INVOICE_DONE_FAILURE, fileNames[i], message, resultStr)
 				}
 				match := utils.MatchRegexExpression(resultStr, `<PostPurchaseInvoice_Result[^>]*>`)
+				matchFault := utils.MatchRegexExpression(resultStr, `<faultcode[^>]*>`)
 
 				// Print the result
-				if !match {
+				if !match && matchFault {
 					message := fmt.Sprintf("Failed:Sync:7 XML string does not contain <PostPurchaseInvoice_Result> element: ", resultStr)
 					utils.Console(message)
-					logger.LogInvoiceFetch(logger.FAILURE, INVOICE_DONE_LOG_FILE_PATH, INVOICE_DONE_SUCCESS, fileNames[i], message, resultStr)
+					logger.LogInvoiceFetch(logger.FAILURE, INVOICE_DONE_LOG_FILE_PATH, INVOICE_DONE_FAILURE, fileNames[i], message, resultStr)
 				} else {
 					isSuccessPost = true
 				}

@@ -165,9 +165,10 @@ func Sync() {
 				logger.LogInvoiceFetch(logger.FAILURE, VENDOR_DONE_LOG_FILE_PATH, VENDOR_DONE_FAILURE, fileNames[i], message, xmlPayload)
 			}
 			match := utils.MatchRegexExpression(resultStr, `<Create_Result[^>]*>`)
+			matchFault := utils.MatchRegexExpression(resultStr, `<faultcode[^>]*>`)
 
 			// Print the result
-			if !match {
+			if !match && matchFault {
 				message := fmt.Sprintf("Failed:Sync:6 XML string does not contain <Create_Result> element: ", result)
 				utils.Console(message)
 				logger.LogInvoiceFetch(logger.FAILURE, VENDOR_DONE_LOG_FILE_PATH, VENDOR_DONE_FAILURE, fileNames[i], message, resultStr)
