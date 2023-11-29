@@ -2,7 +2,6 @@ package main
 
 import (
 	"nav_sync/config"
-	"nav_sync/mods/invoice"
 	"nav_sync/mods/vendor"
 )
 
@@ -11,10 +10,10 @@ func main() {
 	config.LoadYamlFile()
 
 	//invoice
-	invoice.Fetch()
+	//invoice.Fetch()
 	//invoice.Sync()
 
 	//vendor
-	vendor.Fetch()
-	//vendor.Sync()
+	//vendor.Fetch()
+	vendor.Sync()
 }

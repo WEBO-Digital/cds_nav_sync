@@ -124,10 +124,26 @@ func Sync() {
 			isSuccessCreation = false
 			message := "Failed:Sync:2 " + err.Error()
 			utils.Console(message)
-			logger.LogInvoiceFetch(logger.SUCCESS, INVOICE_DONE_LOG_FILE_PATH, INVOICE_DONE_FAILURE, fileNames[i], message, "")
+			logger.LogInvoiceFetch(logger.FAILURE, INVOICE_DONE_LOG_FILE_PATH, INVOICE_DONE_FAILURE, fileNames[i], message, "")
 		} else {
 			utils.Console(response)
-			isSuccessCreation = true
+			resultStr, ok := response.(string)
+			if !ok {
+				// The type assertion failed
+				message := fmt.Sprintf("Failed:Sync:3 Could not convert to string: ", response)
+				utils.Console(message)
+				logger.LogInvoiceFetch(logger.FAILURE, INVOICE_DONE_LOG_FILE_PATH, INVOICE_DONE_FAILURE, fileNames[i], message, resultStr)
+			}
+			match := utils.MatchRegexExpression(resultStr, `<WSPurchaseInvoicePage[^>]*>`)
+
+			// Print the result
+			if !match {
+				message := fmt.Sprintf("Failed:Sync:4 XML string does not contain <WSPurchaseInvoicePage> element: ", resultStr)
+				utils.Console(message)
+				logger.LogInvoiceFetch(logger.FAILURE, INVOICE_DONE_LOG_FILE_PATH, INVOICE_DONE_SUCCESS, fileNames[i], message, resultStr)
+			} else {
+				isSuccessCreation = true
+			}
 		}
 
 		isSuccessPost := false
@@ -135,12 +151,28 @@ func Sync() {
 			response, err = postInvoiceAfterCreation(response)
 			if err != nil {
 				isSuccessPost = false
-				message := "Failed:Sync:3 " + err.Error()
+				message := "Failed:Sync:5 " + err.Error()
 				utils.Console(message)
-				logger.LogInvoiceFetch(logger.SUCCESS, INVOICE_DONE_LOG_FILE_PATH, INVOICE_DONE_FAILURE, fileNames[i], message, "")
+				logger.LogInvoiceFetch(logger.FAILURE, INVOICE_DONE_LOG_FILE_PATH, INVOICE_DONE_FAILURE, fileNames[i], message, "")
 			} else {
 				utils.Console(response)
-				isSuccessPost = true
+				resultStr, ok := response.(string)
+				if !ok {
+					// The type assertion failed
+					message := fmt.Sprintf("Failed:Sync:6 Could not convert to string: ", response)
+					utils.Console(message)
+					logger.LogInvoiceFetch(logger.FAILURE, INVOICE_DONE_LOG_FILE_PATH, INVOICE_DONE_FAILURE, fileNames[i], message, resultStr)
+				}
+				match := utils.MatchRegexExpression(resultStr, `<PostPurchaseInvoice_Result[^>]*>`)
+
+				// Print the result
+				if !match {
+					message := fmt.Sprintf("Failed:Sync:7 XML string does not contain <PostPurchaseInvoice_Result> element: ", resultStr)
+					utils.Console(message)
+					logger.LogInvoiceFetch(logger.FAILURE, INVOICE_DONE_LOG_FILE_PATH, INVOICE_DONE_SUCCESS, fileNames[i], message, resultStr)
+				} else {
+					isSuccessPost = true
+				}
 			}
 		}
 
@@ -150,9 +182,8 @@ func Sync() {
 			if err != nil {
 				message := "Failed:Sync:4 " + err.Error()
 				utils.Console(message)
-				logger.LogInvoiceFetch(logger.SUCCESS, INVOICE_DONE_LOG_FILE_PATH, INVOICE_DONE_FAILURE, fileNames[i], message, "")
+				logger.LogInvoiceFetch(logger.FAILURE, INVOICE_DONE_LOG_FILE_PATH, INVOICE_DONE_FAILURE, fileNames[i], message, "")
 			} else {
-				utils.Console("File moved successfully")
 				message := "Sync: File moved successfully"
 				utils.Console(message)
 				logger.LogInvoiceFetch(logger.SUCCESS, INVOICE_DONE_LOG_FILE_PATH, INVOICE_DONE_SUCCESS, fileNames[i], message, "")

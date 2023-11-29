@@ -83,7 +83,7 @@ func Sync() {
 	//Path
 	VENDOR_PENDING_FILE_PATH := utils.VENDOR_PENDING_FILE_PATH
 	VENDOR_DONE_FILE_PATH := utils.VENDOR_DONE_FILE_PATH
-	VENDOR_DONE_LOG_FILE_PATH := utils.INVOICE_DONE_LOG_FILE_PATH
+	VENDOR_DONE_LOG_FILE_PATH := utils.VENDOR_DONE_LOG_FILE_PATH
 	VENDOR_DONE_FAILURE := utils.INVOICE_DONE_FAILURE
 	VENDOR_DONE_SUCCESS := utils.INVOICE_DONE_SUCCESS
 	NTLM_USERNAME := config.Config.Auth.Ntlm.Username
@@ -109,12 +109,14 @@ func Sync() {
 		//Get Json data from the file
 		jsonData, err := filesystem.ReadFile(VENDOR_PENDING_FILE_PATH, fileNames[i])
 
+		jsonString := string(jsonData)
+
 		// Unmarshal JSON to struct
 		var vendor WSVendor
 		if err := json.Unmarshal([]byte(jsonData), &vendor); err != nil {
 			message := "Failed:Sync:2 Error unmarshaling JSON -> " + err.Error()
 			utils.Console(message)
-			logger.LogInvoiceFetch(logger.SUCCESS, VENDOR_DONE_LOG_FILE_PATH, VENDOR_DONE_FAILURE, fileNames[i], message, "")
+			logger.LogInvoiceFetch(logger.SUCCESS, VENDOR_DONE_LOG_FILE_PATH, VENDOR_DONE_FAILURE, fileNames[i], message, jsonString)
 		}
 
 		//utils.Console(vendor)
@@ -124,7 +126,7 @@ func Sync() {
 		if err != nil {
 			message := "Failed:Sync:3 Error mapping to XML -> " + err.Error()
 			utils.Console(message)
-			logger.LogInvoiceFetch(logger.SUCCESS, VENDOR_DONE_LOG_FILE_PATH, VENDOR_DONE_FAILURE, fileNames[i], message, "")
+			logger.LogInvoiceFetch(logger.SUCCESS, VENDOR_DONE_LOG_FILE_PATH, VENDOR_DONE_FAILURE, fileNames[i], message, jsonString)
 		}
 
 		//Add XML envelope and body elements
@@ -151,13 +153,27 @@ func Sync() {
 		isSuccess := false
 		result, err := amanager.Sync(url, navapi.POST, xmlPayload, NTLM_USERNAME, NTLM_PASSWORD)
 		if err != nil {
-			isSuccess = false
 			message := "Failed:Sync:4 " + err.Error()
 			utils.Console(message)
-			logger.LogInvoiceFetch(logger.SUCCESS, VENDOR_DONE_LOG_FILE_PATH, VENDOR_DONE_FAILURE, fileNames[i], message, "")
+			logger.LogInvoiceFetch(logger.FAILURE, VENDOR_DONE_LOG_FILE_PATH, VENDOR_DONE_FAILURE, fileNames[i], message, xmlPayload)
 		} else {
-			utils.Console(result)
-			isSuccess = true
+			resultStr, ok := result.(string)
+			if !ok {
+				// The type assertion failed
+				message := fmt.Sprintf("Failed:Sync:5 Could not convert to string: ", result)
+				utils.Console(message)
+				logger.LogInvoiceFetch(logger.FAILURE, VENDOR_DONE_LOG_FILE_PATH, VENDOR_DONE_FAILURE, fileNames[i], message, xmlPayload)
+			}
+			match := utils.MatchRegexExpression(resultStr, `<Create_Result[^>]*>`)
+
+			// Print the result
+			if !match {
+				message := fmt.Sprintf("Failed:Sync:6 XML string does not contain <Create_Result> element: ", result)
+				utils.Console(message)
+				logger.LogInvoiceFetch(logger.FAILURE, VENDOR_DONE_LOG_FILE_PATH, VENDOR_DONE_FAILURE, fileNames[i], message, resultStr)
+			} else {
+				isSuccess = true
+			}
 		}
 
 		if isSuccess {
@@ -166,7 +182,7 @@ func Sync() {
 			if err != nil {
 				message := "Failed:Sync:5 " + err.Error()
 				utils.Console(message)
-				logger.LogInvoiceFetch(logger.SUCCESS, VENDOR_DONE_LOG_FILE_PATH, VENDOR_DONE_FAILURE, fileNames[i], message, "")
+				logger.LogInvoiceFetch(logger.FAILURE, VENDOR_DONE_LOG_FILE_PATH, VENDOR_DONE_FAILURE, fileNames[i], message, result.(string))
 			} else {
 				message := "File moved successfully"
 				utils.Console(message)
