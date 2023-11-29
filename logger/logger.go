@@ -28,7 +28,7 @@ func LogInvoiceFetch(responseType ResponseType, filePath string, fileName string
 	//get current timestamp
 	timestamp := utils.GetCurrentTime()
 
-	//Format data
+	//Format data: Please do not change its format
 	appendStr := fmt.Sprintf(
 		`
 
