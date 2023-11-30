@@ -218,7 +218,7 @@ func insertLedgerEntries(jsonData []byte) (interface{}, error) {
 func postLedgerEntriesAfterCreation(stringData interface{}) (interface{}, error) {
 	NTLM_USERNAME := config.Config.Auth.Ntlm.Username
 	NTLM_PASSWORD := config.Config.Auth.Ntlm.Password
-	url := config.Config.Invoice.Post.URL
+	url := config.Config.LedgerEntries.Post.URL
 
 	// Type assertion to get the underlying string
 	str, ok := stringData.(string)
