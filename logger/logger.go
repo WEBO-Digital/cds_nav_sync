@@ -2,7 +2,7 @@ package logger
 
 import (
 	"fmt"
-	filesystem "nav_sync/mods/afile_system"
+	filesystem "nav_sync/mods/ahelpers/file_system"
 	"nav_sync/utils"
 )
 

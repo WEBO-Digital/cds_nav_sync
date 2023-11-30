@@ -1,10 +1,10 @@
-package amanager
+package manager
 
 import (
 	"errors"
 	"fmt"
-	navapi "nav_sync/mods/anav_api"
-	normalapi "nav_sync/mods/anormal_api"
+	navapi "nav_sync/mods/ahelpers/nav_api"
+	normalapi "nav_sync/mods/ahelpers/normal_api"
 	"nav_sync/utils"
 )
 

@@ -7,11 +7,11 @@ import (
 	"fmt"
 	"nav_sync/config"
 	"nav_sync/logger"
-	filesystem "nav_sync/mods/afile_system"
-	"nav_sync/mods/amanager"
-	navapi "nav_sync/mods/anav_api"
-	normalapi "nav_sync/mods/anormal_api"
-	data_parser "nav_sync/mods/aparser"
+	filesystem "nav_sync/mods/ahelpers/file_system"
+	"nav_sync/mods/ahelpers/manager"
+	navapi "nav_sync/mods/ahelpers/nav_api"
+	normalapi "nav_sync/mods/ahelpers/normal_api"
+	data_parser "nav_sync/mods/ahelpers/parser"
 	"nav_sync/utils"
 )
 
@@ -24,7 +24,7 @@ func Fetch() {
 	PENDING_SUCCESS := utils.INVOICE_PENDING_SUCCESS
 
 	//Fetch vendor data
-	response, err := amanager.Fetch(FETCH_URL, normalapi.GET)
+	response, err := manager.Fetch(FETCH_URL, normalapi.GET)
 	if err != nil {
 		message := "Failed:Fetch:1 " + err.Error()
 		utils.Console(message)
@@ -232,7 +232,7 @@ func insertInvoice(jsonData []byte) (interface{}, error) {
 	utils.Console("URL: ", url)
 
 	//Sync to Nav
-	result, err := amanager.Sync(url, navapi.POST, xmlPayload, NTLM_USERNAME, NTLM_PASSWORD)
+	result, err := manager.Sync(url, navapi.POST, xmlPayload, NTLM_USERNAME, NTLM_PASSWORD)
 	if err != nil {
 		return nil, errors.New("insertInvoice: " + err.Error())
 	}
@@ -283,7 +283,7 @@ func postInvoiceAfterCreation(stringData interface{}) (interface{}, error) {
 	utils.Console("URL: ", url)
 
 	//Sync to Nav
-	result, err := amanager.Sync(url, navapi.POST, xmlPayload, NTLM_USERNAME, NTLM_PASSWORD)
+	result, err := manager.Sync(url, navapi.POST, xmlPayload, NTLM_USERNAME, NTLM_PASSWORD)
 	if err != nil {
 		return nil, errors.New("postInvoiceAfterCreation: " + err.Error())
 	}

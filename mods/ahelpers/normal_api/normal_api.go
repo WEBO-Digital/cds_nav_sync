@@ -2,7 +2,7 @@ package normalapi
 
 import (
 	"io/ioutil"
-	data_parser "nav_sync/mods/aparser"
+	data_parser "nav_sync/mods/ahelpers/parser"
 	"net/http"
 )
 

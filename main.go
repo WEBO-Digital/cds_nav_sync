@@ -4,6 +4,7 @@ import (
 	"nav_sync/config"
 	"nav_sync/mods/invoice"
 	ledgerentries "nav_sync/mods/ledger_entries"
+	"nav_sync/mods/vendor"
 )
 
 func main() {
@@ -16,7 +17,7 @@ func main() {
 
 	//vendor
 	//vendor.Fetch()
-	//vendor.Sync()
+	vendor.Sync()
 
 	//ledger_entries
 	//ledgerentries.Fetch()
