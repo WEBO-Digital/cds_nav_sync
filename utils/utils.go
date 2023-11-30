@@ -28,7 +28,7 @@ const VENDOR_DONE_LOG_FILE_PATH = "/data/alogs/vendor/done/"
 const VENDOR_DONE_FAILURE = "done.failure.log"
 const VENDOR_DONE_SUCCESS = "done.success.log"
 
-//2. Ledger Entries
+//3. Ledger Entries
 //a. Pending
 const LEDGER_ENTRIES_PENDING_FILE_PATH = "/data/ledger_entries/pending/"
 const LEDGER_ENTRIES_PENDING_LOG_FILE_PATH = "/data/alogs/ledger_entries/pending/"
