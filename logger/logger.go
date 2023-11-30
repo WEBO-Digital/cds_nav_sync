@@ -14,7 +14,7 @@ const (
 	FAILURE ResponseType = "FAILURE"
 )
 
-func LogInvoiceFetch(responseType ResponseType, filePath string, fileName string, savedfileName string, message string, data string) { //data interface{}) {
+func LogNavState(responseType ResponseType, filePath string, fileName string, savedfileName string, message string, data string) { //data interface{}) {
 	//get current timestamp
 	timestamp := utils.GetCurrentTime()
 

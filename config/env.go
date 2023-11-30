@@ -9,9 +9,10 @@ import (
 
 // Model classes
 type Configuration struct {
-	Vendor  UrlConfig  `yaml:"vendor"`
-	Invoice UrlConfig  `yaml:"invoice"`
-	Auth    AuthConfig `yaml:"auth"`
+	Vendor        UrlConfig  `yaml:"vendor"`
+	Invoice       UrlConfig  `yaml:"invoice"`
+	LedgerEntries UrlConfig  `yaml:"ledger_entries"`
+	Auth          AuthConfig `yaml:"auth"`
 }
 
 type UrlConfig struct {

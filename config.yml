@@ -13,7 +13,15 @@ invoice:
     url: http://SPNAV.sellparker.local:7047/SP_NAV2013R2Test/WS/Sell%20%26%20Parker/Page/WSPurchaseInvoicePage
   post:
     url: http://spnav.sellparker.local:7047/SP_NAV2013R2Test/WS/Sell%20%26%20Parker/Codeunit/WSPurchaseInvoice
-    
+
+ledger_entries:
+  fetch:
+    url: https://jsonplaceholder.typicode.com/posts
+    apikey: sdfjkJ
+  sync:
+    url: http://spnav.sellparker.local:7047/SP_NAV2013R2Test/WS/Sell%20%26%20Parker/Page/VendorPayment
+  post:
+    url: http://spnav.sellparker.local:7047/SP_NAV2013R2Test/WS/Sell%20%26%20Parker/Codeunit/WSPurchaseInvoice
 
 auth:
   ntlm:

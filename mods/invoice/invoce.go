@@ -17,18 +17,18 @@ import (
 
 func Fetch() {
 	//Path
-	INVOICE_FETCH_URL := config.Config.Invoice.Fetch.URL
-	INVOICE_PENDING_FILE_PATH := utils.INVOICE_PENDING_FILE_PATH
-	INVOICE_PENDING_LOG_FILE_PATH := utils.INVOICE_PENDING_LOG_FILE_PATH
-	INVOICE_PENDING_FAILURE := utils.INVOICE_PENDING_FAILURE
-	INVOICE_PENDING_SUCCESS := utils.INVOICE_PENDING_SUCCESS
+	FETCH_URL := config.Config.Invoice.Fetch.URL
+	PENDING_FILE_PATH := utils.INVOICE_PENDING_FILE_PATH
+	PENDING_LOG_FILE_PATH := utils.INVOICE_PENDING_LOG_FILE_PATH
+	PENDING_FAILURE := utils.INVOICE_PENDING_FAILURE
+	PENDING_SUCCESS := utils.INVOICE_PENDING_SUCCESS
 
 	//Fetch vendor data
-	response, err := amanager.Fetch(INVOICE_FETCH_URL, normalapi.GET)
+	response, err := amanager.Fetch(FETCH_URL, normalapi.GET)
 	if err != nil {
 		message := "Failed:Fetch:1 " + err.Error()
 		utils.Console(message)
-		logger.LogInvoiceFetch(logger.SUCCESS, INVOICE_PENDING_LOG_FILE_PATH, INVOICE_PENDING_FAILURE, "", message, "")
+		logger.LogNavState(logger.SUCCESS, PENDING_LOG_FILE_PATH, PENDING_FAILURE, "", message, "")
 	}
 	utils.Console(response)
 
@@ -36,15 +36,15 @@ func Fetch() {
 	timestamp := utils.GetCurrentTime()
 
 	//Save to pending file
-	err = filesystem.Save(INVOICE_PENDING_FILE_PATH, timestamp, response)
+	err = filesystem.Save(PENDING_FILE_PATH, timestamp, response)
 	if err != nil {
 		message := "Failed:Fetch:2 " + err.Error()
 		utils.Console(message)
-		logger.LogInvoiceFetch(logger.SUCCESS, INVOICE_PENDING_LOG_FILE_PATH, INVOICE_PENDING_FAILURE, timestamp+".json", message, "")
+		logger.LogNavState(logger.SUCCESS, PENDING_LOG_FILE_PATH, PENDING_FAILURE, timestamp+".json", message, "")
 	} else {
 		message := "Fetch: Successfully saved invoice to pending file"
 		utils.Console(message)
-		logger.LogInvoiceFetch(logger.SUCCESS, INVOICE_PENDING_LOG_FILE_PATH, INVOICE_PENDING_SUCCESS, timestamp+".json", message, "")
+		logger.LogNavState(logger.SUCCESS, PENDING_LOG_FILE_PATH, PENDING_SUCCESS, timestamp+".json", message, "")
 	}
 
 }
@@ -92,18 +92,18 @@ func Fetch() {
 
 func Sync() {
 	//Path
-	INVOICE_PENDING_FILE_PATH := utils.INVOICE_PENDING_FILE_PATH
-	INVOICE_DONE_FILE_PATH := utils.INVOICE_DONE_FILE_PATH
-	INVOICE_DONE_LOG_FILE_PATH := utils.INVOICE_DONE_LOG_FILE_PATH
-	INVOICE_DONE_FAILURE := utils.INVOICE_DONE_FAILURE
-	INVOICE_DONE_SUCCESS := utils.INVOICE_DONE_SUCCESS
+	PENDING_FILE_PATH := utils.INVOICE_PENDING_FILE_PATH
+	DONE_FILE_PATH := utils.INVOICE_DONE_FILE_PATH
+	DONE_LOG_FILE_PATH := utils.INVOICE_DONE_LOG_FILE_PATH
+	DONE_FAILURE := utils.INVOICE_DONE_FAILURE
+	DONE_SUCCESS := utils.INVOICE_DONE_SUCCESS
 
 	//Get All the vendor pending data
-	fileNames, err := filesystem.GetAllFiles(INVOICE_PENDING_FILE_PATH)
+	fileNames, err := filesystem.GetAllFiles(PENDING_FILE_PATH)
 	if err != nil {
 		message := "Failed:Sync:1 " + err.Error()
 		utils.Console(message)
-		logger.LogInvoiceFetch(logger.SUCCESS, INVOICE_DONE_LOG_FILE_PATH, INVOICE_DONE_FAILURE, "", message, "")
+		logger.LogNavState(logger.SUCCESS, DONE_LOG_FILE_PATH, DONE_FAILURE, "", message, "")
 	}
 
 	//mods.Console(fileNames)
@@ -115,7 +115,7 @@ func Sync() {
 	for i := 0; i < len(fileNames); i++ {
 		//Sync vendor data to NAV
 		//Get Json data from the file
-		jsonData, err := filesystem.ReadFile(INVOICE_PENDING_FILE_PATH, fileNames[i])
+		jsonData, err := filesystem.ReadFile(PENDING_FILE_PATH, fileNames[i])
 
 		//Insert invoice
 		response, err := insertInvoice(jsonData)
@@ -124,7 +124,7 @@ func Sync() {
 			isSuccessCreation = false
 			message := "Failed:Sync:2 " + err.Error()
 			utils.Console(message)
-			logger.LogInvoiceFetch(logger.FAILURE, INVOICE_DONE_LOG_FILE_PATH, INVOICE_DONE_FAILURE, fileNames[i], message, "")
+			logger.LogNavState(logger.FAILURE, DONE_LOG_FILE_PATH, DONE_FAILURE, fileNames[i], message, "")
 		} else {
 			utils.Console(response)
 			resultStr, ok := response.(string)
@@ -132,7 +132,7 @@ func Sync() {
 				// The type assertion failed
 				message := fmt.Sprintf("Failed:Sync:3 Could not convert to string: ", response)
 				utils.Console(message)
-				logger.LogInvoiceFetch(logger.FAILURE, INVOICE_DONE_LOG_FILE_PATH, INVOICE_DONE_FAILURE, fileNames[i], message, resultStr)
+				logger.LogNavState(logger.FAILURE, DONE_LOG_FILE_PATH, DONE_FAILURE, fileNames[i], message, resultStr)
 			}
 			match := utils.MatchRegexExpression(resultStr, `<WSPurchaseInvoicePage[^>]*>`)
 			matchFault := utils.MatchRegexExpression(resultStr, `<faultcode[^>]*>`)
@@ -141,7 +141,7 @@ func Sync() {
 			if !match && matchFault {
 				message := fmt.Sprintf("Failed:Sync:4 XML string does not contain <WSPurchaseInvoicePage> element: ", resultStr)
 				utils.Console(message)
-				logger.LogInvoiceFetch(logger.FAILURE, INVOICE_DONE_LOG_FILE_PATH, INVOICE_DONE_FAILURE, fileNames[i], message, resultStr)
+				logger.LogNavState(logger.FAILURE, DONE_LOG_FILE_PATH, DONE_FAILURE, fileNames[i], message, resultStr)
 			} else {
 				isSuccessCreation = true
 			}
@@ -154,7 +154,7 @@ func Sync() {
 				isSuccessPost = false
 				message := "Failed:Sync:5 " + err.Error()
 				utils.Console(message)
-				logger.LogInvoiceFetch(logger.FAILURE, INVOICE_DONE_LOG_FILE_PATH, INVOICE_DONE_FAILURE, fileNames[i], message, "")
+				logger.LogNavState(logger.FAILURE, DONE_LOG_FILE_PATH, DONE_FAILURE, fileNames[i], message, "")
 			} else {
 				utils.Console(response)
 				resultStr, ok := response.(string)
@@ -162,16 +162,16 @@ func Sync() {
 					// The type assertion failed
 					message := fmt.Sprintf("Failed:Sync:6 Could not convert to string: ", response)
 					utils.Console(message)
-					logger.LogInvoiceFetch(logger.FAILURE, INVOICE_DONE_LOG_FILE_PATH, INVOICE_DONE_FAILURE, fileNames[i], message, resultStr)
+					logger.LogNavState(logger.FAILURE, DONE_LOG_FILE_PATH, DONE_FAILURE, fileNames[i], message, resultStr)
 				}
-				match := utils.MatchRegexExpression(resultStr, `<PostPurchaseInvoice_Result[^>]*>`)
+				match := utils.MatchRegexExpression(resultStr, `<PostPurchaseResult[^>]*>`)
 				matchFault := utils.MatchRegexExpression(resultStr, `<faultcode[^>]*>`)
 
 				// Print the result
 				if !match && matchFault {
-					message := fmt.Sprintf("Failed:Sync:7 XML string does not contain <PostPurchaseInvoice_Result> element: ", resultStr)
+					message := fmt.Sprintf("Failed:Sync:7 XML string does not contain <PostPurchaseResult> element: ", resultStr)
 					utils.Console(message)
-					logger.LogInvoiceFetch(logger.FAILURE, INVOICE_DONE_LOG_FILE_PATH, INVOICE_DONE_FAILURE, fileNames[i], message, resultStr)
+					logger.LogNavState(logger.FAILURE, DONE_LOG_FILE_PATH, DONE_FAILURE, fileNames[i], message, resultStr)
 				} else {
 					isSuccessPost = true
 				}
@@ -180,15 +180,15 @@ func Sync() {
 
 		//Move to done file
 		if isSuccessCreation && isSuccessPost {
-			err = filesystem.MoveFile(fileNames[i], INVOICE_PENDING_FILE_PATH, INVOICE_DONE_FILE_PATH)
+			err = filesystem.MoveFile(fileNames[i], PENDING_FILE_PATH, DONE_FILE_PATH)
 			if err != nil {
 				message := "Failed:Sync:4 " + err.Error()
 				utils.Console(message)
-				logger.LogInvoiceFetch(logger.FAILURE, INVOICE_DONE_LOG_FILE_PATH, INVOICE_DONE_FAILURE, fileNames[i], message, "")
+				logger.LogNavState(logger.FAILURE, DONE_LOG_FILE_PATH, DONE_FAILURE, fileNames[i], message, "")
 			} else {
 				message := "Sync: File moved successfully"
 				utils.Console(message)
-				logger.LogInvoiceFetch(logger.SUCCESS, INVOICE_DONE_LOG_FILE_PATH, INVOICE_DONE_SUCCESS, fileNames[i], message, "")
+				logger.LogNavState(logger.SUCCESS, DONE_LOG_FILE_PATH, DONE_SUCCESS, fileNames[i], message, "")
 			}
 		}
 	}

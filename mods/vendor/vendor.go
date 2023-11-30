@@ -17,18 +17,18 @@ import (
 
 func Fetch() {
 	//Path
-	VENDOR_FETCH_URL := config.Config.Vendor.Fetch.URL
-	VENDOR_PENDING_FILE_PATH := utils.VENDOR_PENDING_FILE_PATH
-	VENDOR_PENDING_LOG_FILE_PATH := utils.VENDOR_DONE_LOG_FILE_PATH
-	VENDOR_PENDING_FAILURE := utils.VENDOR_PENDING_FAILURE
-	VENDOR_PENDING_SUCCESS := utils.VENDOR_PENDING_SUCCESS
+	FETCH_URL := config.Config.Vendor.Fetch.URL
+	PENDING_FILE_PATH := utils.VENDOR_PENDING_FILE_PATH
+	PENDING_LOG_FILE_PATH := utils.VENDOR_DONE_LOG_FILE_PATH
+	PENDING_FAILURE := utils.VENDOR_PENDING_FAILURE
+	PENDING_SUCCESS := utils.VENDOR_PENDING_SUCCESS
 
 	//Fetch vendor data
-	response, err := amanager.Fetch(VENDOR_FETCH_URL, normalapi.GET)
+	response, err := amanager.Fetch(FETCH_URL, normalapi.GET)
 	if err != nil {
 		message := "Failed:Fetch:1 " + err.Error()
 		utils.Console(message)
-		logger.LogInvoiceFetch(logger.SUCCESS, VENDOR_PENDING_LOG_FILE_PATH, VENDOR_PENDING_FAILURE, "", message, "")
+		logger.LogNavState(logger.SUCCESS, PENDING_LOG_FILE_PATH, PENDING_FAILURE, "", message, "")
 	}
 	utils.Console(response)
 
@@ -36,15 +36,15 @@ func Fetch() {
 	timestamp := utils.GetCurrentTime()
 
 	//Save to pending file
-	err = filesystem.Save(VENDOR_PENDING_FILE_PATH, timestamp+".json", response)
+	err = filesystem.Save(PENDING_FILE_PATH, timestamp, response)
 	if err != nil {
 		message := "Failed:Fetch:2 " + err.Error()
 		utils.Console(message)
-		logger.LogInvoiceFetch(logger.SUCCESS, VENDOR_PENDING_LOG_FILE_PATH, VENDOR_PENDING_FAILURE, timestamp+".json", message, "")
+		logger.LogNavState(logger.SUCCESS, PENDING_LOG_FILE_PATH, PENDING_FAILURE, timestamp+".json", message, "")
 	} else {
 		message := "Fetch: Successfully saved vendor to pending file"
 		utils.Console(message)
-		logger.LogInvoiceFetch(logger.SUCCESS, VENDOR_PENDING_LOG_FILE_PATH, VENDOR_PENDING_SUCCESS, timestamp+".json", message, "")
+		logger.LogNavState(logger.SUCCESS, PENDING_LOG_FILE_PATH, PENDING_SUCCESS, timestamp+".json", message, "")
 	}
 
 }
@@ -81,21 +81,21 @@ func Fetch() {
 
 func Sync() {
 	//Path
-	VENDOR_PENDING_FILE_PATH := utils.VENDOR_PENDING_FILE_PATH
-	VENDOR_DONE_FILE_PATH := utils.VENDOR_DONE_FILE_PATH
-	VENDOR_DONE_LOG_FILE_PATH := utils.VENDOR_DONE_LOG_FILE_PATH
-	VENDOR_DONE_FAILURE := utils.INVOICE_DONE_FAILURE
-	VENDOR_DONE_SUCCESS := utils.INVOICE_DONE_SUCCESS
+	PENDING_FILE_PATH := utils.VENDOR_PENDING_FILE_PATH
+	DONE_FILE_PATH := utils.VENDOR_DONE_FILE_PATH
+	DONE_LOG_FILE_PATH := utils.VENDOR_DONE_LOG_FILE_PATH
+	DONE_FAILURE := utils.INVOICE_DONE_FAILURE
+	DONE_SUCCESS := utils.INVOICE_DONE_SUCCESS
 	NTLM_USERNAME := config.Config.Auth.Ntlm.Username
 	NTLM_PASSWORD := config.Config.Auth.Ntlm.Password
 	url := config.Config.Vendor.Sync.URL
 
 	//Get All the vendor pending data
-	fileNames, err := filesystem.GetAllFiles(VENDOR_PENDING_FILE_PATH)
+	fileNames, err := filesystem.GetAllFiles(PENDING_FILE_PATH)
 	if err != nil {
 		message := "Failed:Sync:1 " + err.Error()
 		utils.Console(message)
-		logger.LogInvoiceFetch(logger.SUCCESS, VENDOR_DONE_LOG_FILE_PATH, VENDOR_DONE_FAILURE, "", message, "")
+		logger.LogNavState(logger.SUCCESS, DONE_LOG_FILE_PATH, DONE_FAILURE, "", message, "")
 	}
 
 	utils.Console(fileNames)
@@ -107,7 +107,7 @@ func Sync() {
 	for i := 0; i < len(fileNames); i++ {
 		//Sync vendor data to NAV
 		//Get Json data from the file
-		jsonData, err := filesystem.ReadFile(VENDOR_PENDING_FILE_PATH, fileNames[i])
+		jsonData, err := filesystem.ReadFile(PENDING_FILE_PATH, fileNames[i])
 
 		jsonString := string(jsonData)
 
@@ -116,7 +116,7 @@ func Sync() {
 		if err := json.Unmarshal([]byte(jsonData), &vendor); err != nil {
 			message := "Failed:Sync:2 Error unmarshaling JSON -> " + err.Error()
 			utils.Console(message)
-			logger.LogInvoiceFetch(logger.SUCCESS, VENDOR_DONE_LOG_FILE_PATH, VENDOR_DONE_FAILURE, fileNames[i], message, jsonString)
+			logger.LogNavState(logger.SUCCESS, DONE_LOG_FILE_PATH, DONE_FAILURE, fileNames[i], message, jsonString)
 		}
 
 		//utils.Console(vendor)
@@ -126,7 +126,7 @@ func Sync() {
 		if err != nil {
 			message := "Failed:Sync:3 Error mapping to XML -> " + err.Error()
 			utils.Console(message)
-			logger.LogInvoiceFetch(logger.SUCCESS, VENDOR_DONE_LOG_FILE_PATH, VENDOR_DONE_FAILURE, fileNames[i], message, jsonString)
+			logger.LogNavState(logger.SUCCESS, DONE_LOG_FILE_PATH, DONE_FAILURE, fileNames[i], message, jsonString)
 		}
 
 		//Add XML envelope and body elements
@@ -155,14 +155,14 @@ func Sync() {
 		if err != nil {
 			message := "Failed:Sync:4 " + err.Error()
 			utils.Console(message)
-			logger.LogInvoiceFetch(logger.FAILURE, VENDOR_DONE_LOG_FILE_PATH, VENDOR_DONE_FAILURE, fileNames[i], message, xmlPayload)
+			logger.LogNavState(logger.FAILURE, DONE_LOG_FILE_PATH, DONE_FAILURE, fileNames[i], message, xmlPayload)
 		} else {
 			resultStr, ok := result.(string)
 			if !ok {
 				// The type assertion failed
 				message := fmt.Sprintf("Failed:Sync:5 Could not convert to string: ", result)
 				utils.Console(message)
-				logger.LogInvoiceFetch(logger.FAILURE, VENDOR_DONE_LOG_FILE_PATH, VENDOR_DONE_FAILURE, fileNames[i], message, xmlPayload)
+				logger.LogNavState(logger.FAILURE, DONE_LOG_FILE_PATH, DONE_FAILURE, fileNames[i], message, xmlPayload)
 			}
 			match := utils.MatchRegexExpression(resultStr, `<Create_Result[^>]*>`)
 			matchFault := utils.MatchRegexExpression(resultStr, `<faultcode[^>]*>`)
@@ -171,7 +171,7 @@ func Sync() {
 			if !match && matchFault {
 				message := fmt.Sprintf("Failed:Sync:6 XML string does not contain <Create_Result> element: ", result)
 				utils.Console(message)
-				logger.LogInvoiceFetch(logger.FAILURE, VENDOR_DONE_LOG_FILE_PATH, VENDOR_DONE_FAILURE, fileNames[i], message, resultStr)
+				logger.LogNavState(logger.FAILURE, DONE_LOG_FILE_PATH, DONE_FAILURE, fileNames[i], message, resultStr)
 			} else {
 				isSuccess = true
 			}
@@ -179,15 +179,15 @@ func Sync() {
 
 		if isSuccess {
 			//Move to done file
-			err = filesystem.MoveFile(fileNames[i], VENDOR_PENDING_FILE_PATH, VENDOR_DONE_FILE_PATH)
+			err = filesystem.MoveFile(fileNames[i], PENDING_FILE_PATH, DONE_FILE_PATH)
 			if err != nil {
 				message := "Failed:Sync:5 " + err.Error()
 				utils.Console(message)
-				logger.LogInvoiceFetch(logger.FAILURE, VENDOR_DONE_LOG_FILE_PATH, VENDOR_DONE_FAILURE, fileNames[i], message, result.(string))
+				logger.LogNavState(logger.FAILURE, DONE_LOG_FILE_PATH, DONE_FAILURE, fileNames[i], message, result.(string))
 			} else {
 				message := "File moved successfully"
 				utils.Console(message)
-				logger.LogInvoiceFetch(logger.SUCCESS, VENDOR_DONE_LOG_FILE_PATH, VENDOR_DONE_SUCCESS, fileNames[i], message, "")
+				logger.LogNavState(logger.SUCCESS, DONE_LOG_FILE_PATH, DONE_SUCCESS, fileNames[i], message, "")
 			}
 		}
 	}
