@@ -24,7 +24,7 @@ func Fetch() {
 	PENDING_SUCCESS := utils.INVOICE_PENDING_SUCCESS
 
 	//Fetch vendor data
-	response, err := manager.Fetch(FETCH_URL, normalapi.GET)
+	response, err := manager.Fetch(FETCH_URL, normalapi.GET, nil)
 	if err != nil {
 		message := "Failed:Fetch:1 " + err.Error()
 		utils.Console(message)
@@ -49,47 +49,6 @@ func Fetch() {
 
 }
 
-// func Sync() {
-// 	//Eg.
-// 	NTLM_USERNAME := config.Config.Auth.Ntlm.Username
-// 	NTLM_PASSWORD := config.Config.Auth.Ntlm.Password
-// 	url := config.Config.Invoice.Sync.URL
-// 	xmlPayload := `
-// 		<Envelope
-// 			xmlns="http://schemas.xmlsoap.org/soap/envelope/">
-// 			<Body>
-// 				<Create
-// 					xmlns="urn:microsoft-dynamics-schemas/page/wspurchaseinvoicepage">
-// 					<WSPurchaseInvoicePage>
-// 						<Buy_from_Vendor_No>TEST2</Buy_from_Vendor_No>
-// 						<Vendor_Invoice_No>124A</Vendor_Invoice_No>
-// 						<Buy_from_Vendor_Name>intuji 2</Buy_from_Vendor_Name>
-// 						<!-- Optional -->
-// 						<PurchLines>
-// 							<Purch_Invoice_Line>
-// 								<Type>Item</Type>
-// 								<No>250MS-12MTR-006</No>
-// 								<Quantity>1</Quantity>
-// 								<Unit_Price_LCY>10</Unit_Price_LCY>
-// 								<Location_Code>BI</Location_Code>
-// 							</Purch_Invoice_Line>
-// 						</PurchLines>
-// 					</WSPurchaseInvoicePage>
-// 				</Create>
-// 			</Body>
-// 		</Envelope>
-// 	`
-
-// 	utils.Console(url)
-// 	utils.Console(xmlPayload)
-// 	result, err := amanager.Sync(url, navapi.POST, xmlPayload, NTLM_USERNAME, NTLM_PASSWORD)
-// 	if err != nil {
-// 		utils.Console(err)
-// 	} else {
-// 		utils.Console(result)
-// 	}
-// }
-
 func Sync() {
 	//Path
 	PENDING_FILE_PATH := utils.INVOICE_PENDING_FILE_PATH
@@ -112,13 +71,14 @@ func Sync() {
 		return
 	}
 
+	var responseModel []BackToCDSInvoiceResponse
 	for i := 0; i < len(fileNames); i++ {
 		//Sync vendor data to NAV
 		//Get Json data from the file
 		jsonData, err := filesystem.ReadFile(PENDING_FILE_PATH, fileNames[i])
 
 		//Insert invoice
-		response, err := insertInvoice(jsonData)
+		responseCreate, err := insertInvoice(jsonData)
 		isSuccessCreation := false
 		if err != nil {
 			isSuccessCreation = false
@@ -126,52 +86,53 @@ func Sync() {
 			utils.Console(message)
 			logger.LogNavState(logger.FAILURE, DONE_LOG_FILE_PATH, DONE_FAILURE, fileNames[i], message, "")
 		} else {
-			utils.Console(response)
-			resultStr, ok := response.(string)
+			utils.Console(responseCreate)
+			resultCreateStr, ok := responseCreate.(string)
 			if !ok {
 				// The type assertion failed
-				message := fmt.Sprintf("Failed:Sync:3 Could not convert to string: ", response)
+				message := fmt.Sprintf("Failed:Sync:3 Could not convert to string: ", responseCreate)
 				utils.Console(message)
-				logger.LogNavState(logger.FAILURE, DONE_LOG_FILE_PATH, DONE_FAILURE, fileNames[i], message, resultStr)
+				logger.LogNavState(logger.FAILURE, DONE_LOG_FILE_PATH, DONE_FAILURE, fileNames[i], message, resultCreateStr)
 			}
-			match := utils.MatchRegexExpression(resultStr, `<WSPurchaseInvoicePage[^>]*>`)
-			matchFault := utils.MatchRegexExpression(resultStr, `<faultcode[^>]*>`)
+			match := utils.MatchRegexExpression(resultCreateStr, `<WSPurchaseInvoicePage[^>]*>`)
+			matchFault := utils.MatchRegexExpression(resultCreateStr, `<faultcode[^>]*>`)
 
 			// Print the result
 			if !match && matchFault {
-				message := fmt.Sprintf("Failed:Sync:4 XML string does not contain <WSPurchaseInvoicePage> element: ", resultStr)
+				message := fmt.Sprintf("Failed:Sync:4 XML string does not contain <WSPurchaseInvoicePage> element: ", resultCreateStr)
 				utils.Console(message)
-				logger.LogNavState(logger.FAILURE, DONE_LOG_FILE_PATH, DONE_FAILURE, fileNames[i], message, resultStr)
+				logger.LogNavState(logger.FAILURE, DONE_LOG_FILE_PATH, DONE_FAILURE, fileNames[i], message, resultCreateStr)
 			} else {
 				isSuccessCreation = true
 			}
 		}
 
 		isSuccessPost := false
+		var responsePost interface{}
 		if isSuccessCreation {
-			response, err = postInvoiceAfterCreation(response)
+			responsePost, err = postInvoiceAfterCreation(responseCreate)
 			if err != nil {
 				isSuccessPost = false
 				message := "Failed:Sync:5 " + err.Error()
 				utils.Console(message)
 				logger.LogNavState(logger.FAILURE, DONE_LOG_FILE_PATH, DONE_FAILURE, fileNames[i], message, "")
 			} else {
-				utils.Console(response)
-				resultStr, ok := response.(string)
+				utils.Console(responsePost)
+				resultPostStr, ok := responsePost.(string)
 				if !ok {
 					// The type assertion failed
-					message := fmt.Sprintf("Failed:Sync:6 Could not convert to string: ", response)
+					message := fmt.Sprintf("Failed:Sync:6 Could not convert to string: ", resultPostStr)
 					utils.Console(message)
-					logger.LogNavState(logger.FAILURE, DONE_LOG_FILE_PATH, DONE_FAILURE, fileNames[i], message, resultStr)
+					logger.LogNavState(logger.FAILURE, DONE_LOG_FILE_PATH, DONE_FAILURE, fileNames[i], message, resultPostStr)
 				}
-				match := utils.MatchRegexExpression(resultStr, `<PostPurchaseResult[^>]*>`)
-				matchFault := utils.MatchRegexExpression(resultStr, `<faultcode[^>]*>`)
+				match := utils.MatchRegexExpression(resultPostStr, `<PostPurchaseResult[^>]*>`)
+				matchFault := utils.MatchRegexExpression(resultPostStr, `<faultcode[^>]*>`)
 
 				// Print the result
 				if !match && matchFault {
-					message := fmt.Sprintf("Failed:Sync:7 XML string does not contain <PostPurchaseResult> element: ", resultStr)
+					message := fmt.Sprintf("Failed:Sync:7 XML string does not contain <PostPurchaseResult> element: ", resultPostStr)
 					utils.Console(message)
-					logger.LogNavState(logger.FAILURE, DONE_LOG_FILE_PATH, DONE_FAILURE, fileNames[i], message, resultStr)
+					logger.LogNavState(logger.FAILURE, DONE_LOG_FILE_PATH, DONE_FAILURE, fileNames[i], message, resultPostStr)
 				} else {
 					isSuccessPost = true
 				}
@@ -179,6 +140,7 @@ func Sync() {
 		}
 
 		//Move to done file
+		isSuccessfullySavedToFile := false
 		if isSuccessCreation && isSuccessPost {
 			err = filesystem.MoveFile(fileNames[i], PENDING_FILE_PATH, DONE_FILE_PATH)
 			if err != nil {
@@ -186,11 +148,39 @@ func Sync() {
 				utils.Console(message)
 				logger.LogNavState(logger.FAILURE, DONE_LOG_FILE_PATH, DONE_FAILURE, fileNames[i], message, "")
 			} else {
+				isSuccessfullySavedToFile = true
 				message := "Sync: File moved successfully"
 				utils.Console(message)
 				logger.LogNavState(logger.SUCCESS, DONE_LOG_FILE_PATH, DONE_SUCCESS, fileNames[i], message, "")
 			}
 		}
+
+		//Add successed to an array
+		if isSuccessfullySavedToFile {
+			createInvoiceRes, err := unmarshelCreateInvoiceResponse(responseCreate)
+			if err != nil {
+				message := "Failed:Sync:6 " + err.Error()
+				utils.Console(message)
+			}
+
+			postInvoiceRes, err := unmarshelPostInvoiceResponse(responsePost)
+			if err != nil {
+				message := "Failed:Sync:6 " + err.Error()
+				utils.Console(message)
+			}
+
+			responseModel = append(responseModel, BackToCDSInvoiceResponse{
+				VendorNo:          createInvoiceRes.Body.CreateResult.WSPurchaseInvoicePage.BuyFromVendorNo,
+				PurchaseInvoiceNo: createInvoiceRes.Body.CreateResult.WSPurchaseInvoicePage.No,
+				DocumentId:        postInvoiceRes.Body.ReturnValue,
+			})
+		}
+	}
+
+	//Bulk save
+	//After syncing all files then send response back to CDS
+	if len(responseModel) > 0 {
+		sendToCDS(responseModel)
 	}
 }
 
@@ -244,18 +234,8 @@ func postInvoiceAfterCreation(stringData interface{}) (interface{}, error) {
 	NTLM_PASSWORD := config.Config.Auth.Ntlm.Password
 	url := config.Config.Invoice.Post.URL
 
-	// Type assertion to get the underlying string
-	str, ok := stringData.(string)
-	if !ok {
-		return nil, errors.New("postInvoiceAfterCreation: Conversion failed: not a string")
-	}
-
-	// Convert the string to a byte slice
-	xmlData := []byte(str)
-
 	// Map Go struct to XML
-	var envelope PostInvoiceEnvelope
-	err := xml.Unmarshal(xmlData, &envelope)
+	envelope, err := unmarshelCreateInvoiceResponse(stringData)
 	if err != nil {
 		return nil, errors.New("postInvoiceAfterCreation: Error decoding XML: " + err.Error())
 	}
@@ -288,4 +268,59 @@ func postInvoiceAfterCreation(stringData interface{}) (interface{}, error) {
 		return nil, errors.New("postInvoiceAfterCreation: " + err.Error())
 	}
 	return result, nil
+}
+
+func unmarshelCreateInvoiceResponse(stringData interface{}) (PostInvoiceEnvelope, error) {
+	var envelope PostInvoiceEnvelope
+	// Type assertion to get the underlying string
+	str, ok := stringData.(string)
+	if !ok {
+		return envelope, errors.New("unmarshelCreateInvoiceResponse: Conversion failed: not a string")
+	}
+
+	// Convert the string to a byte slice
+	xmlData := []byte(str)
+
+	// Map Go struct to XML
+	err := xml.Unmarshal(xmlData, &envelope)
+	if err != nil {
+		return envelope, errors.New("unmarshelCreateInvoiceResponse: Error decoding XML: " + err.Error())
+	}
+	return envelope, nil
+}
+
+func unmarshelPostInvoiceResponse(stringData interface{}) (PostResponseInvoiceEnvelope, error) {
+	var envelope PostResponseInvoiceEnvelope
+	// Type assertion to get the underlying string
+	str, ok := stringData.(string)
+	if !ok {
+		return envelope, errors.New("unmarshelPostInvoiceResponse: Conversion failed: not a string")
+	}
+
+	// Convert the string to a byte slice
+	xmlData := []byte(str)
+
+	// Map Go struct to XML
+	err := xml.Unmarshal(xmlData, &envelope)
+	if err != nil {
+		return envelope, errors.New("unmarshelPostInvoiceResponse: Error decoding XML: " + err.Error())
+	}
+	return envelope, nil
+}
+
+func sendToCDS(responseModel []BackToCDSInvoiceResponse) {
+	//Path
+	RESPONSE_URL := config.Config.Invoice.Save.URL
+
+	// //Save Response vendor data to CDS
+	// response, err := manager.Fetch(RESPONSE_URL, normalapi.POST, responseModel)
+	// if err != nil {
+	// 	message := "Failed:sendToCDS:1 " + err.Error()
+	// 	utils.Console(message)
+	// 	//logger.LogNavState(logger.SUCCESS, PENDING_LOG_FILE_PATH, PENDING_FAILURE, "", message, "")
+	// }
+	// utils.Console(response)
+
+	utils.Console("Successfully send to CDS system from nav ---> invoice: ", RESPONSE_URL)
+	utils.Console(responseModel)
 }

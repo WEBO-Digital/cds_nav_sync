@@ -2,6 +2,7 @@ package vendor
 
 import (
 	"encoding/json"
+	"encoding/xml"
 	"fmt"
 	"log"
 	"nav_sync/config"
@@ -23,7 +24,7 @@ func Fetch() {
 	PENDING_SUCCESS := utils.VENDOR_PENDING_SUCCESS
 
 	//Fetch vendor data
-	response, err := manager.Fetch(FETCH_URL, normalapi.GET)
+	response, err := manager.Fetch(FETCH_URL, normalapi.GET, nil)
 	if err != nil {
 		message := "Failed:Fetch:1 " + err.Error()
 		utils.Console(message)
@@ -47,36 +48,6 @@ func Fetch() {
 	}
 
 }
-
-// func Sync() {
-// 	//Eg.
-// 	NTLM_USERNAME := config.Config.Auth.Ntlm.Username
-// 	NTLM_PASSWORD := config.Config.Auth.Ntlm.Password
-// 	url := config.Config.Vendor.Sync.URL
-// 	xmlPayload := `
-// 		<Envelope
-// 			xmlns="http://schemas.xmlsoap.org/soap/envelope/">
-// 			<Body>
-// 				<Create
-// 					xmlns="urn:microsoft-dynamics-schemas/page/wsvendor">
-// 					<WSVendor>
-// 						<Name>Suman Intuji </Name>
-// 						<Address>From vs code</Address>
-// 						<Weighbridge_Supplier_ID>INJ123</Weighbridge_Supplier_ID>
-// 					</WSVendor>
-// 				</Create>
-// 			</Body>
-// 		</Envelope>
-// 	`
-
-// 	utils.Console(xmlPayload)
-// 	result, err := amanager.Sync(url, navapi.POST, xmlPayload, NTLM_USERNAME, NTLM_PASSWORD)
-// 	if err != nil {
-// 		utils.Console(err)
-// 	} else {
-// 		utils.Console(result)
-// 	}
-// }
 
 func Sync() {
 	//Path
@@ -103,6 +74,7 @@ func Sync() {
 		return
 	}
 
+	var responseModel []BackToCDSVendorResponse
 	for i := 0; i < len(fileNames); i++ {
 		//Sync vendor data to NAV
 		//Get Json data from the file
@@ -176,6 +148,7 @@ func Sync() {
 			}
 		}
 
+		isSuccessfullySavedToFile := false
 		if isSuccess {
 			//Move to done file
 			err = filesystem.MoveFile(fileNames[i], PENDING_FILE_PATH, DONE_FILE_PATH)
@@ -184,10 +157,57 @@ func Sync() {
 				utils.Console(message)
 				logger.LogNavState(logger.FAILURE, DONE_LOG_FILE_PATH, DONE_FAILURE, fileNames[i], message, result.(string))
 			} else {
+				isSuccessfullySavedToFile = true
 				message := "File moved successfully"
 				utils.Console(message)
 				logger.LogNavState(logger.SUCCESS, DONE_LOG_FILE_PATH, DONE_SUCCESS, fileNames[i], message, "")
 			}
 		}
+
+		//Add successed to an array
+		if isSuccessfullySavedToFile {
+			// Convert the string to a byte slice
+			xmlData := []byte(result.(string))
+
+			// Map Go struct to XML
+			var parseModel CreateResultVendor
+			err := xml.Unmarshal(xmlData, &parseModel)
+			if err != nil {
+				message := "Failed:Sync:6 " + err.Error()
+				utils.Console(message)
+				logger.LogNavState(logger.FAILURE, DONE_LOG_FILE_PATH, DONE_FAILURE, fileNames[i], message, result.(string))
+			}
+
+			// responseModel[i].VendorNo = parseModel.Body.CreateResult.WSVendor.No
+			// responseModel[i].WeighbridgeSupplierID = parseModel.Body.CreateResult.WSVendor.WeighbridgeSupplierID
+
+			responseModel = append(responseModel, BackToCDSVendorResponse{
+				VendorNo:              parseModel.Body.CreateResult.WSVendor.No,
+				WeighbridgeSupplierID: parseModel.Body.CreateResult.WSVendor.WeighbridgeSupplierID,
+			})
+		}
 	}
+
+	//Bulk save
+	//After syncing all files then send response back to CDS
+	if len(responseModel) > 0 {
+		sendToCDS(responseModel)
+	}
+}
+
+func sendToCDS(responseModel []BackToCDSVendorResponse) {
+	//Path
+	RESPONSE_URL := config.Config.Vendor.Save.URL
+
+	// //Save Response vendor data to CDS
+	// response, err := manager.Fetch(RESPONSE_URL, normalapi.POST, responseModel)
+	// if err != nil {
+	// 	message := "Failed:Fetch:1 " + err.Error()
+	// 	utils.Console(message)
+	// 	//logger.LogNavState(logger.SUCCESS, PENDING_LOG_FILE_PATH, PENDING_FAILURE, "", message, "")
+	// }
+	// utils.Console(response)
+
+	utils.Console("Successfully send to CDS system from nav ---> vendor: ", RESPONSE_URL)
+	utils.Console(responseModel)
 }

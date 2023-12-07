@@ -17,3 +17,7 @@ type VendorPayment struct {
 	AppliesToDocType string  `xml:"Applies_to_Doc_Type" json:"appliesToDocType"`
 	AppliesToDocNo   string  `xml:"Applies_to_Doc_No" json:"appliesToDocNo"`
 }
+
+type BackToCDSLedgerEntriesResponse struct {
+	DocumentNo int `json:"document_no,omitempty"`
+}

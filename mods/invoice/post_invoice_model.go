@@ -2,16 +2,16 @@ package invoice
 
 // Envelope represents the structure of Soap:Envelope element in the XML
 type PostInvoiceEnvelope struct {
-	Body Body `xml:"Body" json:"body"`
+	Body PostBody `xml:"Body" json:"body"`
 }
 
 // Body represents the structure of Soap:Body element in the XML
-type Body struct {
-	CreateResult CreateResult `xml:"Create_Result" json:"create_result"`
+type PostBody struct {
+	CreateResult PostCreateResult `xml:"Create_Result" json:"create_result"`
 }
 
 // CreateResult represents the structure of Create_Result element in the XML
-type CreateResult struct {
+type PostCreateResult struct {
 	WSPurchaseInvoicePage WSPurchaseInvoicePage2 `xml:"WSPurchaseInvoicePage" json:"ws_purchase_invoice_page"`
 }
 
@@ -28,12 +28,11 @@ type WSPurchaseInvoicePage2 struct {
 
 // PurchLines represents the structure of PurchLines element in the XML
 type PurchLines struct {
-	PurchInvoiceLine PurchInvoiceLine `xml:"Purch_Invoice_Line" json:"purch_invoice_line"`
+	PurchInvoiceLine PurchInvoiceLine2 `xml:"Purch_Invoice_Line" json:"purch_invoice_line"`
 }
 
 // PurchInvoiceLine represents the structure of Purch_Invoice_Line element in the XML
-type PurchInvoiceLine struct {
+type PurchInvoiceLine2 struct {
 	Key  string `xml:"Key" json:"key"`
 	Type string `xml:"Type" json:"type"`
-	// Add other fields based on your XML structure
 }

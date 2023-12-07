@@ -8,10 +8,10 @@ import (
 	"nav_sync/utils"
 )
 
-func Fetch(url string, method normalapi.APIMethod) (interface{}, error) {
+func Fetch(url string, method normalapi.APIMethod, data interface{}) (interface{}, error) {
 	//Make response call
 	if method == normalapi.POST {
-		return normalapi.Post()
+		return normalapi.Post(url, data)
 	} else if method == normalapi.GET {
 		return normalapi.Get(url)
 	} else if method == normalapi.PUT {

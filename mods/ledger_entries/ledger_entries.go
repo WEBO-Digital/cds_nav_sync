@@ -24,7 +24,7 @@ func Fetch() {
 	PENDING_SUCCESS := utils.LEDGER_ENTRIES_PENDING_SUCCESS
 
 	//Fetch LEDGER_ENTRIES data
-	response, err := manager.Fetch(FETCH_URL, normalapi.GET)
+	response, err := manager.Fetch(FETCH_URL, normalapi.GET, nil)
 	if err != nil {
 		message := "Failed:Fetch:1 " + err.Error()
 		utils.Console(message)
@@ -68,6 +68,7 @@ func Sync() {
 		return
 	}
 
+	var responseModel []BackToCDSLedgerEntriesResponse
 	for i := 0; i < len(fileNames); i++ {
 		//Sync vendor data to NAV
 		//Get Json data from the file
@@ -104,19 +105,20 @@ func Sync() {
 		}
 
 		isSuccessPost := false
+		var responsePost interface{}
 		if isSuccessCreation {
-			response, err = postLedgerEntriesAfterCreation(response)
+			responsePost, err = postLedgerEntriesAfterCreation(responsePost)
 			if err != nil {
 				isSuccessPost = false
 				message := "Failed:Sync:5 " + err.Error()
 				utils.Console(message)
 				logger.LogNavState(logger.FAILURE, DONE_LOG_FILE_PATH, DONE_FAILURE, fileNames[i], message, "")
 			} else {
-				utils.Console(response)
-				resultStr, ok := response.(string)
+				utils.Console(responsePost)
+				resultStr, ok := responsePost.(string)
 				if !ok {
 					// The type assertion failed
-					message := fmt.Sprintf("Failed:Sync:6 Could not convert to string: ", response)
+					message := fmt.Sprintf("Failed:Sync:6 Could not convert to string: ", responsePost)
 					utils.Console(message)
 					logger.LogNavState(logger.FAILURE, DONE_LOG_FILE_PATH, DONE_FAILURE, fileNames[i], message, resultStr)
 				}
@@ -135,6 +137,7 @@ func Sync() {
 		}
 
 		//Move to done file
+		isSuccessfullySavedToFile := false
 		if isSuccessCreation && isSuccessPost {
 			err = filesystem.MoveFile(fileNames[i], PENDING_FILE_PATH, DONE_FILE_PATH)
 			if err != nil {
@@ -147,6 +150,26 @@ func Sync() {
 				logger.LogNavState(logger.SUCCESS, DONE_LOG_FILE_PATH, DONE_SUCCESS, fileNames[i], message, "")
 			}
 		}
+
+		//Add successed to an array
+		if isSuccessfullySavedToFile {
+			postLedgerRes, err := unmarshelCreateLedgerEntryResponse(responsePost)
+			if err != nil {
+				message := "Failed:Sync:6 " + err.Error()
+				utils.Console(message)
+			}
+
+			utils.Console(responsePost)
+			responseModel = append(responseModel, BackToCDSLedgerEntriesResponse{
+				DocumentNo: postLedgerRes.Body.CreateResult.VendorPayment.DocumentNo,
+			})
+		}
+	}
+
+	//Bulk save
+	//After syncing all files then send response back to CDS
+	if len(responseModel) > 0 {
+		sendToCDS(responseModel)
 	}
 }
 
@@ -166,24 +189,6 @@ func insertLedgerEntries(jsonData []byte) (interface{}, error) {
 	if err != nil {
 		return nil, errors.New("insertLedgerEntries: Error mapping to XML -> " + err.Error())
 	}
-
-	// <Envelope xmlns="http://schemas.xmlsoap.org/soap/envelope/">
-	// 	<Body>
-	// 		<Create xmlns="urn:microsoft-dynamics-schemas/page/vendorpayment">
-	// 			<CurrentJnlBatchName>Default</CurrentJnlBatchName>
-	// 			<VendorPayment>
-	// 				<Posting_Date>2023-11-30</Posting_Date>
-	// 				<Document_Date>2023-02-12</Document_Date>
-	// 				<Document_Type>Payment</Document_Type>
-	// 				<Account_Type>Vendor</Account_Type>
-	// 				<Account_No>TEST2</Account_No>
-	// 				<Amount>1010</Amount>
-	// 				<Applies_to_Doc_Type>Invoice</Applies_to_Doc_Type>
-	// 				<Applies_to_Doc_No>PI541733</Applies_to_Doc_No>
-	// 			</VendorPayment>
-	// 		</Create>
-	// 	</Body>
-	// </Envelope>
 
 	//Add XML envelope and body elements
 	xmlPayload := fmt.Sprintf(
@@ -221,28 +226,26 @@ func postLedgerEntriesAfterCreation(stringData interface{}) (interface{}, error)
 	url := config.Config.LedgerEntries.Post.URL
 
 	// Type assertion to get the underlying string
-	str, ok := stringData.(string)
-	if !ok {
-		return nil, errors.New("postLedgerEntriesAfterCreation: Conversion failed: not a string")
-	}
+	// str, ok := stringData.(string)
+	// if !ok {
+	// 	return nil, errors.New("postLedgerEntriesAfterCreation: Conversion failed: not a string")
+	// }
 
-	// Convert the string to a byte slice
-	xmlData := []byte(str)
+	// // Convert the string to a byte slice
+	// xmlData := []byte(str)
 
-	// Map Go struct to XML
-	var envelope PostLedgerEntriesEnvelope
-	err := xml.Unmarshal(xmlData, &envelope)
+	// // Map Go struct to XML
+	// var envelope PostLedgerEntriesEnvelope
+	// err := xml.Unmarshal(xmlData, &envelope)
+	// if err != nil {
+	// 	return nil, errors.New("postLedgerEntriesAfterCreation: Error decoding XML: " + err.Error())
+	// }
+
+	envelope, err := unmarshelCreateLedgerEntryResponse(stringData)
 	if err != nil {
-		return nil, errors.New("postLedgerEntriesAfterCreation: Error decoding XML: " + err.Error())
+		message := "postLedgerEntriesAfterCreation: " + err.Error()
+		utils.Console(message)
 	}
-
-	// <Envelope xmlns="http://schemas.xmlsoap.org/soap/envelope/">
-	// 	<Body>
-	// 		<PostGenJNlLine xmlns="urn:microsoft-dynamics-schemas/codeunit/WSPurchaseInvoice">
-	// 			<docNo>6</docNo>
-	// 		</PostGenJNlLine>
-	// 	</Body>
-	// </Envelope>
 
 	//Add XML envelope and body elements
 	xmlPayload := fmt.Sprintf(
@@ -270,4 +273,40 @@ func postLedgerEntriesAfterCreation(stringData interface{}) (interface{}, error)
 		return nil, errors.New("postLedgerEntriesAfterCreation: " + err.Error())
 	}
 	return result, nil
+}
+
+func unmarshelCreateLedgerEntryResponse(stringData interface{}) (PostLedgerEntriesEnvelope, error) {
+	var envelope PostLedgerEntriesEnvelope
+	// Type assertion to get the underlying string
+	str, ok := stringData.(string)
+	if !ok {
+		return envelope, errors.New("unmarshelCreateLedgerEntryResponse: Conversion failed: not a string")
+	}
+
+	// Convert the string to a byte slice
+	xmlData := []byte(str)
+
+	// Map Go struct to XML
+	err := xml.Unmarshal(xmlData, &envelope)
+	if err != nil {
+		return envelope, errors.New("unmarshelCreateLedgerEntryResponse: Error decoding XML: " + err.Error())
+	}
+	return envelope, nil
+}
+
+func sendToCDS(responseModel []BackToCDSLedgerEntriesResponse) {
+	//Path
+	RESPONSE_URL := config.Config.Vendor.Save.URL
+
+	// //Save Response vendor data to CDS
+	// response, err := manager.Fetch(RESPONSE_URL, normalapi.POST, responseModel)
+	// if err != nil {
+	// 	message := "Failed:Fetch:1 " + err.Error()
+	// 	utils.Console(message)
+	// 	//logger.LogNavState(logger.SUCCESS, PENDING_LOG_FILE_PATH, PENDING_FAILURE, "", message, "")
+	// }
+	// utils.Console(response)
+
+	utils.Console("Successfully send to CDS system from nav ---> ledger entry: ", RESPONSE_URL)
+	utils.Console(responseModel)
 }

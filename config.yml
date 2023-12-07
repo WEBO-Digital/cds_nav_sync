@@ -4,6 +4,8 @@ vendor:
     apikey: sdfjkJ
   sync:
     url: http://spnav.sellparker.local:7047/SP_NAV2013R2Test/WS/Sell%20%26%20Parker/Page/WSVendor
+  save:
+    url: https://dummyjson.com/products
 
 invoice:
   fetch:
@@ -13,6 +15,8 @@ invoice:
     url: http://SPNAV.sellparker.local:7047/SP_NAV2013R2Test/WS/Sell%20%26%20Parker/Page/WSPurchaseInvoicePage
   post:
     url: http://spnav.sellparker.local:7047/SP_NAV2013R2Test/WS/Sell%20%26%20Parker/Codeunit/WSPurchaseInvoice
+  save:
+    url: https://dummyjson.com/products
 
 ledger_entries:
   fetch:
@@ -22,6 +26,8 @@ ledger_entries:
     url: http://spnav.sellparker.local:7047/SP_NAV2013R2Test/WS/Sell%20%26%20Parker/Page/VendorPayment
   post:
     url: http://spnav.sellparker.local:7047/SP_NAV2013R2Test/WS/Sell%20%26%20Parker/Codeunit/WSPurchaseInvoice
+  save:
+    url: https://dummyjson.com/products
 
 auth:
   ntlm:
