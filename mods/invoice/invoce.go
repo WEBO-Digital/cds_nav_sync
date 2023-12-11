@@ -18,13 +18,14 @@ import (
 func Fetch() {
 	//Path
 	FETCH_URL := config.Config.Invoice.Fetch.URL
+	TOKEN_KEY := config.Config.Invoice.Fetch.APIKey
 	PENDING_FILE_PATH := utils.INVOICE_PENDING_FILE_PATH
 	PENDING_LOG_FILE_PATH := utils.INVOICE_PENDING_LOG_FILE_PATH
 	PENDING_FAILURE := utils.INVOICE_PENDING_FAILURE
 	PENDING_SUCCESS := utils.INVOICE_PENDING_SUCCESS
 
 	//Fetch vendor data
-	response, err := manager.Fetch(FETCH_URL, normalapi.GET, nil)
+	response, err := manager.Fetch(FETCH_URL, normalapi.GET, TOKEN_KEY, nil)
 	if err != nil {
 		message := "Failed:Fetch:1 " + err.Error()
 		utils.Console(message)

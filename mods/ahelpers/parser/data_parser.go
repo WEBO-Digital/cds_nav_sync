@@ -3,16 +3,31 @@ package data_parser
 import (
 	"encoding/json"
 	"encoding/xml"
+	"fmt"
 	"nav_sync/utils"
 )
 
-func ParseByteToJson(body []byte) (interface{}, error) {
-	var data interface{}
+func ParseByteToJson(body []byte) (map[string]interface{}, error) {
+	var data map[string]interface{}
 	err := json.Unmarshal(body, &data)
 	if err != nil {
 		return nil, err
 	}
 	return data, nil
+}
+
+func ParseModelToString(body interface{}) (string, error) {
+	var conv string
+	// Convert struct to JSON
+	jsonData, err := json.MarshalIndent(body, "", "  ")
+	if err != nil {
+		fmt.Println("Error marshalling data:", err)
+		return conv, err
+	}
+
+	// Print the JSON representation
+	conv = string(jsonData)
+	return conv, nil
 }
 
 func ParseJsonToXml(data interface{}) ([]byte, error) {

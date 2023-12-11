@@ -1,6 +1,8 @@
 package utils
 
 import (
+	"crypto/md5"
+	"encoding/hex"
 	"fmt"
 	"log"
 	"regexp"
@@ -30,4 +32,11 @@ func MatchRegexExpression(value string, pattern string) bool {
 	// Check if the pattern matches the XML string
 	match := re.MatchString(value)
 	return match
+}
+
+func ComputeMD5(input string) string {
+	hasher := md5.New()
+	hasher.Write([]byte(input))
+	hashInBytes := hasher.Sum(nil)
+	return hex.EncodeToString(hashInBytes)
 }

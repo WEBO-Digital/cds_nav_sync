@@ -28,6 +28,10 @@ const VENDOR_DONE_LOG_FILE_PATH = "/data/alogs/vendor/done/"
 const VENDOR_DONE_FAILURE = "done.failure.log"
 const VENDOR_DONE_SUCCESS = "done.success.log"
 
+//c. Hash
+const VENDOR_HASH_FILE_PATH = "/data/hash/"
+const VENDOR_HASH_DB = "vendor.hash.json"
+
 //3. Ledger Entries
 //a. Pending
 const LEDGER_ENTRIES_PENDING_FILE_PATH = "/data/ledger_entries/pending/"

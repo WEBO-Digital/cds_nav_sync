@@ -37,6 +37,7 @@ type WSVendor struct {
 	VendorPostingGroup    string `xml:"Vendor_Posting_Group,omitempty" json:"vendor_posting_group,omitempty"`
 	InvoiceDiscCode       string `xml:"Invoice_Disc_Code,omitempty" json:"invoice_disc_code,omitempty"`
 	ApplicationMethod     string `xml:"Application_Method,omitempty" json:"application_method,omitempty"`
+	ACN                   string `xml:"IRD_No,omitempty" json:"acn,omitempty"`
 	ABN                   string `xml:"ABN,omitempty" json:"abn,omitempty"`
 	ABNDivisionPartNo     string `xml:"ABN_Division_Part_No,omitempty" json:"abn_division_part_no,omitempty"`
 	Registered            bool   `xml:"Registered,omitempty" json:"registered,omitempty"`

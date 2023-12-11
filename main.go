@@ -32,7 +32,7 @@ func runcFunctionFromCommandArgument() {
 	case "vendor_fetch":
 		vendor.Fetch()
 	case "vendor_sync":
-		vendor.Sync()
+		vendor.Sync2()
 	case "ledgerentries_fetch":
 		ledgerentries.Fetch()
 	case "ledgerentries_sync":

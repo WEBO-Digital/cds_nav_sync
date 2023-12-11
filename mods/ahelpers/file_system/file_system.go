@@ -149,6 +149,43 @@ func Append(path string, fileName string, data string) error {
 	return nil
 }
 
+func CleanAndSave(path string, fileName string, data string) error {
+	//Create folder if it does not exists
+	filePath, err := createDirectoryIfNotExists(path)
+	if err != nil {
+		return err
+	}
+
+	//Specify the file path
+	destinationPath := fmt.Sprintf("%s%s", *filePath, fileName)
+
+	utils.Console(destinationPath)
+
+	//Create File if it does not exists
+	if _, err := os.Stat(destinationPath); os.IsNotExist(err) {
+		//Create file
+		_, err := os.Create(destinationPath)
+		if err != nil {
+			return err
+		}
+	}
+
+	file, err := os.OpenFile(destinationPath, os.O_RDWR, 0755)
+	if err != nil {
+		return err
+	}
+
+	// Append data to the file
+	res, err := file.WriteString(data)
+	if err != nil {
+		return err
+	} else {
+		utils.Console(res)
+	}
+
+	return nil
+}
+
 func getCurrentWorkingDirectory() (string, error) {
 	currentDir, err := os.Getwd()
 	return currentDir, err

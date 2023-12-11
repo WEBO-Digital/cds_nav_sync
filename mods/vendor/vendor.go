@@ -18,13 +18,14 @@ import (
 func Fetch() {
 	//Path
 	FETCH_URL := config.Config.Vendor.Fetch.URL
+	TOKEN_KEY := config.Config.Vendor.Fetch.APIKey
 	PENDING_FILE_PATH := utils.VENDOR_PENDING_FILE_PATH
 	PENDING_LOG_FILE_PATH := utils.VENDOR_DONE_LOG_FILE_PATH
 	PENDING_FAILURE := utils.VENDOR_PENDING_FAILURE
 	PENDING_SUCCESS := utils.VENDOR_PENDING_SUCCESS
 
 	//Fetch vendor data
-	response, err := manager.Fetch(FETCH_URL, normalapi.GET, nil)
+	response, err := manager.Fetch(FETCH_URL, normalapi.GET, TOKEN_KEY, nil)
 	if err != nil {
 		message := "Failed:Fetch:1 " + err.Error()
 		utils.Console(message)
@@ -190,6 +191,7 @@ func Sync() {
 
 	//Bulk save
 	//After syncing all files then send response back to CDS
+	utils.Console("responseModel------> ", len(responseModel))
 	if len(responseModel) > 0 {
 		sendToCDS(responseModel)
 	}
@@ -198,16 +200,143 @@ func Sync() {
 func sendToCDS(responseModel []BackToCDSVendorResponse) {
 	//Path
 	RESPONSE_URL := config.Config.Vendor.Save.URL
+	TOKEN_KEY := config.Config.Vendor.Fetch.APIKey
 
-	// //Save Response vendor data to CDS
-	// response, err := manager.Fetch(RESPONSE_URL, normalapi.POST, responseModel)
-	// if err != nil {
-	// 	message := "Failed:Fetch:1 " + err.Error()
-	// 	utils.Console(message)
-	// 	//logger.LogNavState(logger.SUCCESS, PENDING_LOG_FILE_PATH, PENDING_FAILURE, "", message, "")
-	// }
-	// utils.Console(response)
+	//Save Response vendor data to CDS
+	response, err := manager.Fetch(RESPONSE_URL, normalapi.POST, TOKEN_KEY, responseModel)
+	if err != nil {
+		message := "Failed:sendToCDS:Fetch:1 " + err.Error()
+		utils.Console(message)
+		//logger.LogNavState(logger.SUCCESS, PENDING_LOG_FILE_PATH, PENDING_FAILURE, "", message, "")
+	}
+	if response != nil {
+		utils.Console(response)
+	}
 
-	utils.Console("Successfully send to CDS system from nav ---> vendor: ", RESPONSE_URL)
-	utils.Console(responseModel)
+	// utils.Console("Successfully send to CDS system from nav ---> vendor: ", RESPONSE_URL)
+	// utils.Console(responseModel)
+}
+
+func Sync2() {
+	//Path
+	PENDING_FILE_PATH := utils.VENDOR_PENDING_FILE_PATH
+	DONE_FILE_PATH := utils.VENDOR_DONE_FILE_PATH
+	DONE_LOG_FILE_PATH := utils.VENDOR_DONE_LOG_FILE_PATH
+	DONE_FAILURE := utils.INVOICE_DONE_FAILURE
+	DONE_SUCCESS := utils.INVOICE_DONE_SUCCESS
+
+	//Get All the vendor pending data
+	fileNames, err := filesystem.GetAllFiles(PENDING_FILE_PATH)
+	if err != nil {
+		message := "Failed:Sync:1 " + err.Error()
+		utils.Console(message)
+		logger.LogNavState(logger.SUCCESS, DONE_LOG_FILE_PATH, DONE_FAILURE, "", message, "")
+	}
+
+	utils.Console(fileNames)
+
+	if fileNames == nil || len(fileNames) < 1 {
+		return
+	}
+
+	//Get Hash Database
+	hashModels := GetHash()
+
+	//Syncing
+	var responseModel []BackToCDSVendorResponse
+	for i := 0; i < len(fileNames); i++ {
+		//Get Json data from the file
+		jsonData, err := filesystem.ReadFile(PENDING_FILE_PATH, fileNames[i])
+		jsonString := string(jsonData)
+
+		// Unmarshal JSON to struct
+		var vendors []WSVendor
+		if err := json.Unmarshal([]byte(jsonData), &vendors); err != nil {
+			message := "Failed:Sync:2 Error unmarshaling JSON -> " + err.Error()
+			utils.Console(message)
+			logger.LogNavState(logger.SUCCESS, DONE_LOG_FILE_PATH, DONE_FAILURE, fileNames[i], message, jsonString)
+		}
+
+		var isSuccessArr []bool
+		for j := 0; j < len(vendors); j++ {
+			hashMaps, isHashed := CompareWithHash(vendors[j], hashModels)
+			if !isHashed {
+				isSuccess, err, result := InsertToNav(vendors[j], fileNames[i], jsonString)
+				if err != nil {
+					message := err.Error() //"Failed:Sync:3 Error mapping to XML -> " + err.Error()
+					utils.Console(message)
+					logger.LogNavState(logger.SUCCESS, DONE_LOG_FILE_PATH, DONE_FAILURE, fileNames[i], message, jsonString)
+				}
+				isSuccessArr = append(isSuccessArr, isSuccess)
+				if isSuccess {
+					// Convert the string to a byte slice
+					xmlData := []byte(result.(string))
+
+					// Map Go struct to XML
+					var parseModel CreateResultVendor
+					err = xml.Unmarshal(xmlData, &parseModel)
+					if err != nil {
+						message := "Failed:Sync:6 " + err.Error()
+						utils.Console(message)
+						logger.LogNavState(logger.FAILURE, DONE_LOG_FILE_PATH, DONE_FAILURE, fileNames[i], message, result.(string))
+					}
+
+					//append success hash map and save hash map
+					vendorStr, _ := data_parser.ParseModelToString(vendors[j])
+
+					// Update the Hash field for a specific key
+					err = UpdateHashInModel(hashMaps, vendors[j].WeighbridgeSupplierID, utils.ComputeMD5(vendorStr), parseModel.Body.CreateResult.WSVendor.No)
+					if err != nil {
+						utils.Console("UpdateHashInModel::Error:", err)
+					}
+					utils.Console("hashMaps", hashMaps)
+
+					//Add successed to an array
+					responseModel = append(responseModel, BackToCDSVendorResponse{
+						VendorNo:              parseModel.Body.CreateResult.WSVendor.No,
+						WeighbridgeSupplierID: parseModel.Body.CreateResult.WSVendor.WeighbridgeSupplierID,
+					})
+
+				}
+
+			}
+		}
+		//Check if can be saved to file system
+		// canSaveToFileSystem := true
+		// for j := 0; j < len(isSuccessArr); j++ {
+		// 	if !isSuccessArr[j] {
+		// 		canSaveToFileSystem = false
+		// 		break
+		// 	}
+		// }
+
+		//Move to done file
+		//if canSaveToFileSystem {
+		err = filesystem.MoveFile(fileNames[i], PENDING_FILE_PATH, DONE_FILE_PATH)
+		if err != nil {
+			message := "Failed:Sync:5 " + err.Error()
+			utils.Console(message)
+			logger.LogNavState(logger.FAILURE, DONE_LOG_FILE_PATH, DONE_FAILURE, fileNames[i], message, jsonString)
+		} else {
+			//isSuccessfullySavedToFile = true
+			message := "File moved successfully"
+			utils.Console(message)
+			logger.LogNavState(logger.SUCCESS, DONE_LOG_FILE_PATH, DONE_SUCCESS, fileNames[i], message, "")
+		}
+		//}
+	}
+
+	//Save to Hash Folder
+	val, err := SaveHashLogs(hashModels)
+	if err != nil {
+		utils.Console("SaveHashLogs::err", err)
+	}
+	utils.Console("SaveHashLogs::val", val)
+
+	//Bulk save
+	//After syncing all files then send response back to CDS
+	utils.Console("responseModel------> ", len(responseModel))
+	if len(responseModel) > 0 {
+		sendToCDS(responseModel)
+	}
 }

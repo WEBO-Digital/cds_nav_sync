@@ -9,15 +9,32 @@ import (
 	"net/http"
 )
 
-func Post(url string, data interface{}) (interface{}, error) {
+func Post(url string, token string, payloadData interface{}) (interface{}, error) {
 	// Convert data to JSON
-	jsonData, err := json.Marshal(data)
+	jsonData, err := json.Marshal(payloadData)
 	if err != nil {
 		return nil, err
 	}
 
-	// Make POST request
-	response, err := http.Post(url, "application/json", bytes.NewBuffer(jsonData))
+	// // Make POST request
+	// response, err := http.Post(url, "application/json", bytes.NewBuffer(jsonData))
+	// if err != nil {
+	// 	return nil, err
+	// }
+	// defer response.Body.Close()
+
+	// Create a new POST request with the JSON body
+	request, err := http.NewRequest("POST", url, bytes.NewBuffer(jsonData))
+	if err != nil {
+		return nil, err
+	}
+
+	// Add the token to the request header
+	request.Header.Set("Authorization", "Bearer "+token)
+	request.Header.Set("Content-Type", "application/json") // Set content type as JSON
+
+	// Make the request
+	response, err := http.DefaultClient.Do(request)
 	if err != nil {
 		return nil, err
 	}
@@ -34,19 +51,42 @@ func Post(url string, data interface{}) (interface{}, error) {
 		return nil, err
 	}
 
+	// // Convert to JSON
+	// var responseData interface{}
+	// err = json.Unmarshal(body, &responseData)
+	// if err != nil {
+	// 	return nil, err
+	// }
+
 	// Convert to JSON
-	var responseData interface{}
-	err = json.Unmarshal(body, &responseData)
+	data, err := data_parser.ParseByteToJson(body)
 	if err != nil {
 		return nil, err
 	}
 
-	return responseData, nil
+	resData := data["payload"].(interface{})
+	return resData, nil
 }
 
-func Get(url string) (interface{}, error) {
-	//Make response call
-	response, err := http.Get(url)
+func Get(url string, token string) (interface{}, error) {
+	// //Make response call
+	// response, err := http.Get(url)
+	// if err != nil {
+	// 	return nil, err
+	// }
+	// defer response.Body.Close()
+
+	// Create a new request with the GET method
+	request, err := http.NewRequest("GET", url, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	// Add the token to the request header
+	request.Header.Set("Authorization", "Bearer "+token)
+
+	// Make the request
+	response, err := http.DefaultClient.Do(request)
 	if err != nil {
 		return nil, err
 	}
@@ -69,7 +109,8 @@ func Get(url string) (interface{}, error) {
 		return nil, err
 	}
 
-	return data, nil
+	resData := data["payload"].(interface{})
+	return resData, nil
 }
 
 func Put() (interface{}, error) {
