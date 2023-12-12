@@ -299,19 +299,19 @@ func unmarshelCreateLedgerEntryResponse(stringData interface{}) (PostLedgerEntri
 func sendToCDS(responseModel []BackToCDSLedgerEntriesResponse) {
 	//Path
 	RESPONSE_URL := config.Config.LedgerEntries.Save.URL
-	TOKEN_KEY := config.Config.Invoice.Fetch.APIKey
+	// TOKEN_KEY := config.Config.Invoice.Fetch.APIKey
 
-	//Save Response vendor data to CDS
-	response, err := manager.Fetch(RESPONSE_URL, normalapi.POST, TOKEN_KEY, responseModel)
-	if err != nil {
-		message := "Failed:Fetch:1 " + err.Error()
-		utils.Console(message)
-		//logger.LogNavState(logger.SUCCESS, PENDING_LOG_FILE_PATH, PENDING_FAILURE, "", message, "")
-	}
-	utils.Console(response)
+	// //Save Response vendor data to CDS
+	// response, err := manager.Fetch(RESPONSE_URL, normalapi.POST, TOKEN_KEY, responseModel)
+	// if err != nil {
+	// 	message := "Failed:Fetch:1 " + err.Error()
+	// 	utils.Console(message)
+	// 	//logger.LogNavState(logger.SUCCESS, PENDING_LOG_FILE_PATH, PENDING_FAILURE, "", message, "")
+	// }
+	// utils.Console(response)
 
-	// utils.Console("Successfully send to CDS system from nav ---> ledger entry: ", RESPONSE_URL)
-	// utils.Console(responseModel)
+	utils.Console("Successfully send to CDS system from nav ---> ledger entry: ", RESPONSE_URL)
+	utils.Console(responseModel)
 }
 
 func Sync3() {
@@ -365,77 +365,79 @@ func Sync3() {
 		}
 
 		for j := 0; j < len(ledger_entries); j++ {
-			key := ledger_entries[j].VendorPayment.AppliesToDocNo
-			vendorNo := ledger_entries[j].VendorPayment.AccountNo
-			modelStr, _ := data_parser.ParseModelToString(ledger_entries[j])
-			hash := hashrecs.Hash(modelStr)
-			preHash := hashModels.GetHash(key)
+			if ledger_entries[j].VendorPayment.AppliesToDocNo != nil && ledger_entries[j].VendorPayment.AccountNo != nil {
+				key := *ledger_entries[j].VendorPayment.AppliesToDocNo
+				vendorNo := *ledger_entries[j].VendorPayment.AccountNo
+				paymentId := ledger_entries[j].PaymentID
+				modelStr, _ := data_parser.ParseModelToString(ledger_entries[j])
+				hash := hashrecs.Hash(modelStr)
+				preHash := hashModels.GetHash(key)
 
-			if preHash == "" {
-				isSuccessCreation, err, resultCreate := InsertToNav(ledger_entries[j])
-				if err != nil {
-					message := "Failed:Sync:3 -> " + err.Error()
-					utils.Console(message)
-					logger.LogNavState(logger.SUCCESS, DONE_LOG_FILE_PATH, DONE_FAILURE, fileNames[i], message, jsonString)
-				}
-
-				if isSuccessCreation {
-					// Map Go struct to XML
-					createLedgerEntryRes, err := UnmarshelCreateLedgerEntryResponse(resultCreate)
+				if preHash == "" {
+					isSuccessCreation, err, resultCreate := InsertToNav(ledger_entries[j])
 					if err != nil {
-						message := "Failed:Sync:4 Error unmarshaling JSON -> " + err.Error()
-						utils.Console(message)
-						logger.LogNavState(logger.SUCCESS, DONE_LOG_FILE_PATH, DONE_FAILURE, fileNames[i], message, "")
-					}
-
-					isSuccessPost, err, resultPost := PostLedgerEntriesAfterCreation(createLedgerEntryRes)
-					if err != nil {
-						message := "Failed:Sync:5 -> " + err.Error()
+						message := "Failed:Sync:3 -> " + err.Error()
 						utils.Console(message)
 						logger.LogNavState(logger.SUCCESS, DONE_LOG_FILE_PATH, DONE_FAILURE, fileNames[i], message, jsonString)
 					}
 
-					if isSuccessPost {
-						postLedgerEntryRes, err := UnmarshelCreateLedgerEntryResponse(resultPost)
+					if isSuccessCreation {
+						// Map Go struct to XML
+						createLedgerEntryRes, err := UnmarshelCreateLedgerEntryResponse(resultCreate)
 						if err != nil {
-							message := "Failed:Sync:6 " + err.Error()
+							message := "Failed:Sync:4 Error unmarshaling JSON -> " + err.Error()
 							utils.Console(message)
+							logger.LogNavState(logger.SUCCESS, DONE_LOG_FILE_PATH, DONE_FAILURE, fileNames[i], message, "")
 						}
 
-						//map
-						// vendorNo := createInvoiceRes.Body.CreateResult.WSPurchaseInvoicePage.BuyFromVendorNo
-						// purchaseInvoiceNo := createInvoiceRes.Body.CreateResult.WSPurchaseInvoicePage.No
-						documentNo := postLedgerEntryRes.Body.CreateResult.VendorPayment.DocumentNo
-
-						// append success hash map and save hash map
-						// Update the Hash field for a specific key
-						hashModels.Set(key, hashrecs.HashRec{
-							Hash:  hash,
-							NavID: &vendorNo,
-							//InvoiceNo:  purchaseInvoiceNo,
-							DocumentNo: fmt.Sprintf("%i", documentNo),
-							//RefundId:   refundId,
-						})
+						isSuccessPost, err, resultPost := PostLedgerEntriesAfterCreation(createLedgerEntryRes)
 						if err != nil {
-							utils.Console("UpdateHashInModel::Error:", err)
+							message := "Failed:Sync:5 -> " + err.Error()
+							utils.Console(message)
+							logger.LogNavState(logger.SUCCESS, DONE_LOG_FILE_PATH, DONE_FAILURE, fileNames[i], message, jsonString)
 						}
-						utils.Console("hashMaps", hashModels)
 
-						//Add successed to an array
-						responseModel = append(responseModel, BackToCDSLedgerEntriesResponse{
-							//RefundId:          refundId,
-							VendorNo: vendorNo,
-							//PurchaseInvoiceNo: purchaseInvoiceNo,
-							DocumentNo: documentNo,
-						})
+						if isSuccessPost {
+							postLedgerEntryRes, err := UnmarshelCreateLedgerEntryResponse(resultPost)
+							if err != nil {
+								message := "Failed:Sync:6 " + err.Error()
+								utils.Console(message)
+							}
+
+							//map
+							// vendorNo := createInvoiceRes.Body.CreateResult.WSPurchaseInvoicePage.BuyFromVendorNo
+							// purchaseInvoiceNo := createInvoiceRes.Body.CreateResult.WSPurchaseInvoicePage.No
+							documentNo := postLedgerEntryRes.Body.CreateResult.VendorPayment.DocumentNo
+
+							// append success hash map and save hash map
+							// Update the Hash field for a specific key
+							hashModels.Set(key, hashrecs.HashRec{
+								Hash:       hash,
+								NavID:      vendorNo,
+								DocumentNo: fmt.Sprintf("%i", documentNo),
+								PaymentId:  paymentId,
+							})
+							if err != nil {
+								utils.Console("UpdateHashInModel::Error:", err)
+							}
+							utils.Console("hashMaps", hashModels)
+
+							//Add successed to an array
+							responseModel = append(responseModel, BackToCDSLedgerEntriesResponse{
+								//RefundId:          refundId,
+								VendorNo: vendorNo,
+								//PurchaseInvoiceNo: purchaseInvoiceNo,
+								DocumentNo: documentNo,
+							})
+
+						}
 
 					}
-
 				}
-			}
 
-			if preHash != "" && preHash != hash {
-				// @TODO: Update the vendor
+				if preHash != "" && preHash != hash {
+					// @TODO: Update the vendor
+				}
 			}
 		}
 

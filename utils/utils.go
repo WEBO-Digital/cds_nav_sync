@@ -17,7 +17,7 @@ const VENDOR_DONE_SUCCESS = "done.success.log"
 
 //c. Hash
 const VENDOR_HASH_FILE_PATH = "/data/vendor/hashrecs/"
-const VENDOR_HASH_DB = "vendor.hash.json"
+const VENDOR_HASH_DB = "vendor.hash"
 
 //2. Invoice
 //a. Pending
@@ -34,7 +34,7 @@ const INVOICE_DONE_SUCCESS = "done.success.log"
 
 //c. Hash
 const INVOICE_HASH_FILE_PATH = "/data/invoice/hashrecs/"
-const INVOICE_HASH_DB = "invoice.hash.json"
+const INVOICE_HASH_DB = "invoice.hash"
 
 //3. Ledger Entries
 //a. Pending
@@ -51,4 +51,4 @@ const LEDGER_ENTRIES_DONE_SUCCESS = "done.success.log"
 
 //c. Hash
 const LEDGER_ENTRIES_HASH_FILE_PATH = "/data/ledger_entries/hashrecs/"
-const LEDGER_ENTRIES_HASH_DB = "invoice.hash.json"
+const LEDGER_ENTRIES_HASH_DB = "ledger_entries.hash"

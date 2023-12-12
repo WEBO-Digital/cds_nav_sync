@@ -25,18 +25,18 @@ func runcFunctionFromCommandArgument() {
 
 	//Call the appropratiate function based on the provided action
 	switch *action {
-	case "invoice_fetch":
-		invoice.Fetch()
-	case "invoice_sync":
-		invoice.Sync2()
 	case "vendor_fetch":
 		vendor.Fetch()
 	case "vendor_sync":
-		vendor.Sync2()
+		vendor.Sync3()
+	case "invoice_fetch":
+		invoice.Fetch()
+	case "invoice_sync":
+		invoice.Sync3()
 	case "ledgerentries_fetch":
 		ledgerentries.Fetch()
 	case "ledgerentries_sync":
-		ledgerentries.Sync()
+		ledgerentries.Sync3()
 	default:
 		utils.Console("Invalid action. Available actions: invoice_fetch, invoice_sync, vendor_fetch, vendor_sync, ledgerentries_fetch, ledgerentries_sync")
 		os.Exit(1)

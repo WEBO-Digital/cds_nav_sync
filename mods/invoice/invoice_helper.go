@@ -68,7 +68,7 @@ func CompareWithHash(invoice WSPurchaseInvoicePage, hash HashInvoiceModel) (Hash
 			return hashRecord, true
 		}
 
-		if !containsHash(hash, hashStr) && key == invoice.BuyFromVendorNo { //&& value.NavID == nil
+		if !containsHash(hash, hashStr) && key == *invoice.BuyFromVendorNo { //&& value.NavID == nil
 			/** @TODO: UPDATE THE VEDOR **/
 			return hashRecord, true
 		}
@@ -87,7 +87,7 @@ func containsHash(model HashInvoiceModel, targetHash string) bool {
 	return false
 }
 
-func UpdateHashInModel(hashModel HashInvoiceModel, key, hash string, navId string, purchaseInvoiceNo string, documentNo string, refundId string) error {
+func UpdateHashInModel(hashModel HashInvoiceModel, key, hash string, navId string, purchaseInvoiceNo string, documentNo string, refundId int) error {
 	// Initialize the map if it is nil
 	if hashModel == nil {
 		hashModel = make(HashInvoiceModel)
@@ -257,12 +257,12 @@ func PostToNavAfterInsert(envelope PostInvoiceEnvelope) (bool, error, interface{
 			message := fmt.Sprintf("Failed:Sync:5 Could not convert to string: ", result)
 			return isSuccess, errors.New(message), result
 		}
-		match := utils.MatchRegexExpression(resultPostStr, `<PostPurchaseResult[^>]*>`)
+		match := utils.MatchRegexExpression(resultPostStr, `<PostPurchaseInvoice_Result[^>]*>`)
 		matchFault := utils.MatchRegexExpression(resultPostStr, `<faultcode[^>]*>`)
 
 		// Print the result
 		if !match && matchFault {
-			message := fmt.Sprintf("Failed:Sync:6 XML string does not contain <PostPurchaseResult> element: ", result)
+			message := fmt.Sprintf("Failed:Sync:6 XML string does not contain <PostPurchaseInvoice_Result> element: ", result)
 			return isSuccess, errors.New(message), result
 		} else {
 			isSuccess = true

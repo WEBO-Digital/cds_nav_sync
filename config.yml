@@ -10,14 +10,14 @@ vendor:
 
 invoice:
   fetch:
-    url: https://jsonplaceholder.typicode.com/posts
+    url: https://cds-tickets.webo.dev/api/v1/nav/refund
     apikey: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwidXNlcl9pZCI6NX0.zl22NTtVYsoFBq7wMASpeLJY7DttcSevVhXjfaMGOpc
   sync:
     url: http://SPNAV.sellparker.local:7047/SP_NAV2013R2Test/WS/Sell%20%26%20Parker/Page/WSPurchaseInvoicePage
   post:
     url: http://spnav.sellparker.local:7047/SP_NAV2013R2Test/WS/Sell%20%26%20Parker/Codeunit/WSPurchaseInvoice
   save:
-    url: https://dummyjson.com/products
+    url: https://cds-tickets.webo.dev/api/v1/nav/refund
     apikey: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwidXNlcl9pZCI6NX0.zl22NTtVYsoFBq7wMASpeLJY7DttcSevVhXjfaMGOpc
 
 ledger_entries:

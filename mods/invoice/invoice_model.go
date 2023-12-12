@@ -9,8 +9,8 @@ type WSPurchaseInvoicePage struct {
 	BuyFromCountryRegionCode string        `xml:"Buy_from_Country_Region_Code,omitempty" json:"buy_from_country_region_code,omitempty"`
 	PostingDate              string        `xml:"Posting_Date,omitempty" json:"posting_date,omitempty"`
 	DocumentDate             string        `xml:"Document_Date,omitempty" json:"document_date,omitempty"`
-	VendorInvoiceNo          string        `xml:"Vendor_Invoice_No,omitempty" json:"vendor_invoice_no,omitempty"`
-	PayToVendorNo            string        `xml:"Pay_to_Vendor_No,omitempty" json:"pay_to_vendor_no,omitempty"`
+	VendorInvoiceNo          int           `xml:"Vendor_Invoice_No,omitempty" json:"vendor_invoice_no,omitempty"`
+	PayToVendorNo            *string       `xml:"Pay_to_Vendor_No,omitempty" json:"pay_to_vendor_no,omitempty"`
 	PayToName                string        `xml:"Pay_to_Name,omitempty" json:"pay_to_name,omitempty"`
 	PayToCity                string        `xml:"Pay_to_City,omitempty" json:"pay_to_city,omitempty"`
 	PayToCountryRegionCode   string        `xml:"Pay_to_Country_Region_Code,omitempty" json:"pay_to_country_region_code,omitempty"`
@@ -33,17 +33,17 @@ type PurchLines2 struct {
 }
 
 type PurchInvoiceLine struct {
-	Type               string `xml:"Type,omitempty" json:"type,omitempty"`
-	No                 string `xml:"No,omitempty" json:"no,omitempty"`
-	Quantity           string `xml:"Quantity,omitempty" json:"quantity,omitempty"`
-	ShortcutDimension1 string `xml:"Shortcut_Dimension_1_Code,omitempty" json:"shortcut_dimension_1_code,omitempty"`
-	ShortcutDimension2 string `xml:"Shortcut_Dimension_2_Code,omitempty" json:"shortcut_dimension_2_code,omitempty"`
-	UnitPriceLCY       string `xml:"Unit_Price_LCY,omitempty" json:"unit_price_lcy,omitempty"`
-	LocationCode       string `xml:"Location_Code,omitempty" json:"location_code,omitempty"`
+	Type               string  `xml:"Type,omitempty" json:"type,omitempty"`
+	No                 string  `xml:"No,omitempty" json:"no,omitempty"`
+	Quantity           int     `xml:"Quantity,omitempty" json:"quantity,omitempty"`
+	ShortcutDimension1 string  `xml:"Shortcut_Dimension_1_Code,omitempty" json:"shortcut_dimension_1_code,omitempty"`
+	ShortcutDimension2 string  `xml:"Shortcut_Dimension_2_Code,omitempty" json:"shortcut_dimension_2_code,omitempty"`
+	UnitPriceLCY       float32 `xml:"Unit_Price_LCY,omitempty" json:"unit_price_lcy,omitempty"`
+	LocationCode       string  `xml:"Location_Code,omitempty" json:"location_code,omitempty"`
 }
 
 type BackToCDSInvoiceResponse struct {
-	RefundId          string `json:"refund_id,omitempty"`
+	RefundId          int    `json:"refund_id,omitempty"`
 	VendorNo          string `json:"vendor_no,omitempty"`
 	PurchaseInvoiceNo string `json:"purchase_invoice_no,omitempty"`
 	DocumentNo        string `json:"document_id,omitempty"`

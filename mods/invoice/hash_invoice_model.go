@@ -8,5 +8,5 @@ type HashInvoiceEntry struct {
 	NavID      string `json:"nav_id"`
 	InvoiceNo  string `json:"invoice_no"`
 	DocumentNo string `json:"document_no"`
-	RefundId   string `json:"refund_id"`
+	RefundId   int    `json:"refund_id"`
 }

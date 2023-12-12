@@ -420,7 +420,7 @@ func Sync3() {
 					// Update the Hash field for a specific key
 					hashModels.Set(key, hashrecs.HashRec{
 						Hash:  hash,
-						NavID: &parseModel.Body.CreateResult.WSVendor.No,
+						NavID: parseModel.Body.CreateResult.WSVendor.No,
 					})
 					if err != nil {
 						utils.Console("UpdateHashInModel::Error:", err)

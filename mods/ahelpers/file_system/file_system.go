@@ -45,7 +45,7 @@ func Save(path string, fileName string, data interface{}) error {
 
 func ReadFile(path string, fileName string) ([]byte, error) {
 	// Get the current working directory
-	currentDir, err := getCurrentWorkingDirectory()
+	currentDir, err := GetCurrentWorkingDirectory()
 	if err != nil {
 		return nil, err
 	}
@@ -61,7 +61,7 @@ func ReadFile(path string, fileName string) ([]byte, error) {
 
 func GetAllFiles(path string) ([]string, error) {
 	// Get the current working directory
-	currentDir, err := getCurrentWorkingDirectory()
+	currentDir, err := GetCurrentWorkingDirectory()
 	if err != nil {
 		return nil, err
 	}
@@ -91,7 +91,7 @@ func MoveFile(sourceFileName string, sourceDirectory string, destinationDirector
 	}
 
 	// Get the current working directory
-	currentDir, err := getCurrentWorkingDirectory()
+	currentDir, err := GetCurrentWorkingDirectory()
 	if err != nil {
 		return err
 	}
@@ -186,14 +186,14 @@ func CleanAndSave(path string, fileName string, data string) error {
 	return nil
 }
 
-func getCurrentWorkingDirectory() (string, error) {
+func GetCurrentWorkingDirectory() (string, error) {
 	currentDir, err := os.Getwd()
 	return currentDir, err
 }
 
 func createDirectoryIfNotExists(path string) (*string, error) {
 	// Get the current working directory
-	currentDir, err := getCurrentWorkingDirectory()
+	currentDir, err := GetCurrentWorkingDirectory()
 	if err != nil {
 		return nil, err
 	}

@@ -407,7 +407,7 @@ func Sync2() {
 						//map
 						vendorStr, _ := data_parser.ParseModelToString(invoices[j])
 						refundId := invoices[j].RefundId
-						vendorInvoiceNo := invoices[j].VendorInvoiceNo
+						vendorInvoiceNo := fmt.Sprintf("%i", invoices[j].VendorInvoiceNo)
 						vendorNo := createInvoiceRes.Body.CreateResult.WSPurchaseInvoicePage.BuyFromVendorNo
 						purchaseInvoiceNo := createInvoiceRes.Body.CreateResult.WSPurchaseInvoicePage.No
 						documentId := postInvoiceRes.Body.ReturnValue
@@ -510,14 +510,19 @@ func Sync3() {
 			logger.LogNavState(logger.SUCCESS, DONE_LOG_FILE_PATH, DONE_FAILURE, fileNames[i], message, jsonString)
 		}
 
-		for j := 0; j < len(invoices); j++ {
-			key := invoices[j].VendorInvoiceNo
-			refundId := invoices[j].RefundId
-			modelStr, _ := data_parser.ParseModelToString(invoices[j])
-			hash := hashrecs.Hash(modelStr)
-			preHash := hashModels.GetHash(key)
+		// for j := 0; j < len(invoices); j++ {
+		// 	// 250500001
+		// 	invoices[j].VendorInvoiceNo = 26959000 + j + 1
+		// }
 
+		for j := 0; j < len(invoices); j++ {
 			if invoices[j].BuyFromVendorNo != nil {
+				key := fmt.Sprintf("%i", invoices[j].VendorInvoiceNo)
+				refundId := invoices[j].RefundId
+				modelStr, _ := data_parser.ParseModelToString(invoices[j])
+				hash := hashrecs.Hash(modelStr)
+				preHash := hashModels.GetHash(key)
+
 				if preHash == "" {
 					isSuccessCreation, err, resultCreate := InsertToNav(invoices[j])
 					if err != nil {
@@ -557,7 +562,7 @@ func Sync3() {
 							// Update the Hash field for a specific key
 							hashModels.Set(key, hashrecs.HashRec{
 								Hash:       hash,
-								NavID:      &vendorNo,
+								NavID:      vendorNo,
 								InvoiceNo:  purchaseInvoiceNo,
 								DocumentNo: documentNo,
 								RefundId:   refundId,

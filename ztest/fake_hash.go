@@ -13,10 +13,10 @@ func main() {
 	recs.Load()
 
 	recs.Set("nn1", hashrecs.HashRec{
-		Hash: "dmkdfkdf",
+		Hash: hashrecs.Hash("dmkdfkdf"), //"dmkdfkdf",
 	})
 
-	fmt.Println(recs.GetHash("nn1"))
+	fmt.Println("hash------------>", recs.GetHash("nn1"))
 
 	recs.Save()
 }
