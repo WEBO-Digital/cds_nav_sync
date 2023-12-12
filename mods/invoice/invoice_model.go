@@ -1,7 +1,8 @@
 package invoice
 
 type WSPurchaseInvoicePage struct {
-	BuyFromVendorNo          string        `xml:"Buy_from_Vendor_No,omitempty" json:"buy_from_vendor_no,omitempty"`
+	RefundId                 int           `json:"refund_id,omitempty"`
+	BuyFromVendorNo          *string       `xml:"Buy_from_Vendor_No,omitempty" json:"buy_from_vendor_no,omitempty"`
 	BuyFromContactNo         string        `xml:"Buy_from_Contact_No,omitempty" json:"buy_from_contact_no,omitempty"`
 	BuyFromVendorName        string        `xml:"Buy_from_Vendor_Name,omitempty" json:"buy_from_vendor_name,omitempty"`
 	BuyFromCity              string        `xml:"Buy_from_City,omitempty" json:"buy_from_city,omitempty"`
@@ -42,9 +43,10 @@ type PurchInvoiceLine struct {
 }
 
 type BackToCDSInvoiceResponse struct {
+	RefundId          string `json:"refund_id,omitempty"`
 	VendorNo          string `json:"vendor_no,omitempty"`
 	PurchaseInvoiceNo string `json:"purchase_invoice_no,omitempty"`
-	DocumentId        string `json:"document_id,omitempty"`
+	DocumentNo        string `json:"document_id,omitempty"`
 }
 
 // type WSPurchaseInvoicePage struct {

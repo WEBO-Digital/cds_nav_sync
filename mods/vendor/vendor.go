@@ -3,15 +3,13 @@ package vendor
 import (
 	"encoding/json"
 	"encoding/xml"
-	"fmt"
-	"log"
 	"nav_sync/config"
 	"nav_sync/logger"
 	filesystem "nav_sync/mods/ahelpers/file_system"
 	"nav_sync/mods/ahelpers/manager"
-	navapi "nav_sync/mods/ahelpers/nav_api"
 	normalapi "nav_sync/mods/ahelpers/normal_api"
 	data_parser "nav_sync/mods/ahelpers/parser"
+	hashrecs "nav_sync/mods/hashrecs"
 	"nav_sync/utils"
 )
 
@@ -50,152 +48,152 @@ func Fetch() {
 
 }
 
-func Sync() {
-	//Path
-	PENDING_FILE_PATH := utils.VENDOR_PENDING_FILE_PATH
-	DONE_FILE_PATH := utils.VENDOR_DONE_FILE_PATH
-	DONE_LOG_FILE_PATH := utils.VENDOR_DONE_LOG_FILE_PATH
-	DONE_FAILURE := utils.INVOICE_DONE_FAILURE
-	DONE_SUCCESS := utils.INVOICE_DONE_SUCCESS
-	NTLM_USERNAME := config.Config.Auth.Ntlm.Username
-	NTLM_PASSWORD := config.Config.Auth.Ntlm.Password
-	url := config.Config.Vendor.Sync.URL
+// func Sync() {
+// 	//Path
+// 	PENDING_FILE_PATH := utils.VENDOR_PENDING_FILE_PATH
+// 	DONE_FILE_PATH := utils.VENDOR_DONE_FILE_PATH
+// 	DONE_LOG_FILE_PATH := utils.VENDOR_DONE_LOG_FILE_PATH
+// 	DONE_FAILURE := utils.INVOICE_DONE_FAILURE
+// 	DONE_SUCCESS := utils.INVOICE_DONE_SUCCESS
+// 	NTLM_USERNAME := config.Config.Auth.Ntlm.Username
+// 	NTLM_PASSWORD := config.Config.Auth.Ntlm.Password
+// 	url := config.Config.Vendor.Sync.URL
 
-	//Get All the vendor pending data
-	fileNames, err := filesystem.GetAllFiles(PENDING_FILE_PATH)
-	if err != nil {
-		message := "Failed:Sync:1 " + err.Error()
-		utils.Console(message)
-		logger.LogNavState(logger.SUCCESS, DONE_LOG_FILE_PATH, DONE_FAILURE, "", message, "")
-	}
+// 	//Get All the vendor pending data
+// 	fileNames, err := filesystem.GetAllFiles(PENDING_FILE_PATH)
+// 	if err != nil {
+// 		message := "Failed:Sync:1 " + err.Error()
+// 		utils.Console(message)
+// 		logger.LogNavState(logger.SUCCESS, DONE_LOG_FILE_PATH, DONE_FAILURE, "", message, "")
+// 	}
 
-	utils.Console(fileNames)
+// 	utils.Console(fileNames)
 
-	if fileNames == nil || len(fileNames) < 1 {
-		return
-	}
+// 	if fileNames == nil || len(fileNames) < 1 {
+// 		return
+// 	}
 
-	var responseModel []BackToCDSVendorResponse
-	for i := 0; i < len(fileNames); i++ {
-		//Sync vendor data to NAV
-		//Get Json data from the file
-		jsonData, err := filesystem.ReadFile(PENDING_FILE_PATH, fileNames[i])
+// 	var responseModel []BackToCDSVendorResponse
+// 	for i := 0; i < len(fileNames); i++ {
+// 		//Sync vendor data to NAV
+// 		//Get Json data from the file
+// 		jsonData, err := filesystem.ReadFile(PENDING_FILE_PATH, fileNames[i])
 
-		jsonString := string(jsonData)
+// 		jsonString := string(jsonData)
 
-		// Unmarshal JSON to struct
-		var vendor WSVendor
-		if err := json.Unmarshal([]byte(jsonData), &vendor); err != nil {
-			message := "Failed:Sync:2 Error unmarshaling JSON -> " + err.Error()
-			utils.Console(message)
-			logger.LogNavState(logger.SUCCESS, DONE_LOG_FILE_PATH, DONE_FAILURE, fileNames[i], message, jsonString)
-		}
+// 		// Unmarshal JSON to struct
+// 		var vendor WSVendor
+// 		if err := json.Unmarshal([]byte(jsonData), &vendor); err != nil {
+// 			message := "Failed:Sync:2 Error unmarshaling JSON -> " + err.Error()
+// 			utils.Console(message)
+// 			logger.LogNavState(logger.SUCCESS, DONE_LOG_FILE_PATH, DONE_FAILURE, fileNames[i], message, jsonString)
+// 		}
 
-		//utils.Console(vendor)
+// 		//utils.Console(vendor)
 
-		// Map Go struct to XML
-		xmlData, err := data_parser.ParseJsonToXml(vendor)
-		if err != nil {
-			message := "Failed:Sync:3 Error mapping to XML -> " + err.Error()
-			utils.Console(message)
-			logger.LogNavState(logger.SUCCESS, DONE_LOG_FILE_PATH, DONE_FAILURE, fileNames[i], message, jsonString)
-		}
+// 		// Map Go struct to XML
+// 		xmlData, err := data_parser.ParseJsonToXml(vendor)
+// 		if err != nil {
+// 			message := "Failed:Sync:3 Error mapping to XML -> " + err.Error()
+// 			utils.Console(message)
+// 			logger.LogNavState(logger.SUCCESS, DONE_LOG_FILE_PATH, DONE_FAILURE, fileNames[i], message, jsonString)
+// 		}
 
-		//Add XML envelope and body elements
-		xmlPayload := fmt.Sprintf(
-			`
-				<Envelope xmlns="http://schemas.xmlsoap.org/soap/envelope/">
-					<Body>
-						<Create xmlns="urn:microsoft-dynamics-schemas/page/wsvendor">
-							%s
-						</Create>
-					</Body>
-				</Envelope>
-			`,
-			string(xmlData),
-		)
+// 		//Add XML envelope and body elements
+// 		xmlPayload := fmt.Sprintf(
+// 			`
+// 				<Envelope xmlns="http://schemas.xmlsoap.org/soap/envelope/">
+// 					<Body>
+// 						<Create xmlns="urn:microsoft-dynamics-schemas/page/wsvendor">
+// 							%s
+// 						</Create>
+// 					</Body>
+// 				</Envelope>
+// 			`,
+// 			string(xmlData),
+// 		)
 
-		//Return the result
-		log.Println(xmlPayload)
-		utils.Console("username: ", NTLM_USERNAME)
-		utils.Console("username: ", NTLM_PASSWORD)
-		utils.Console("URL: ", url)
+// 		//Return the result
+// 		log.Println(xmlPayload)
+// 		utils.Console("username: ", NTLM_USERNAME)
+// 		utils.Console("username: ", NTLM_PASSWORD)
+// 		utils.Console("URL: ", url)
 
-		//Sync to Nav
-		isSuccess := false
-		result, err := manager.Sync(url, navapi.POST, xmlPayload, NTLM_USERNAME, NTLM_PASSWORD)
-		if err != nil {
-			message := "Failed:Sync:4 " + err.Error()
-			utils.Console(message)
-			logger.LogNavState(logger.FAILURE, DONE_LOG_FILE_PATH, DONE_FAILURE, fileNames[i], message, xmlPayload)
-		} else {
-			resultStr, ok := result.(string)
-			if !ok {
-				// The type assertion failed
-				message := fmt.Sprintf("Failed:Sync:5 Could not convert to string: ", result)
-				utils.Console(message)
-				logger.LogNavState(logger.FAILURE, DONE_LOG_FILE_PATH, DONE_FAILURE, fileNames[i], message, xmlPayload)
-			}
-			match := utils.MatchRegexExpression(resultStr, `<Create_Result[^>]*>`)
-			matchFault := utils.MatchRegexExpression(resultStr, `<faultcode[^>]*>`)
+// 		//Sync to Nav
+// 		isSuccess := false
+// 		result, err := manager.Sync(url, navapi.POST, xmlPayload, NTLM_USERNAME, NTLM_PASSWORD)
+// 		if err != nil {
+// 			message := "Failed:Sync:4 " + err.Error()
+// 			utils.Console(message)
+// 			logger.LogNavState(logger.FAILURE, DONE_LOG_FILE_PATH, DONE_FAILURE, fileNames[i], message, xmlPayload)
+// 		} else {
+// 			resultStr, ok := result.(string)
+// 			if !ok {
+// 				// The type assertion failed
+// 				message := fmt.Sprintf("Failed:Sync:5 Could not convert to string: ", result)
+// 				utils.Console(message)
+// 				logger.LogNavState(logger.FAILURE, DONE_LOG_FILE_PATH, DONE_FAILURE, fileNames[i], message, xmlPayload)
+// 			}
+// 			match := utils.MatchRegexExpression(resultStr, `<Create_Result[^>]*>`)
+// 			matchFault := utils.MatchRegexExpression(resultStr, `<faultcode[^>]*>`)
 
-			// Print the result
-			if !match && matchFault {
-				message := fmt.Sprintf("Failed:Sync:6 XML string does not contain <Create_Result> element: ", result)
-				utils.Console(message)
-				logger.LogNavState(logger.FAILURE, DONE_LOG_FILE_PATH, DONE_FAILURE, fileNames[i], message, resultStr)
-			} else {
-				isSuccess = true
-			}
-		}
+// 			// Print the result
+// 			if !match && matchFault {
+// 				message := fmt.Sprintf("Failed:Sync:6 XML string does not contain <Create_Result> element: ", result)
+// 				utils.Console(message)
+// 				logger.LogNavState(logger.FAILURE, DONE_LOG_FILE_PATH, DONE_FAILURE, fileNames[i], message, resultStr)
+// 			} else {
+// 				isSuccess = true
+// 			}
+// 		}
 
-		isSuccessfullySavedToFile := false
-		if isSuccess {
-			//Move to done file
-			err = filesystem.MoveFile(fileNames[i], PENDING_FILE_PATH, DONE_FILE_PATH)
-			if err != nil {
-				message := "Failed:Sync:5 " + err.Error()
-				utils.Console(message)
-				logger.LogNavState(logger.FAILURE, DONE_LOG_FILE_PATH, DONE_FAILURE, fileNames[i], message, result.(string))
-			} else {
-				isSuccessfullySavedToFile = true
-				message := "File moved successfully"
-				utils.Console(message)
-				logger.LogNavState(logger.SUCCESS, DONE_LOG_FILE_PATH, DONE_SUCCESS, fileNames[i], message, "")
-			}
-		}
+// 		isSuccessfullySavedToFile := false
+// 		if isSuccess {
+// 			//Move to done file
+// 			err = filesystem.MoveFile(fileNames[i], PENDING_FILE_PATH, DONE_FILE_PATH)
+// 			if err != nil {
+// 				message := "Failed:Sync:5 " + err.Error()
+// 				utils.Console(message)
+// 				logger.LogNavState(logger.FAILURE, DONE_LOG_FILE_PATH, DONE_FAILURE, fileNames[i], message, result.(string))
+// 			} else {
+// 				isSuccessfullySavedToFile = true
+// 				message := "File moved successfully"
+// 				utils.Console(message)
+// 				logger.LogNavState(logger.SUCCESS, DONE_LOG_FILE_PATH, DONE_SUCCESS, fileNames[i], message, "")
+// 			}
+// 		}
 
-		//Add successed to an array
-		if isSuccessfullySavedToFile {
-			// Convert the string to a byte slice
-			xmlData := []byte(result.(string))
+// 		//Add successed to an array
+// 		if isSuccessfullySavedToFile {
+// 			// Convert the string to a byte slice
+// 			xmlData := []byte(result.(string))
 
-			// Map Go struct to XML
-			var parseModel CreateResultVendor
-			err := xml.Unmarshal(xmlData, &parseModel)
-			if err != nil {
-				message := "Failed:Sync:6 " + err.Error()
-				utils.Console(message)
-				logger.LogNavState(logger.FAILURE, DONE_LOG_FILE_PATH, DONE_FAILURE, fileNames[i], message, result.(string))
-			}
+// 			// Map Go struct to XML
+// 			var parseModel CreateResultVendor
+// 			err := xml.Unmarshal(xmlData, &parseModel)
+// 			if err != nil {
+// 				message := "Failed:Sync:6 " + err.Error()
+// 				utils.Console(message)
+// 				logger.LogNavState(logger.FAILURE, DONE_LOG_FILE_PATH, DONE_FAILURE, fileNames[i], message, result.(string))
+// 			}
 
-			// responseModel[i].VendorNo = parseModel.Body.CreateResult.WSVendor.No
-			// responseModel[i].WeighbridgeSupplierID = parseModel.Body.CreateResult.WSVendor.WeighbridgeSupplierID
+// 			// responseModel[i].VendorNo = parseModel.Body.CreateResult.WSVendor.No
+// 			// responseModel[i].WeighbridgeSupplierID = parseModel.Body.CreateResult.WSVendor.WeighbridgeSupplierID
 
-			responseModel = append(responseModel, BackToCDSVendorResponse{
-				VendorNo:              parseModel.Body.CreateResult.WSVendor.No,
-				WeighbridgeSupplierID: parseModel.Body.CreateResult.WSVendor.WeighbridgeSupplierID,
-			})
-		}
-	}
+// 			responseModel = append(responseModel, BackToCDSVendorResponse{
+// 				VendorNo:              parseModel.Body.CreateResult.WSVendor.No,
+// 				WeighbridgeSupplierID: parseModel.Body.CreateResult.WSVendor.WeighbridgeSupplierID,
+// 			})
+// 		}
+// 	}
 
-	//Bulk save
-	//After syncing all files then send response back to CDS
-	utils.Console("responseModel------> ", len(responseModel))
-	if len(responseModel) > 0 {
-		sendToCDS(responseModel)
-	}
-}
+// 	//Bulk save
+// 	//After syncing all files then send response back to CDS
+// 	utils.Console("responseModel------> ", len(responseModel))
+// 	if len(responseModel) > 0 {
+// 		sendToCDS(responseModel)
+// 	}
+// }
 
 func sendToCDS(responseModel []BackToCDSVendorResponse) {
 	//Path
@@ -244,6 +242,7 @@ func Sync2() {
 
 	//Syncing
 	var responseModel []BackToCDSVendorResponse
+
 	for i := 0; i < len(fileNames); i++ {
 		//Get Json data from the file
 		jsonData, err := filesystem.ReadFile(PENDING_FILE_PATH, fileNames[i])
@@ -258,12 +257,14 @@ func Sync2() {
 		}
 
 		var isSuccessArr []bool
+
 		for j := 0; j < len(vendors); j++ {
 			hashMaps, isHashed := CompareWithHash(vendors[j], hashModels)
+
 			if !isHashed {
-				isSuccess, err, result := InsertToNav(vendors[j], fileNames[i], jsonString)
+				isSuccess, err, result := InsertToNav(vendors[j])
 				if err != nil {
-					message := err.Error() //"Failed:Sync:3 Error mapping to XML -> " + err.Error()
+					message := err.Error()
 					utils.Console(message)
 					logger.LogNavState(logger.SUCCESS, DONE_LOG_FILE_PATH, DONE_FAILURE, fileNames[i], message, jsonString)
 				}
@@ -281,10 +282,9 @@ func Sync2() {
 						logger.LogNavState(logger.FAILURE, DONE_LOG_FILE_PATH, DONE_FAILURE, fileNames[i], message, result.(string))
 					}
 
-					//append success hash map and save hash map
-					vendorStr, _ := data_parser.ParseModelToString(vendors[j])
-
+					// append success hash map and save hash map
 					// Update the Hash field for a specific key
+					vendorStr, _ := data_parser.ParseModelToString(vendors[j])
 					err = UpdateHashInModel(hashMaps, vendors[j].WeighbridgeSupplierID, utils.ComputeMD5(vendorStr), parseModel.Body.CreateResult.WSVendor.No)
 					if err != nil {
 						utils.Console("UpdateHashInModel::Error:", err)
@@ -336,6 +336,131 @@ func Sync2() {
 	//Bulk save
 	//After syncing all files then send response back to CDS
 	utils.Console("responseModel------> ", len(responseModel))
+	if len(responseModel) > 0 {
+		sendToCDS(responseModel)
+	}
+}
+
+func Sync3() {
+	//Path
+	PENDING_FILE_PATH := utils.VENDOR_PENDING_FILE_PATH
+	DONE_FILE_PATH := utils.VENDOR_DONE_FILE_PATH
+	DONE_LOG_FILE_PATH := utils.VENDOR_DONE_LOG_FILE_PATH
+	DONE_FAILURE := utils.INVOICE_DONE_FAILURE
+	DONE_SUCCESS := utils.INVOICE_DONE_SUCCESS
+	HASH_FILE_PATH := utils.VENDOR_HASH_FILE_PATH
+	HASH_DB := utils.VENDOR_HASH_DB
+
+	//Get All the vendor pending data
+	fileNames, err := filesystem.GetAllFiles(PENDING_FILE_PATH)
+	if err != nil {
+		message := "Failed:Sync:1 " + err.Error()
+		utils.Console(message)
+		logger.LogNavState(logger.SUCCESS, DONE_LOG_FILE_PATH, DONE_FAILURE, "", message, "")
+	}
+
+	utils.Console(fileNames)
+
+	if fileNames == nil || len(fileNames) < 1 {
+		return
+	}
+
+	//Get Hash Database
+	hashModels := hashrecs.HashRecs{
+		FilePath: HASH_FILE_PATH,
+		Name:     HASH_DB,
+	}
+	hashModels.Load()
+
+	//Syncing
+	var responseModel []BackToCDSVendorResponse
+	for i := 0; i < len(fileNames); i++ {
+		//Get Json data from the file
+		jsonData, err := filesystem.ReadFile(PENDING_FILE_PATH, fileNames[i])
+		jsonString := string(jsonData)
+
+		// Unmarshal JSON to struct
+		var vendors []WSVendor
+		if err := json.Unmarshal([]byte(jsonData), &vendors); err != nil {
+			message := "Failed:Sync:2 Error unmarshaling JSON -> " + err.Error()
+			utils.Console(message)
+			logger.LogNavState(logger.SUCCESS, DONE_LOG_FILE_PATH, DONE_FAILURE, fileNames[i], message, jsonString)
+		}
+
+		for j := 0; j < len(vendors); j++ {
+			key := vendors[j].WeighbridgeSupplierID
+			modelStr, _ := data_parser.ParseModelToString(vendors[j])
+			hash := hashrecs.Hash(modelStr)
+			preHash := hashModels.GetHash(key)
+
+			if preHash == "" {
+				isSuccess, err, result := InsertToNav(vendors[j])
+
+				if err != nil {
+					message := err.Error()
+					utils.Console(message)
+					logger.LogNavState(logger.SUCCESS, DONE_LOG_FILE_PATH, DONE_FAILURE, fileNames[i], message, jsonString)
+				}
+
+				if isSuccess {
+					// Convert the string to a byte slice
+					xmlData := []byte(result.(string))
+
+					// Map Go struct to XML
+					var parseModel CreateResultVendor
+					err = xml.Unmarshal(xmlData, &parseModel)
+
+					if err != nil {
+						message := "Failed:Sync:6 " + err.Error()
+						utils.Console(message)
+						logger.LogNavState(logger.FAILURE, DONE_LOG_FILE_PATH, DONE_FAILURE, fileNames[i], message, result.(string))
+					}
+
+					// append success hash map and save hash map
+					// Update the Hash field for a specific key
+					hashModels.Set(key, hashrecs.HashRec{
+						Hash:  hash,
+						NavID: &parseModel.Body.CreateResult.WSVendor.No,
+					})
+					if err != nil {
+						utils.Console("UpdateHashInModel::Error:", err)
+					}
+					utils.Console("hashMaps", hashModels)
+
+					//Add successed to an array
+					responseModel = append(responseModel, BackToCDSVendorResponse{
+						VendorNo:              parseModel.Body.CreateResult.WSVendor.No,
+						WeighbridgeSupplierID: parseModel.Body.CreateResult.WSVendor.WeighbridgeSupplierID,
+					})
+				}
+			}
+
+			if preHash != "" && preHash != hash {
+				// @TODO: Update the vendor
+			}
+		}
+
+		//Move to done file
+		err = filesystem.MoveFile(fileNames[i], PENDING_FILE_PATH, DONE_FILE_PATH)
+		if err != nil {
+			message := "Failed:Sync:5 " + err.Error()
+			utils.Console(message)
+			logger.LogNavState(logger.FAILURE, DONE_LOG_FILE_PATH, DONE_FAILURE, fileNames[i], message, jsonString)
+		} else {
+			//isSuccessfullySavedToFile = true
+			message := "File moved successfully"
+			utils.Console(message)
+			logger.LogNavState(logger.SUCCESS, DONE_LOG_FILE_PATH, DONE_SUCCESS, fileNames[i], message, "")
+		}
+	}
+
+	//Save to Hash Folder
+	hashModels.Save()
+
+	//Bulk save
+	//After syncing all files then send response back to CDS
+	utils.Console("responseModel------> ", len(responseModel))
+
 	if len(responseModel) > 0 {
 		sendToCDS(responseModel)
 	}

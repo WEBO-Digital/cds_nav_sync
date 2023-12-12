@@ -12,6 +12,7 @@ import (
 	navapi "nav_sync/mods/ahelpers/nav_api"
 	normalapi "nav_sync/mods/ahelpers/normal_api"
 	data_parser "nav_sync/mods/ahelpers/parser"
+	"nav_sync/mods/hashrecs"
 	"nav_sync/utils"
 )
 
@@ -297,17 +298,166 @@ func unmarshelCreateLedgerEntryResponse(stringData interface{}) (PostLedgerEntri
 
 func sendToCDS(responseModel []BackToCDSLedgerEntriesResponse) {
 	//Path
-	RESPONSE_URL := config.Config.Vendor.Save.URL
+	RESPONSE_URL := config.Config.LedgerEntries.Save.URL
+	TOKEN_KEY := config.Config.Invoice.Fetch.APIKey
 
-	// //Save Response vendor data to CDS
-	// response, err := manager.Fetch(RESPONSE_URL, normalapi.POST, responseModel)
-	// if err != nil {
-	// 	message := "Failed:Fetch:1 " + err.Error()
-	// 	utils.Console(message)
-	// 	//logger.LogNavState(logger.SUCCESS, PENDING_LOG_FILE_PATH, PENDING_FAILURE, "", message, "")
-	// }
-	// utils.Console(response)
+	//Save Response vendor data to CDS
+	response, err := manager.Fetch(RESPONSE_URL, normalapi.POST, TOKEN_KEY, responseModel)
+	if err != nil {
+		message := "Failed:Fetch:1 " + err.Error()
+		utils.Console(message)
+		//logger.LogNavState(logger.SUCCESS, PENDING_LOG_FILE_PATH, PENDING_FAILURE, "", message, "")
+	}
+	utils.Console(response)
 
-	utils.Console("Successfully send to CDS system from nav ---> ledger entry: ", RESPONSE_URL)
-	utils.Console(responseModel)
+	// utils.Console("Successfully send to CDS system from nav ---> ledger entry: ", RESPONSE_URL)
+	// utils.Console(responseModel)
+}
+
+func Sync3() {
+	//Path
+	PENDING_FILE_PATH := utils.LEDGER_ENTRIES_PENDING_FILE_PATH
+	DONE_FILE_PATH := utils.LEDGER_ENTRIES_DONE_FILE_PATH
+	DONE_LOG_FILE_PATH := utils.LEDGER_ENTRIES_DONE_LOG_FILE_PATH
+	DONE_FAILURE := utils.LEDGER_ENTRIES_DONE_FAILURE
+	DONE_SUCCESS := utils.LEDGER_ENTRIES_DONE_SUCCESS
+	HASH_FILE_PATH := utils.LEDGER_ENTRIES_HASH_FILE_PATH
+	HASH_DB := utils.LEDGER_ENTRIES_HASH_DB
+
+	//Get All the vendor pending data
+	fileNames, err := filesystem.GetAllFiles(PENDING_FILE_PATH)
+	if err != nil {
+		message := "Failed:Sync:1 " + err.Error()
+		utils.Console(message)
+		logger.LogNavState(logger.SUCCESS, DONE_LOG_FILE_PATH, DONE_FAILURE, "", message, "")
+	}
+
+	if fileNames == nil || len(fileNames) < 1 {
+		return
+	}
+
+	//Get Hash Database
+	hashModels := hashrecs.HashRecs{
+		FilePath: HASH_FILE_PATH,
+		Name:     HASH_DB,
+	}
+	hashModels.Load()
+
+	//Syncing
+	var responseModel []BackToCDSLedgerEntriesResponse
+	for i := 0; i < len(fileNames); i++ {
+		//Sync vendor data to NAV
+		//Get Json data from the file
+		jsonData, err := filesystem.ReadFile(PENDING_FILE_PATH, fileNames[i])
+		if err != nil {
+			message := "Failed:Sync:1 Could not read file -> " + err.Error()
+			utils.Console(message)
+			logger.LogNavState(logger.SUCCESS, DONE_LOG_FILE_PATH, DONE_FAILURE, fileNames[i], message, "")
+		}
+		jsonString := string(jsonData)
+
+		// Unmarshal JSON to struct
+		var ledger_entries []LedgerEntriesCreate
+		if err := json.Unmarshal([]byte(jsonData), &ledger_entries); err != nil {
+			message := "Failed:Sync:2 Error unmarshaling JSON -> " + err.Error()
+			utils.Console(message)
+			logger.LogNavState(logger.SUCCESS, DONE_LOG_FILE_PATH, DONE_FAILURE, fileNames[i], message, jsonString)
+		}
+
+		for j := 0; j < len(ledger_entries); j++ {
+			key := ledger_entries[j].VendorPayment.AppliesToDocNo
+			vendorNo := ledger_entries[j].VendorPayment.AccountNo
+			modelStr, _ := data_parser.ParseModelToString(ledger_entries[j])
+			hash := hashrecs.Hash(modelStr)
+			preHash := hashModels.GetHash(key)
+
+			if preHash == "" {
+				isSuccessCreation, err, resultCreate := InsertToNav(ledger_entries[j])
+				if err != nil {
+					message := "Failed:Sync:3 -> " + err.Error()
+					utils.Console(message)
+					logger.LogNavState(logger.SUCCESS, DONE_LOG_FILE_PATH, DONE_FAILURE, fileNames[i], message, jsonString)
+				}
+
+				if isSuccessCreation {
+					// Map Go struct to XML
+					createLedgerEntryRes, err := UnmarshelCreateLedgerEntryResponse(resultCreate)
+					if err != nil {
+						message := "Failed:Sync:4 Error unmarshaling JSON -> " + err.Error()
+						utils.Console(message)
+						logger.LogNavState(logger.SUCCESS, DONE_LOG_FILE_PATH, DONE_FAILURE, fileNames[i], message, "")
+					}
+
+					isSuccessPost, err, resultPost := PostLedgerEntriesAfterCreation(createLedgerEntryRes)
+					if err != nil {
+						message := "Failed:Sync:5 -> " + err.Error()
+						utils.Console(message)
+						logger.LogNavState(logger.SUCCESS, DONE_LOG_FILE_PATH, DONE_FAILURE, fileNames[i], message, jsonString)
+					}
+
+					if isSuccessPost {
+						postLedgerEntryRes, err := UnmarshelCreateLedgerEntryResponse(resultPost)
+						if err != nil {
+							message := "Failed:Sync:6 " + err.Error()
+							utils.Console(message)
+						}
+
+						//map
+						// vendorNo := createInvoiceRes.Body.CreateResult.WSPurchaseInvoicePage.BuyFromVendorNo
+						// purchaseInvoiceNo := createInvoiceRes.Body.CreateResult.WSPurchaseInvoicePage.No
+						documentNo := postLedgerEntryRes.Body.CreateResult.VendorPayment.DocumentNo
+
+						// append success hash map and save hash map
+						// Update the Hash field for a specific key
+						hashModels.Set(key, hashrecs.HashRec{
+							Hash:  hash,
+							NavID: &vendorNo,
+							//InvoiceNo:  purchaseInvoiceNo,
+							DocumentNo: fmt.Sprintf("%i", documentNo),
+							//RefundId:   refundId,
+						})
+						if err != nil {
+							utils.Console("UpdateHashInModel::Error:", err)
+						}
+						utils.Console("hashMaps", hashModels)
+
+						//Add successed to an array
+						responseModel = append(responseModel, BackToCDSLedgerEntriesResponse{
+							//RefundId:          refundId,
+							VendorNo: vendorNo,
+							//PurchaseInvoiceNo: purchaseInvoiceNo,
+							DocumentNo: documentNo,
+						})
+
+					}
+
+				}
+			}
+
+			if preHash != "" && preHash != hash {
+				// @TODO: Update the vendor
+			}
+		}
+
+		//Move to done file
+		err = filesystem.MoveFile(fileNames[i], PENDING_FILE_PATH, DONE_FILE_PATH)
+		if err != nil {
+			message := "Failed:Sync:4 " + err.Error()
+			utils.Console(message)
+			logger.LogNavState(logger.FAILURE, DONE_LOG_FILE_PATH, DONE_FAILURE, fileNames[i], message, "")
+		} else {
+			message := "Sync: File moved successfully"
+			utils.Console(message)
+			logger.LogNavState(logger.SUCCESS, DONE_LOG_FILE_PATH, DONE_SUCCESS, fileNames[i], message, "")
+		}
+	}
+
+	//Save to Hash Folder
+	hashModels.Save()
+
+	//Bulk save
+	//After syncing all files then send response back to CDS
+	if len(responseModel) > 0 {
+		sendToCDS(responseModel)
+	}
 }

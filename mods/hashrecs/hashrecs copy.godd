@@ -1,0 +1,132 @@
+package hashrecs
+
+import (
+	"crypto/md5"
+	"encoding/hex"
+	"encoding/json"
+	"errors"
+	filesystem "nav_sync/mods/ahelpers/file_system"
+	data_parser "nav_sync/mods/ahelpers/parser"
+	"nav_sync/utils"
+)
+
+// func (hashrec *HashRecs) Load(filePath string, fileName string) {
+// 	file := "./data/hashrecs/" + hashrec.Name + ".json"
+// 	jsonContent := '' // read file
+// 	hashrec.Recs = '' // Set marshelled
+// }
+
+// func (hashrec *HashRecs) Set(id string, rec HashRec) {
+// 	hashrec[id] = rec
+// }
+
+// func (hashrec *HashRecs) Save() {
+// 	file := "./data/hashrecs/" + hashrec.Name + ".json"
+// 	// convert hashrec.Recs to json and save to $file
+// }
+
+// func (hashrec *HashRecs) Get(id string) HashRec {
+// 	return hashrec.Recs[id]
+// }
+
+// func Hash(content string) string {
+// 	return "dfjkdf"
+// }
+
+func (hashrecs *HashRecs) Load() {
+	// utils.Console("************************GetHash::inner****************************")
+	var golbalModel map[string]HashRec
+
+	//Get Json data from the file
+	jsonData, err := filesystem.ReadFile(hashrecs.FilePath, hashrecs.Name+".json")
+
+	if err != nil {
+		hashrecs.Recs = golbalModel
+		return
+	}
+	jsonString := string(jsonData)
+	utils.Console(jsonString)
+
+	// Unmarshal JSON to struct
+	if err := json.Unmarshal(jsonData, &golbalModel); err != nil {
+		hashrecs.Recs = golbalModel
+		return
+	}
+
+	// Set hashrecs.Rec to golbalModel
+	hashrecs.Recs = golbalModel
+}
+
+func (hashrec *HashRecs) Set(key string, rec HashRec) {
+	// Initialize the map if it is nil
+	if hashrec == nil {
+		var golbalModel map[string]HashRec
+		hashrec.Recs = golbalModel
+	}
+
+	// Check if the key exists in the map
+	entry, exists := hashrec.Recs[key]
+	if exists {
+		// Update the Hash field with the new value
+		entry.Hash = rec.Hash
+		entry.NavID = rec.NavID
+		hashrec.Recs[key] = entry
+	} else {
+		hashrec.Recs[key] = rec
+	}
+}
+
+func (hashrecs *HashRecs) Get(key string) HashRec {
+	return hashrecs.Recs[key]
+}
+
+func (hashrecs *HashRecs) Save() (string, error) {
+	//Convert to String
+	response, _ := data_parser.ParseModelToString(hashrecs.Recs)
+
+	//Save to pending file
+	var result string
+	err := filesystem.CleanAndSave(hashrecs.FilePath, hashrecs.Name, response)
+	if err != nil {
+		message := "Failed:SaveHashLogs:Fetch:1 " + err.Error()
+		return result, errors.New(message)
+	} else {
+		result := "Fetch: Successfully saved vendor to hashed file"
+		return result, nil
+	}
+}
+
+func (hashrecs *HashRecs) CompareWithHash(key string, hashString string, compareString string) bool {
+	hashRecord := hashrecs.Recs
+	for key, _ := range hashRecord {
+		//hash is already pushed to nav server
+		if containsHash(hashRecord, hashString) {
+			//hashRecord[key] = value
+			return true
+		}
+
+		if !containsHash(hashRecord, hashString) && key == compareString { //&& value.NavID == nil
+			/** @TODO: UPDATE THE VEDOR **/
+			return true
+		}
+	}
+
+	//hash is not found then insert to nav server
+	return false
+}
+
+func containsHash(model map[string]HashRec, targetHash string) bool {
+	for _, entry := range model {
+		if entry.Hash == targetHash {
+			return true
+		}
+	}
+	return false
+}
+
+func Hash(content string) string {
+	hasher := md5.New()
+	hasher.Write([]byte(content))
+	hashInBytes := hasher.Sum(nil)
+	return hex.EncodeToString(hashInBytes)
+}

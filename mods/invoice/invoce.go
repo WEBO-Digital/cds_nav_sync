@@ -12,6 +12,7 @@ import (
 	navapi "nav_sync/mods/ahelpers/nav_api"
 	normalapi "nav_sync/mods/ahelpers/normal_api"
 	data_parser "nav_sync/mods/ahelpers/parser"
+	"nav_sync/mods/hashrecs"
 	"nav_sync/utils"
 )
 
@@ -173,7 +174,7 @@ func Sync() {
 			responseModel = append(responseModel, BackToCDSInvoiceResponse{
 				VendorNo:          createInvoiceRes.Body.CreateResult.WSPurchaseInvoicePage.BuyFromVendorNo,
 				PurchaseInvoiceNo: createInvoiceRes.Body.CreateResult.WSPurchaseInvoicePage.No,
-				DocumentId:        postInvoiceRes.Body.ReturnValue,
+				DocumentNo:        postInvoiceRes.Body.ReturnValue,
 			})
 		}
 	}
@@ -312,16 +313,297 @@ func unmarshelPostInvoiceResponse(stringData interface{}) (PostResponseInvoiceEn
 func sendToCDS(responseModel []BackToCDSInvoiceResponse) {
 	//Path
 	RESPONSE_URL := config.Config.Invoice.Save.URL
+	TOKEN_KEY := config.Config.Invoice.Fetch.APIKey
 
-	// //Save Response vendor data to CDS
-	// response, err := manager.Fetch(RESPONSE_URL, normalapi.POST, responseModel)
-	// if err != nil {
-	// 	message := "Failed:sendToCDS:1 " + err.Error()
-	// 	utils.Console(message)
-	// 	//logger.LogNavState(logger.SUCCESS, PENDING_LOG_FILE_PATH, PENDING_FAILURE, "", message, "")
-	// }
-	// utils.Console(response)
+	//Save Response vendor data to CDS
+	response, err := manager.Fetch(RESPONSE_URL, normalapi.POST, TOKEN_KEY, responseModel)
+	if err != nil {
+		message := "Failed:sendToCDS:1 " + err.Error()
+		utils.Console(message)
+		//logger.LogNavState(logger.SUCCESS, PENDING_LOG_FILE_PATH, PENDING_FAILURE, "", message, "")
+	}
+	utils.Console(response)
 
-	utils.Console("Successfully send to CDS system from nav ---> invoice: ", RESPONSE_URL)
-	utils.Console(responseModel)
+	// utils.Console("Successfully send to CDS system from nav ---> invoice: ", RESPONSE_URL)
+	// utils.Console(responseModel)
+}
+
+func Sync2() {
+	//Path
+	PENDING_FILE_PATH := utils.INVOICE_PENDING_FILE_PATH
+	DONE_FILE_PATH := utils.INVOICE_DONE_FILE_PATH
+	DONE_LOG_FILE_PATH := utils.INVOICE_DONE_LOG_FILE_PATH
+	DONE_FAILURE := utils.INVOICE_DONE_FAILURE
+	DONE_SUCCESS := utils.INVOICE_DONE_SUCCESS
+
+	//Get All the vendor pending data
+	fileNames, err := filesystem.GetAllFiles(PENDING_FILE_PATH)
+	if err != nil {
+		message := "Failed:Sync:1 " + err.Error()
+		utils.Console(message)
+		logger.LogNavState(logger.SUCCESS, DONE_LOG_FILE_PATH, DONE_FAILURE, "", message, "")
+	}
+
+	if fileNames == nil || len(fileNames) < 1 {
+		return
+	}
+
+	//Get Hash Database
+	hashModels := GetHash()
+
+	//Syncing
+	var responseModel []BackToCDSInvoiceResponse
+	for i := 0; i < len(fileNames); i++ {
+		//Get Json data from the file
+		jsonData, err := filesystem.ReadFile(PENDING_FILE_PATH, fileNames[i])
+		if err != nil {
+			message := "Failed:Sync:1 Could not read file -> " + err.Error()
+			utils.Console(message)
+			logger.LogNavState(logger.SUCCESS, DONE_LOG_FILE_PATH, DONE_FAILURE, fileNames[i], message, "")
+		}
+		jsonString := string(jsonData)
+
+		// Unmarshal JSON to struct
+		var invoices []WSPurchaseInvoicePage
+		if err := json.Unmarshal([]byte(jsonData), &invoices); err != nil {
+			message := "Failed:Sync:2 Error unmarshaling JSON -> " + err.Error()
+			utils.Console(message)
+			logger.LogNavState(logger.SUCCESS, DONE_LOG_FILE_PATH, DONE_FAILURE, fileNames[i], message, jsonString)
+		}
+
+		//var isSuccessArr []bool
+		for j := 0; j < len(invoices); j++ {
+			hashMaps, isHashed := CompareWithHash(invoices[j], hashModels)
+			if !isHashed {
+				isSuccessCreation, err, resultCreate := InsertToNav(invoices[j])
+				if err != nil {
+					message := "Failed:Sync:3 -> " + err.Error()
+					utils.Console(message)
+					logger.LogNavState(logger.SUCCESS, DONE_LOG_FILE_PATH, DONE_FAILURE, fileNames[i], message, jsonString)
+				}
+
+				if isSuccessCreation {
+					// Map Go struct to XML
+					createInvoiceRes, err := UnmarshelCreateInvoiceResponse(resultCreate)
+					if err != nil {
+						message := "Failed:Sync:2 Error unmarshaling JSON -> " + err.Error()
+						utils.Console(message)
+						logger.LogNavState(logger.SUCCESS, DONE_LOG_FILE_PATH, DONE_FAILURE, fileNames[i], message, "")
+					}
+					isSuccessPost, err, resultPost := PostToNavAfterInsert(createInvoiceRes)
+					if err != nil {
+						message := "Failed:Sync:4 -> " + err.Error()
+						utils.Console(message)
+						logger.LogNavState(logger.SUCCESS, DONE_LOG_FILE_PATH, DONE_FAILURE, fileNames[i], message, jsonString)
+					}
+
+					if isSuccessPost {
+						postInvoiceRes, err := UnmarshelPostInvoiceResponse(resultPost)
+						if err != nil {
+							message := "Failed:Sync:6 " + err.Error()
+							utils.Console(message)
+						}
+
+						//map
+						vendorStr, _ := data_parser.ParseModelToString(invoices[j])
+						refundId := invoices[j].RefundId
+						vendorInvoiceNo := invoices[j].VendorInvoiceNo
+						vendorNo := createInvoiceRes.Body.CreateResult.WSPurchaseInvoicePage.BuyFromVendorNo
+						purchaseInvoiceNo := createInvoiceRes.Body.CreateResult.WSPurchaseInvoicePage.No
+						documentId := postInvoiceRes.Body.ReturnValue
+
+						// append success hash map and save hash map
+						// Update the Hash field for a specific key
+						err = UpdateHashInModel(hashMaps, vendorInvoiceNo, utils.ComputeMD5(vendorStr), vendorNo, purchaseInvoiceNo, documentId, refundId)
+						if err != nil {
+							utils.Console("UpdateHashInModel::Error:", err)
+						}
+						utils.Console("hashMaps", hashMaps)
+
+						responseModel = append(responseModel, BackToCDSInvoiceResponse{
+							RefundId:          refundId,
+							VendorNo:          vendorNo,
+							PurchaseInvoiceNo: purchaseInvoiceNo,
+							DocumentNo:        documentId,
+						})
+					}
+				}
+			}
+
+			//Move to done file
+			err = filesystem.MoveFile(fileNames[i], PENDING_FILE_PATH, DONE_FILE_PATH)
+			if err != nil {
+				message := "Failed:Sync:5 " + err.Error()
+				utils.Console(message)
+				logger.LogNavState(logger.FAILURE, DONE_LOG_FILE_PATH, DONE_FAILURE, fileNames[i], message, jsonString)
+			} else {
+				//isSuccessfullySavedToFile = true
+				message := "File moved successfully"
+				utils.Console(message)
+				logger.LogNavState(logger.SUCCESS, DONE_LOG_FILE_PATH, DONE_SUCCESS, fileNames[i], message, "")
+			}
+
+		}
+	}
+
+	//Save to Hash Folder
+	val, err := SaveHashLogs(hashModels)
+	if err != nil {
+		utils.Console("SaveHashLogs::err", err)
+	}
+	utils.Console("SaveHashLogs::val", val)
+
+	//Bulk save
+	//After syncing all files then send response back to CDS
+	if len(responseModel) > 0 {
+		sendToCDS(responseModel)
+	}
+
+}
+
+func Sync3() {
+	//Path
+	PENDING_FILE_PATH := utils.INVOICE_PENDING_FILE_PATH
+	DONE_FILE_PATH := utils.INVOICE_DONE_FILE_PATH
+	DONE_LOG_FILE_PATH := utils.INVOICE_DONE_LOG_FILE_PATH
+	DONE_FAILURE := utils.INVOICE_DONE_FAILURE
+	DONE_SUCCESS := utils.INVOICE_DONE_SUCCESS
+	HASH_FILE_PATH := utils.INVOICE_HASH_FILE_PATH
+	HASH_DB := utils.INVOICE_HASH_DB
+
+	//Get All the vendor pending data
+	fileNames, err := filesystem.GetAllFiles(PENDING_FILE_PATH)
+	if err != nil {
+		message := "Failed:Sync:1 " + err.Error()
+		utils.Console(message)
+		logger.LogNavState(logger.SUCCESS, DONE_LOG_FILE_PATH, DONE_FAILURE, "", message, "")
+	}
+
+	if fileNames == nil || len(fileNames) < 1 {
+		return
+	}
+
+	//Get Hash Database
+	hashModels := hashrecs.HashRecs{
+		FilePath: HASH_FILE_PATH,
+		Name:     HASH_DB,
+	}
+	hashModels.Load()
+
+	//Syncing
+	var responseModel []BackToCDSInvoiceResponse
+	for i := 0; i < len(fileNames); i++ {
+		//Get Json data from the file
+		jsonData, err := filesystem.ReadFile(PENDING_FILE_PATH, fileNames[i])
+		if err != nil {
+			message := "Failed:Sync:1 Could not read file -> " + err.Error()
+			utils.Console(message)
+			logger.LogNavState(logger.SUCCESS, DONE_LOG_FILE_PATH, DONE_FAILURE, fileNames[i], message, "")
+		}
+		jsonString := string(jsonData)
+
+		// Unmarshal JSON to struct
+		var invoices []WSPurchaseInvoicePage
+		if err := json.Unmarshal([]byte(jsonData), &invoices); err != nil {
+			message := "Failed:Sync:2 Error unmarshaling JSON -> " + err.Error()
+			utils.Console(message)
+			logger.LogNavState(logger.SUCCESS, DONE_LOG_FILE_PATH, DONE_FAILURE, fileNames[i], message, jsonString)
+		}
+
+		for j := 0; j < len(invoices); j++ {
+			key := invoices[j].VendorInvoiceNo
+			refundId := invoices[j].RefundId
+			modelStr, _ := data_parser.ParseModelToString(invoices[j])
+			hash := hashrecs.Hash(modelStr)
+			preHash := hashModels.GetHash(key)
+
+			if invoices[j].BuyFromVendorNo != nil {
+				if preHash == "" {
+					isSuccessCreation, err, resultCreate := InsertToNav(invoices[j])
+					if err != nil {
+						message := "Failed:Sync:3 -> " + err.Error()
+						utils.Console(message)
+						logger.LogNavState(logger.SUCCESS, DONE_LOG_FILE_PATH, DONE_FAILURE, fileNames[i], message, jsonString)
+					}
+
+					if isSuccessCreation {
+						// Map Go struct to XML
+						createInvoiceRes, err := UnmarshelCreateInvoiceResponse(resultCreate)
+						if err != nil {
+							message := "Failed:Sync:2 Error unmarshaling JSON -> " + err.Error()
+							utils.Console(message)
+							logger.LogNavState(logger.SUCCESS, DONE_LOG_FILE_PATH, DONE_FAILURE, fileNames[i], message, "")
+						}
+						isSuccessPost, err, resultPost := PostToNavAfterInsert(createInvoiceRes)
+						if err != nil {
+							message := "Failed:Sync:4 -> " + err.Error()
+							utils.Console(message)
+							logger.LogNavState(logger.SUCCESS, DONE_LOG_FILE_PATH, DONE_FAILURE, fileNames[i], message, jsonString)
+						}
+
+						if isSuccessPost {
+							postInvoiceRes, err := UnmarshelPostInvoiceResponse(resultPost)
+							if err != nil {
+								message := "Failed:Sync:6 " + err.Error()
+								utils.Console(message)
+							}
+
+							//map
+							vendorNo := createInvoiceRes.Body.CreateResult.WSPurchaseInvoicePage.BuyFromVendorNo
+							purchaseInvoiceNo := createInvoiceRes.Body.CreateResult.WSPurchaseInvoicePage.No
+							documentNo := postInvoiceRes.Body.ReturnValue
+
+							// append success hash map and save hash map
+							// Update the Hash field for a specific key
+							hashModels.Set(key, hashrecs.HashRec{
+								Hash:       hash,
+								NavID:      &vendorNo,
+								InvoiceNo:  purchaseInvoiceNo,
+								DocumentNo: documentNo,
+								RefundId:   refundId,
+							})
+							if err != nil {
+								utils.Console("UpdateHashInModel::Error:", err)
+							}
+							utils.Console("hashMaps", hashModels)
+
+							responseModel = append(responseModel, BackToCDSInvoiceResponse{
+								RefundId:          refundId,
+								VendorNo:          vendorNo,
+								PurchaseInvoiceNo: purchaseInvoiceNo,
+								DocumentNo:        documentNo,
+							})
+						}
+					}
+				}
+
+				if preHash != "" && preHash != hash {
+					// @TODO: Update the vendor
+				}
+			}
+
+		}
+
+		//Move to done file
+		err = filesystem.MoveFile(fileNames[i], PENDING_FILE_PATH, DONE_FILE_PATH)
+		if err != nil {
+			message := "Failed:Sync:5 " + err.Error()
+			utils.Console(message)
+			logger.LogNavState(logger.FAILURE, DONE_LOG_FILE_PATH, DONE_FAILURE, fileNames[i], message, jsonString)
+		} else {
+			//isSuccessfullySavedToFile = true
+			message := "File moved successfully"
+			utils.Console(message)
+			logger.LogNavState(logger.SUCCESS, DONE_LOG_FILE_PATH, DONE_SUCCESS, fileNames[i], message, "")
+		}
+	}
+
+	//Save to Hash Folder
+	hashModels.Save()
+
+	//Bulk save
+	//After syncing all files then send response back to CDS
+	if len(responseModel) > 0 {
+		sendToCDS(responseModel)
+	}
 }

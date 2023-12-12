@@ -115,7 +115,7 @@ func UpdateHashInModel(hashModel HashVendorModel, key, hash string, navId string
 	return nil
 }
 
-func InsertToNav(vendor WSVendor, fileName string, jsonString string) (bool, error, interface{}) {
+func InsertToNav(vendor WSVendor) (bool, error, interface{}) {
 	//Path
 	NTLM_USERNAME := config.Config.Auth.Ntlm.Username
 	NTLM_PASSWORD := config.Config.Auth.Ntlm.Password
@@ -125,9 +125,7 @@ func InsertToNav(vendor WSVendor, fileName string, jsonString string) (bool, err
 	// Map Go struct to XML
 	xmlData, err := data_parser.ParseJsonToXml(vendor)
 	if err != nil {
-		message := "Failed:Sync:3 Error mapping to XML -> " + err.Error()
-		//utils.Console(message)
-		//logger.LogNavState(logger.SUCCESS, DONE_LOG_FILE_PATH, DONE_FAILURE, fileName, message, jsonString)
+		message := "Failed:InsertToNav:Sync:3 Error mapping to XML -> " + err.Error()
 		return false, errors.New(message), result
 	}
 
@@ -156,17 +154,13 @@ func InsertToNav(vendor WSVendor, fileName string, jsonString string) (bool, err
 	result, err = manager.Sync(url, navapi.POST, xmlPayload, NTLM_USERNAME, NTLM_PASSWORD)
 	if err != nil {
 		message := "Failed:Sync:4 " + err.Error()
-		// utils.Console(message)
-		// logger.LogNavState(logger.FAILURE, DONE_LOG_FILE_PATH, DONE_FAILURE, fileName, message, xmlPayload)
-		return false, errors.New(message), result
+		return isSuccess, errors.New(message), result
 	} else {
 		resultStr, ok := result.(string)
 		if !ok {
 			// The type assertion failed
 			message := fmt.Sprintf("Failed:Sync:5 Could not convert to string: ", result)
-			// utils.Console(message)
-			// logger.LogNavState(logger.FAILURE, DONE_LOG_FILE_PATH, DONE_FAILURE, fileName, message, xmlPayload)
-			return false, errors.New(message), result
+			return isSuccess, errors.New(message), result
 		}
 		match := utils.MatchRegexExpression(resultStr, `<Create_Result[^>]*>`)
 		matchFault := utils.MatchRegexExpression(resultStr, `<faultcode[^>]*>`)
@@ -174,9 +168,7 @@ func InsertToNav(vendor WSVendor, fileName string, jsonString string) (bool, err
 		// Print the result
 		if !match && matchFault {
 			message := fmt.Sprintf("Failed:Sync:6 XML string does not contain <Create_Result> element: ", result)
-			// utils.Console(message)
-			// logger.LogNavState(logger.FAILURE, DONE_LOG_FILE_PATH, DONE_FAILURE, fileName, message, resultStr)
-			return false, errors.New(message), result
+			return isSuccess, errors.New(message), result
 		} else {
 			isSuccess = true
 		}
@@ -197,7 +189,7 @@ func SaveHashLogs(model HashVendorModel) (string, error) {
 	var result string
 	err := filesystem.CleanAndSave(PENDING_FILE_PATH, HASH_DB, response)
 	if err != nil {
-		message := "Failed:Fetch:2 " + err.Error()
+		message := "Failed:SaveHashLogs:Fetch:1 " + err.Error()
 		//utils.Console(message)
 		//logger.LogNavState(logger.SUCCESS, PENDING_LOG_FILE_PATH, PENDING_FAILURE, timestamp+".json", message, "")
 		return result, errors.New(message)

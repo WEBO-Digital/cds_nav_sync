@@ -28,7 +28,7 @@ func runcFunctionFromCommandArgument() {
 	case "invoice_fetch":
 		invoice.Fetch()
 	case "invoice_sync":
-		invoice.Sync()
+		invoice.Sync2()
 	case "vendor_fetch":
 		vendor.Fetch()
 	case "vendor_sync":
