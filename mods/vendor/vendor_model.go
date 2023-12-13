@@ -31,16 +31,16 @@ type WSVendor struct {
 	WeighbridgeSupplierID string `xml:"Weighbridge_Supplier_ID,omitempty" json:"weighbridge_supplier_id,omitempty"`
 	FaxNo                 string `xml:"Fax_No,omitempty" json:"fax_no,omitempty"`
 	Email                 string `xml:"E_Mail,omitempty" json:"e_mail,omitempty"`
-	PayToVendorNo         string `xml:"Pay_to_Vendor_No,omitempty" json:"pay_to_vendor_no,omitempty"`
-	GenBusPostingGroup    string `xml:"Gen_Bus_Posting_Group,omitempty" json:"gen_bus_posting_group,omitempty"`
-	VATBusPostingGroup    string `xml:"VAT_Bus_Posting_Group,omitempty" json:"vat_bus_posting_group,omitempty"`
-	VendorPostingGroup    string `xml:"Vendor_Posting_Group,omitempty" json:"vendor_posting_group,omitempty"`
-	InvoiceDiscCode       string `xml:"Invoice_Disc_Code,omitempty" json:"invoice_disc_code,omitempty"`
-	ApplicationMethod     string `xml:"Application_Method,omitempty" json:"application_method,omitempty"`
-	ACN                   string `xml:"IRD_No,omitempty" json:"acn,omitempty"`
-	ABN                   string `xml:"ABN,omitempty" json:"abn,omitempty"`
-	ABNDivisionPartNo     string `xml:"ABN_Division_Part_No,omitempty" json:"abn_division_part_no,omitempty"`
-	Registered            bool   `xml:"Registered,omitempty" json:"registered,omitempty"`
+	// PayToVendorNo         string `xml:"Pay_to_Vendor_No,omitempty" json:"pay_to_vendor_no,omitempty"`
+	GenBusPostingGroup string `xml:"Gen_Bus_Posting_Group,omitempty" json:"gen_bus_posting_group,omitempty"`
+	VATBusPostingGroup string `xml:"VAT_Bus_Posting_Group,omitempty" json:"vat_bus_posting_group,omitempty"`
+	VendorPostingGroup string `xml:"Vendor_Posting_Group,omitempty" json:"vendor_posting_group,omitempty"`
+	InvoiceDiscCode    string `xml:"Invoice_Disc_Code,omitempty" json:"invoice_disc_code,omitempty"`
+	ApplicationMethod  string `xml:"Application_Method,omitempty" json:"application_method,omitempty"`
+	ACN                string `xml:"IRD_No,omitempty" json:"acn,omitempty"`
+	ABN                string `xml:"ABN,omitempty" json:"abn,omitempty"`
+	ABNDivisionPartNo  string `xml:"ABN_Division_Part_No,omitempty" json:"abn_division_part_no,omitempty"`
+	Registered         bool   `xml:"Registered,omitempty" json:"registered,omitempty"`
 }
 
 type BackToCDSVendorResponse struct {

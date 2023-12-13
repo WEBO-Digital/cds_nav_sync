@@ -21,5 +21,6 @@ type VendorPayment struct {
 
 type BackToCDSLedgerEntriesResponse struct {
 	VendorNo   string `json:"vendor_no,omitempty"`
+	PaymentId  int    `json:"payment_id,omitempty"`
 	DocumentNo string `json:"document_no,omitempty"`
 }

@@ -11,6 +11,25 @@ import (
 	"nav_sync/utils"
 )
 
+func UnmarshelCreateLedgerEntryResponse(stringData interface{}) (PostLedgerEntriesEnvelope, error) {
+	var envelope PostLedgerEntriesEnvelope
+	// Type assertion to get the underlying string
+	str, ok := stringData.(string)
+	if !ok {
+		return envelope, errors.New("unmarshelCreateLedgerEntryResponse: Conversion failed: not a string")
+	}
+
+	// Convert the string to a byte slice
+	xmlData := []byte(str)
+
+	// Map Go struct to XML
+	err := xml.Unmarshal(xmlData, &envelope)
+	if err != nil {
+		return envelope, errors.New("unmarshelCreateLedgerEntryResponse: Error decoding XML: " + err.Error())
+	}
+	return envelope, nil
+}
+
 func InsertToNav(ledgerentrie LedgerEntriesCreate) (bool, error, interface{}) {
 	NTLM_USERNAME := config.Config.Auth.Ntlm.Username
 	NTLM_PASSWORD := config.Config.Auth.Ntlm.Password
@@ -71,25 +90,6 @@ func InsertToNav(ledgerentrie LedgerEntriesCreate) (bool, error, interface{}) {
 		}
 	}
 	return isSuccess, nil, result
-}
-
-func UnmarshelCreateLedgerEntryResponse(stringData interface{}) (PostLedgerEntriesEnvelope, error) {
-	var envelope PostLedgerEntriesEnvelope
-	// Type assertion to get the underlying string
-	str, ok := stringData.(string)
-	if !ok {
-		return envelope, errors.New("unmarshelCreateLedgerEntryResponse: Conversion failed: not a string")
-	}
-
-	// Convert the string to a byte slice
-	xmlData := []byte(str)
-
-	// Map Go struct to XML
-	err := xml.Unmarshal(xmlData, &envelope)
-	if err != nil {
-		return envelope, errors.New("unmarshelCreateLedgerEntryResponse: Error decoding XML: " + err.Error())
-	}
-	return envelope, nil
 }
 
 func PostLedgerEntriesAfterCreation(envelope PostLedgerEntriesEnvelope) (bool, error, interface{}) {

@@ -2,7 +2,6 @@ package ledgerentries
 
 import (
 	"encoding/json"
-	"fmt"
 	"nav_sync/config"
 	"nav_sync/logger"
 	filesystem "nav_sync/mods/ahelpers/file_system"
@@ -11,6 +10,7 @@ import (
 	data_parser "nav_sync/mods/ahelpers/parser"
 	"nav_sync/mods/hashrecs"
 	"nav_sync/utils"
+	"strconv"
 )
 
 func Fetch() {
@@ -131,23 +131,27 @@ func Sync3() {
 						}
 
 						if isSuccessPost {
-							postLedgerEntryRes, err := UnmarshelCreateLedgerEntryResponse(resultPost)
-							if err != nil {
-								message := "Failed:Sync:6 " + err.Error()
-								utils.Console(message)
-							}
+							utils.Console(resultPost)
+							// postLedgerEntryRes, err := UnmarshelCreateLedgerEntryResponse(resultPost)
+							// if err != nil {
+							// 	message := "Failed:Sync:6 " + err.Error()
+							// 	utils.Console(message)
+							// }
 
 							//map
 							// vendorNo := createInvoiceRes.Body.CreateResult.WSPurchaseInvoicePage.BuyFromVendorNo
 							// purchaseInvoiceNo := createInvoiceRes.Body.CreateResult.WSPurchaseInvoicePage.No
-							documentNo := postLedgerEntryRes.Body.CreateResult.VendorPayment.DocumentNo
+							documentNo := createLedgerEntryRes.Body.CreateResult.VendorPayment.DocumentNo
+							documentNoStr := strconv.Itoa(documentNo)
+
+							utils.Console("documentNoStr----------->", documentNoStr)
 
 							// append success hash map and save hash map
 							// Update the Hash field for a specific key
 							hashModels.Set(key, hashrecs.HashRec{
 								Hash:       hash,
 								NavID:      vendorNo,
-								DocumentNo: fmt.Sprintf("%i", documentNo),
+								DocumentNo: documentNoStr,
 								PaymentId:  paymentId,
 							})
 							if err != nil {
@@ -159,8 +163,9 @@ func Sync3() {
 							responseModel = append(responseModel, BackToCDSLedgerEntriesResponse{
 								//RefundId:          refundId,
 								//PurchaseInvoiceNo: purchaseInvoiceNo,
+								PaymentId:  paymentId,
 								VendorNo:   vendorNo,
-								DocumentNo: fmt.Sprintf("%i", documentNo),
+								DocumentNo: documentNoStr,
 							})
 
 						}
@@ -217,6 +222,7 @@ func ReSync() {
 			//PurchaseInvoiceNo: purchaseInvoiceNo,
 			VendorNo:   value.NavID,
 			DocumentNo: value.DocumentNo,
+			PaymentId:  value.PaymentId,
 		})
 	}
 
@@ -228,17 +234,17 @@ func ReSync() {
 func sendToCDS(responseModel []BackToCDSLedgerEntriesResponse) {
 	//Path
 	RESPONSE_URL := config.Config.LedgerEntries.Save.URL
-	// TOKEN_KEY := config.Config.Invoice.Fetch.APIKey
+	TOKEN_KEY := config.Config.Invoice.Fetch.APIKey
 
-	// //Save Response vendor data to CDS
-	// response, err := manager.Fetch(RESPONSE_URL, normalapi.POST, TOKEN_KEY, responseModel)
-	// if err != nil {
-	// 	message := "Failed:Fetch:1 " + err.Error()
-	// 	utils.Console(message)
-	// 	//logger.LogNavState(logger.SUCCESS, PENDING_LOG_FILE_PATH, PENDING_FAILURE, "", message, "")
-	// }
-	// utils.Console(response)
+	//Save Response vendor data to CDS
+	response, err := manager.Fetch(RESPONSE_URL, normalapi.POST, TOKEN_KEY, responseModel)
+	if err != nil {
+		message := "Failed:Fetch:1 " + err.Error()
+		utils.Console(message)
+		//logger.LogNavState(logger.SUCCESS, PENDING_LOG_FILE_PATH, PENDING_FAILURE, "", message, "")
+	}
+	utils.Console(response)
 
-	utils.Console("Successfully send to CDS system from nav ---> ledger entry: ", RESPONSE_URL)
-	utils.Console(responseModel)
+	// utils.Console("Successfully send to CDS system from nav ---> ledger entry: ", RESPONSE_URL)
+	// utils.Console(responseModel)
 }

@@ -2,7 +2,6 @@ package invoice
 
 import (
 	"encoding/json"
-	"fmt"
 	"nav_sync/config"
 	"nav_sync/logger"
 	filesystem "nav_sync/mods/ahelpers/file_system"
@@ -11,6 +10,7 @@ import (
 	data_parser "nav_sync/mods/ahelpers/parser"
 	"nav_sync/mods/hashrecs"
 	"nav_sync/utils"
+	"strconv"
 )
 
 func Fetch() {
@@ -99,12 +99,13 @@ func Sync3() {
 
 		// for j := 0; j < len(invoices); j++ {
 		// 	// 250500001
-		// 	invoices[j].VendorInvoiceNo = 26959000 + j + 1
+		// 	invoices[j].VendorInvoiceNo = 96959000 + j + 1
 		// }
 
 		for j := 0; j < len(invoices); j++ {
 			if invoices[j].BuyFromVendorNo != nil {
-				key := fmt.Sprintf("%i", invoices[j].VendorInvoiceNo)
+				VendorInvoiceNoStr := strconv.Itoa(invoices[j].VendorInvoiceNo)
+				key := VendorInvoiceNoStr
 				refundId := invoices[j].RefundId
 				modelStr, _ := data_parser.ParseModelToString(invoices[j])
 				hash := hashrecs.Hash(modelStr)
