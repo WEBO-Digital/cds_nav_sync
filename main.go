@@ -29,16 +29,22 @@ func runcFunctionFromCommandArgument() {
 		vendor.Fetch()
 	case "vendor_sync":
 		vendor.Sync3()
+	case "vendor_resync":
+		vendor.ReSync()
 	case "invoice_fetch":
 		invoice.Fetch()
 	case "invoice_sync":
 		invoice.Sync3()
+	case "invoice_resync":
+		invoice.ReSync()
 	case "ledgerentries_fetch":
 		ledgerentries.Fetch()
 	case "ledgerentries_sync":
 		ledgerentries.Sync3()
+	case "ledgerentries_resync":
+		ledgerentries.ReSync()
 	default:
-		utils.Console("Invalid action. Available actions: invoice_fetch, invoice_sync, vendor_fetch, vendor_sync, ledgerentries_fetch, ledgerentries_sync")
+		utils.Console("Invalid action. Available actions: vendor_fetch, vendor_sync, vendor_resync, invoice_fetch, invoice_sync, invoice_resync, ledgerentries_fetch, ledgerentries_sync, ledgerentries_resync")
 		os.Exit(1)
 	}
 }
