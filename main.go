@@ -41,7 +41,7 @@ func RuncFunctionFromCommandArgument() {
 		invoice.Sync3()
 	case "invoice_resync":
 		invoice.ReSync()
-	case "ledgerentries_fetch":
+	case "ledger_entries_fetch":
 		ledgerentries.Fetch()
 	case "ledger_entries_sync":
 		ledgerentries.Sync3()
