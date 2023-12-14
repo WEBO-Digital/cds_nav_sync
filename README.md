@@ -1,3 +1,17 @@
+## Make .exe file
+go build -o nav_sync_test.exe
+
+## Run jobs by action
+nav_sync_test.exe -action vendor_fetch 
+nav_sync_test.exe -action vendor_sync
+nav_sync_test.exe -action vendor_resync
+nav_sync_test.exe -action invoice_fetch
+nav_sync_test.exe -action invoice_sync
+nav_sync_test.exe -action invoice_resync
+nav_sync_test.exe -action ledger_entries_fetch
+nav_sync_test.exe -action ledger_entries_sync
+nav_sync_test.exe -action ledger_entries_resync
+
 ## Directory structure
 
 data
