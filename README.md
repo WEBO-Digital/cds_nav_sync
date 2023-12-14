@@ -1,7 +1,10 @@
 ## Make .exe file
+```
 go build -o nav_sync_test.exe
+```
 
 ## Run jobs by action
+```
 nav_sync_test.exe -action vendor_fetch 
 nav_sync_test.exe -action vendor_sync
 nav_sync_test.exe -action vendor_resync
@@ -11,39 +14,69 @@ nav_sync_test.exe -action invoice_resync
 nav_sync_test.exe -action ledger_entries_fetch
 nav_sync_test.exe -action ledger_entries_sync
 nav_sync_test.exe -action ledger_entries_resync
+```
 
 
 ## Cron Job in NAV system
+```
+vendor_fetch
 "C:\Users\rojan.shrestha\Desktop\nav syncing test\crons\vendor_fetch_cron.bat"
+```
+```
+vendor_sync
 "C:\Users\rojan.shrestha\Desktop\nav syncing test\crons\vendor_sync_cron.bat"
+```
+```
+vendor_resync
 "C:\Users\rojan.shrestha\Desktop\nav syncing test\crons\vendor_resync_cron.bat"
+```
+```
+invoice_fetch
 "C:\Users\rojan.shrestha\Desktop\nav syncing test\crons\invoice_fetch_cron.bat"
+```
+```
+invoice_sync
 "C:\Users\rojan.shrestha\Desktop\nav syncing test\crons\invoice_sync_cron.bat"
+```
+```
+invoice_resync
 "C:\Users\rojan.shrestha\Desktop\nav syncing test\crons\invoice_resync_cron.bat"
+```
+```
+ledger_entries_fetch
 "C:\Users\rojan.shrestha\Desktop\nav syncing test\crons\ledger_entries_fetch_cron.bat"
+```
+```
+ledger_entries_sync
 "C:\Users\rojan.shrestha\Desktop\nav syncing test\crons\ledger_entries_sync_cron.bat"
+```
+```
+ledger_entries_resync
 "C:\Users\rojan.shrestha\Desktop\nav syncing test\crons\ledger_entries_resync_cron.bat"
+```
 
 
 ## Directory structure
-
+```
 data
  |_ vendor
    |_ pending
      |_ timestamp.json
    |_ done
      |_ timestamp.json
+```
 
-
-
-//How to sync data
+## How to sync data
+```
 pending
 --- vendoers.json
 
 done
 --- vendoers.json
+```
 
-
+## Hash Function Example
+```
 vendors
 {
     "CDS-ID": {
@@ -51,7 +84,10 @@ vendors
         "nav_id": "xdfjk"
     },
 }
+```
 
+## Algorithm to sync data
+```
 hash_records = {
     aaa: []
     bbb: []
@@ -83,3 +119,5 @@ loop: vendoers.json -> vender:
         /** @TODO: UPDATE THE VEDOR **/
     
     saveHashRecords(hash_records)
+
+```
