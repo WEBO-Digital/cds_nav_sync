@@ -12,6 +12,19 @@ nav_sync_test.exe -action ledger_entries_fetch
 nav_sync_test.exe -action ledger_entries_sync
 nav_sync_test.exe -action ledger_entries_resync
 
+
+## Cron Job in NAV system
+"C:\Users\rojan.shrestha\Desktop\nav syncing test\crons\vendor_fetch_cron.bat"
+"C:\Users\rojan.shrestha\Desktop\nav syncing test\crons\vendor_sync_cron.bat"
+"C:\Users\rojan.shrestha\Desktop\nav syncing test\crons\vendor_resync_cron.bat"
+"C:\Users\rojan.shrestha\Desktop\nav syncing test\crons\invoice_fetch_cron.bat"
+"C:\Users\rojan.shrestha\Desktop\nav syncing test\crons\invoice_sync_cron.bat"
+"C:\Users\rojan.shrestha\Desktop\nav syncing test\crons\invoice_resync_cron.bat"
+"C:\Users\rojan.shrestha\Desktop\nav syncing test\crons\ledger_entries_fetch_cron.bat"
+"C:\Users\rojan.shrestha\Desktop\nav syncing test\crons\ledger_entries_sync_cron.bat"
+"C:\Users\rojan.shrestha\Desktop\nav syncing test\crons\ledger_entries_resync_cron.bat"
+
+
 ## Directory structure
 
 data
