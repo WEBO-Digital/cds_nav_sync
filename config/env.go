@@ -16,10 +16,11 @@ type Configuration struct {
 }
 
 type UrlConfig struct {
-	Fetch FetchConfig `yaml:"fetch"`
-	Sync  SyncConfig  `yaml:"sync"`
-	Post  SyncConfig  `yaml:"post"`
-	Save  SyncConfig  `yaml:"save"`
+	Fetch      FetchConfig `yaml:"fetch"`
+	Sync       SyncConfig  `yaml:"sync"`
+	Post       SyncConfig  `yaml:"post"`
+	Save       SyncConfig  `yaml:"save"`
+	FakeInsert bool        `yaml:"fake_insert"`
 }
 
 type AuthConfig struct {

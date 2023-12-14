@@ -13,16 +13,21 @@ import (
 )
 
 func InsertToNav(vendor WSVendor) (bool, error, interface{}) {
-	var result interface{}
-
-	//Fake Insert To Nav
-	isFakeSuccess, err, result := manager.ApiFakeResponse("/ztest/", "vendor_fake.xml")
-	return isFakeSuccess, err, result
-
 	//Path
+	FAKE_INSERT := config.Config.Vendor.FakeInsert
 	NTLM_USERNAME := config.Config.Auth.Ntlm.Username
 	NTLM_PASSWORD := config.Config.Auth.Ntlm.Password
 	url := config.Config.Vendor.Sync.URL
+
+	//Result
+	var result interface{}
+
+	if FAKE_INSERT {
+		//Fake Insert To Nav
+		utils.Console("Fake Insert Vendor----------> ", FAKE_INSERT)
+		isFakeSuccess, err, result := manager.ApiFakeResponse("/ztest/", "vendor_fake.xml")
+		return isFakeSuccess, err, result
+	}
 
 	// Map Go struct to XML
 	xmlData, err := data_parser.ParseJsonToXml(vendor)

@@ -50,15 +50,21 @@ func UnmarshelPostInvoiceResponse(stringData interface{}) (PostResponseInvoiceEn
 }
 
 func InsertToNav(invoice WSPurchaseInvoicePage) (bool, error, interface{}) {
-	var result interface{}
-
-	//Fake Insert To Nav
-	isFakeSuccess, err, result := manager.ApiFakeResponse("/ztest/", "invoice_insert_fake.xml")
-	return isFakeSuccess, err, result
-
+	//Path
+	FAKE_INSERT := config.Config.Invoice.FakeInsert
 	NTLM_USERNAME := config.Config.Auth.Ntlm.Username
 	NTLM_PASSWORD := config.Config.Auth.Ntlm.Password
 	url := config.Config.Invoice.Sync.URL
+
+	//Result
+	var result interface{}
+
+	if FAKE_INSERT {
+		//Fake Insert To Nav
+		utils.Console("Fake Insert Invoice----------> ", FAKE_INSERT)
+		isFakeSuccess, err, result := manager.ApiFakeResponse("/ztest/", "invoice_insert_fake.xml")
+		return isFakeSuccess, err, result
+	}
 
 	// Map Go struct to XML
 	xmlData, err := data_parser.ParseJsonToXml(invoice)
@@ -115,15 +121,21 @@ func InsertToNav(invoice WSPurchaseInvoicePage) (bool, error, interface{}) {
 }
 
 func PostToNavAfterInsert(envelope PostInvoiceEnvelope) (bool, error, interface{}) {
-	var result interface{}
-
-	//Fake Post To Nav
-	isFakeSuccess, err, result := manager.ApiFakeResponse("/ztest/", "invoice_post_fake.xml")
-	return isFakeSuccess, err, result
-
+	//Path
+	FAKE_INSERT := config.Config.Invoice.FakeInsert
 	NTLM_USERNAME := config.Config.Auth.Ntlm.Username
 	NTLM_PASSWORD := config.Config.Auth.Ntlm.Password
 	url := config.Config.Invoice.Post.URL
+
+	//Result
+	var result interface{}
+
+	if FAKE_INSERT {
+		//Fake Post To Nav
+		utils.Console("Fake Insert After Post Invoice----------> ", FAKE_INSERT)
+		isFakeSuccess, err, result := manager.ApiFakeResponse("/ztest/", "invoice_post_fake.xml")
+		return isFakeSuccess, err, result
+	}
 
 	isSuccess := false
 	// Map Go struct to XML
@@ -151,7 +163,7 @@ func PostToNavAfterInsert(envelope PostInvoiceEnvelope) (bool, error, interface{
 	utils.Console("URL: ", url)
 
 	//Sync to Nav
-	result, err = manager.Sync(url, navapi.POST, xmlPayload, NTLM_USERNAME, NTLM_PASSWORD)
+	result, err := manager.Sync(url, navapi.POST, xmlPayload, NTLM_USERNAME, NTLM_PASSWORD)
 	if err != nil {
 		// The type assertion failed
 		message := fmt.Sprintf("Failed:Sync:5 Could not convert to string: ", result)
