@@ -1,0 +1,48 @@
+<Soap:Envelope
+	xmlns:Soap="http://schemas.xmlsoap.org/soap/envelope/">
+	<Soap:Body>
+		<Create_Result
+			xmlns="urn:microsoft-dynamics-schemas/page/wsvendor">
+			<WSVendor>
+				<Key>24;FwAAAAJ7/1YAMwA4ADYAMQAw9;3987211330;</Key>
+				<No>V38610</No>
+				<Name>Intuji vendor - F5</Name>
+				<Address>Western Aus</Address>
+				<Address_2>Perth</Address_2>
+				<Post_Code>6001</Post_Code>
+				<City>Cityville</City>
+				<County>Countyshire</County>
+				<Country_Region_Code>AU</Country_Region_Code>
+				<Phone_No>0491570156</Phone_No>
+				<Primary_Contact_No>CN040850</Primary_Contact_No>
+				<Contact>John Doe</Contact>
+				<Search_Name>INTUJI VENDOR - F5</Search_Name>
+				<Balance_LCY>0</Balance_LCY>
+				<Post_Dated_Checks_LCY>0</Post_Dated_Checks_LCY>
+				<_Balance_LCY_ABS_Post_Dated_Checks_LCY>0</_Balance_LCY_ABS_Post_Dated_Checks_LCY>
+				<Blocked>_blank_</Blocked>
+				<Last_Date_Modified>2023-12-13</Last_Date_Modified>
+				<Weighbridge_Supplier_ID>C005</Weighbridge_Supplier_ID>
+				<Fax_No>0491570156</Fax_No>
+				<E_Mail>intuji@gmail.com</E_Mail>
+				<Gen_Bus_Posting_Group>SPL</Gen_Bus_Posting_Group>
+				<VAT_Bus_Posting_Group>LOCAL</VAT_Bus_Posting_Group>
+				<Vendor_Posting_Group>DOMESTIC</Vendor_Posting_Group>
+				<Invoice_Disc_Code>V38610</Invoice_Disc_Code>
+				<Prices_Including_VAT>false</Prices_Including_VAT>
+				<Prepayment_Percent>0</Prepayment_Percent>
+				<Application_Method>Manual</Application_Method>
+				<Partner_Type>_blank_</Partner_Type>
+				<Priority>0</Priority>
+				<Block_Payment_Tolerance>false</Block_Payment_Tolerance>
+				<EFT_Payment>false</EFT_Payment>
+				<Customized_Calendar>No</Customized_Calendar>
+				<ABN_Division_Part_No>XY1</ABN_Division_Part_No>
+				<Registered>false</Registered>
+				<Foreign_Vend>false</Foreign_Vend>
+				<Send_To_Concur>false</Send_To_Concur>
+				<Concur_Invoice_Last_Updated>0001-01-01T00:00:00</Concur_Invoice_Last_Updated>
+			</WSVendor>
+		</Create_Result>
+	</Soap:Body>
+</Soap:Envelope>

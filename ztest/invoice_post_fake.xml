@@ -1,0 +1,9 @@
+<Soap:Envelope
+	xmlns:Soap="http://schemas.xmlsoap.org/soap/envelope/">
+	<Soap:Body>
+		<PostPurchaseInvoice_Result
+			xmlns="urn:microsoft-dynamics-schemas/codeunit/WSPurchaseInvoice">
+			<return_value>PI541878</return_value>
+		</PostPurchaseInvoice_Result>
+	</Soap:Body>
+</Soap:Envelope>

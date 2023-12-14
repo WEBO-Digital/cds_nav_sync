@@ -13,10 +13,14 @@ import (
 func main() {
 	//Load yaml config
 	config.LoadYamlFile()
-	runcFunctionFromCommandArgument()
+	RuncFunctionFromCommandArgument()
+	//cmdrun.RuncFunctionFromCommandArgument()
+
+	//Specify scheduler runner
+	//cronjob.RunCron(1, 1, "vendor_fetch")
 }
 
-func runcFunctionFromCommandArgument() {
+func RuncFunctionFromCommandArgument() {
 	//Define a command-line flag named "action" with a default value of "defaultAction"
 	action := flag.String("action", "defaultAction", "Specify the action to perform")
 
@@ -39,12 +43,12 @@ func runcFunctionFromCommandArgument() {
 		invoice.ReSync()
 	case "ledgerentries_fetch":
 		ledgerentries.Fetch()
-	case "ledgerentries_sync":
+	case "ledger_entries_sync":
 		ledgerentries.Sync3()
-	case "ledgerentries_resync":
+	case "ledger_entries_resync":
 		ledgerentries.ReSync()
 	default:
-		utils.Console("Invalid action. Available actions: vendor_fetch, vendor_sync, vendor_resync, invoice_fetch, invoice_sync, invoice_resync, ledgerentries_fetch, ledgerentries_sync, ledgerentries_resync")
+		utils.Console("Invalid action. Available actions: vendor_fetch, vendor_sync, vendor_resync, invoice_fetch, invoice_sync, invoice_resync, ledger_entries_fetch, ledger_entries_sync, ledger_entries_resync")
 		os.Exit(1)
 	}
 }

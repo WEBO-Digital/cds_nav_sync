@@ -31,11 +31,16 @@ func UnmarshelCreateLedgerEntryResponse(stringData interface{}) (PostLedgerEntri
 }
 
 func InsertToNav(ledgerentrie LedgerEntriesCreate) (bool, error, interface{}) {
+	var result interface{}
+
+	//Fake Post To Nav
+	isFakeSuccess, err, result := manager.ApiFakeResponse("/ztest/", "ledger_entries_insert_fake.xml")
+	return isFakeSuccess, err, result
+
 	NTLM_USERNAME := config.Config.Auth.Ntlm.Username
 	NTLM_PASSWORD := config.Config.Auth.Ntlm.Password
 	url := config.Config.LedgerEntries.Sync.URL
 
-	var result interface{}
 	// Map Go struct to XML
 	xmlData, err := data_parser.ParseJsonToXml(ledgerentrie.VendorPayment)
 	if err != nil {
@@ -93,11 +98,16 @@ func InsertToNav(ledgerentrie LedgerEntriesCreate) (bool, error, interface{}) {
 }
 
 func PostLedgerEntriesAfterCreation(envelope PostLedgerEntriesEnvelope) (bool, error, interface{}) {
+	var result interface{}
+
+	//Fake Post To Nav
+	isFakeSuccess, err, result := manager.ApiFakeResponse("/ztest/", "ledger_entries_post_fake.xml")
+	return isFakeSuccess, err, result
+
 	NTLM_USERNAME := config.Config.Auth.Ntlm.Username
 	NTLM_PASSWORD := config.Config.Auth.Ntlm.Password
 	url := config.Config.LedgerEntries.Post.URL
 
-	var result interface{}
 	isSuccess := false
 	//Add XML envelope and body elements
 	xmlPayload := fmt.Sprintf(
@@ -120,7 +130,7 @@ func PostLedgerEntriesAfterCreation(envelope PostLedgerEntriesEnvelope) (bool, e
 	utils.Console("URL: ", url)
 
 	//Sync to Nav
-	result, err := manager.Sync(url, navapi.POST, xmlPayload, NTLM_USERNAME, NTLM_PASSWORD)
+	result, err = manager.Sync(url, navapi.POST, xmlPayload, NTLM_USERNAME, NTLM_PASSWORD)
 	if err != nil {
 		// The type assertion failed
 		message := fmt.Sprintf("Failed:Sync:5 Could not convert to string: ", result)

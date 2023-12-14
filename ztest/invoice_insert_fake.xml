@@ -1,0 +1,103 @@
+<Soap:Envelope
+	xmlns:Soap="http://schemas.xmlsoap.org/soap/envelope/">
+	<Soap:Body>
+		<Create_Result
+			xmlns="urn:microsoft-dynamics-schemas/page/wspurchaseinvoicepage">
+			<WSPurchaseInvoicePage>
+				<Key>44;JgAAAACLAgAAAAJ7/1AASQBOAFYANAA2ADYAMAA4ADA=9;3987211561;10;PurchLines1;52;JwAAAACLAgAAAAJ7/1AASQBOAFYANAA2ADYAMAA4ADAAAAAAhxAn9;3987211580;</Key>
+				<No>PINV466080</No>
+				<Buy_from_Vendor_No>V38610</Buy_from_Vendor_No>
+				<Buy_from_Contact_No>CN040850</Buy_from_Contact_No>
+				<Buy_from_Vendor_Name>Jack Simpson Fuel Supplies Pty Ltd</Buy_from_Vendor_Name>
+				<Buy_from_Address>Western Aus</Buy_from_Address>
+				<Buy_from_Address_2>Perth</Buy_from_Address_2>
+				<Buy_from_Post_Code>6001</Buy_from_Post_Code>
+				<Buy_from_City>OAKVILLE</Buy_from_City>
+				<Buy_from_County>Countyshire</Buy_from_County>
+				<Buy_from_Country_Region_Code>AU</Buy_from_Country_Region_Code>
+				<Buy_from_Contact>John Doe</Buy_from_Contact>
+				<Posting_Date>2023-12-11</Posting_Date>
+				<Document_Date>2023-12-11</Document_Date>
+				<Incoming_Document_Entry_No>0</Incoming_Document_Entry_No>
+				<Vendor_Invoice_No>DIPAK</Vendor_Invoice_No>
+				<Assigned_User_ID>SELLPARKER\ROJAN.SHRESTHA</Assigned_User_ID>
+				<Job_Queue_Status>_blank_</Job_Queue_Status>
+				<Status>Open</Status>
+				<Xaana_Transaction>false</Xaana_Transaction>
+				<Pay_to_Vendor_No>V38610</Pay_to_Vendor_No>
+				<Pay_to_Contact_No>CN040850</Pay_to_Contact_No>
+				<Pay_to_Name>Jack Simpson Fuel Supplies Pty Ltd</Pay_to_Name>
+				<Pay_to_Address>Western Aus</Pay_to_Address>
+				<Pay_to_Address_2>Perth</Pay_to_Address_2>
+				<Pay_to_Post_Code>6001</Pay_to_Post_Code>
+				<Pay_to_City>OAKVILLE</Pay_to_City>
+				<Pay_to_County>Countyshire</Pay_to_County>
+				<Pay_to_Country_Region_Code>AU</Pay_to_Country_Region_Code>
+				<Pay_to_Contact>John Doe</Pay_to_Contact>
+				<Vendor_Exchange_Rate_ACY>0</Vendor_Exchange_Rate_ACY>
+				<Payment_Terms_Code>7D</Payment_Terms_Code>
+				<Due_Date>2023-12-07</Due_Date>
+				<Payment_Discount_Percent>0</Payment_Discount_Percent>
+				<Pmt_Discount_Date>2023-12-18</Pmt_Discount_Date>
+				<Prices_Including_VAT>false</Prices_Including_VAT>
+				<VAT_Bus_Posting_Group>LOCAL</VAT_Bus_Posting_Group>
+				<Invoice_Received_Date>0001-01-01</Invoice_Received_Date>
+				<Ship_to_Name>Waterloo</Ship_to_Name>
+				<Ship_to_Address>15 Amelia Street</Ship_to_Address>
+				<Ship_to_Post_Code>2017</Ship_to_Post_Code>
+				<Ship_to_City>WATERLOO</Ship_to_City>
+				<Ship_to_County>NSW</Ship_to_County>
+				<Location_Code>WL</Location_Code>
+				<Expected_Receipt_Date>2023-12-07</Expected_Receipt_Date>
+				<Applies_to_Doc_Type>_blank_</Applies_to_Doc_Type>
+				<PurchLines>
+					<Purch_Invoice_Line>
+						<Key>52;JwAAAACLAgAAAAJ7/1AASQBOAFYANAA2ADYAMAA4ADAAAAAAhxAn9;3987211580;</Key>
+						<Type>G_L_Account</Type>
+						<No>2353</No>
+						<Gen_Prod_Posting_Group>OTH CDS</Gen_Prod_Posting_Group>
+						<FA_Posting_Type>_blank_</FA_Posting_Type>
+						<Gen_Bus_Posting_Group>SPL</Gen_Bus_Posting_Group>
+						<IC_Partner_Ref_Type>_blank_</IC_Partner_Ref_Type>
+						<Nonstock>false</Nonstock>
+						<VAT_Prod_Posting_Group>GST-10</VAT_Prod_Posting_Group>
+						<Description>CDS Receivables</Description>
+						<Apportion_Method>_blank_</Apportion_Method>
+						<Location_Code>WL</Location_Code>
+						<Quantity>7</Quantity>
+						<Direct_Unit_Cost>11</Direct_Unit_Cost>
+						<Indirect_Cost_Percent>0</Indirect_Cost_Percent>
+						<Unit_Cost_LCY>11</Unit_Cost_LCY>
+						<Unit_Price_LCY>0</Unit_Price_LCY>
+						<Line_Amount>77</Line_Amount>
+						<WHT_Absorb_Base>0</WHT_Absorb_Base>
+						<Line_Discount_Percent>0</Line_Discount_Percent>
+						<Line_Discount_Amount>0</Line_Discount_Amount>
+						<Allow_Invoice_Disc>false</Allow_Invoice_Disc>
+						<Inv_Discount_Amount>0</Inv_Discount_Amount>
+						<Allow_Item_Charge_Assignment>false</Allow_Item_Charge_Assignment>
+						<Qty_to_Assign>0</Qty_to_Assign>
+						<Qty_Assigned>0</Qty_Assigned>
+						<Job_Line_Type>_blank_</Job_Line_Type>
+						<Job_Unit_Price>0</Job_Unit_Price>
+						<Job_Line_Amount>0</Job_Line_Amount>
+						<Job_Line_Discount_Amount>0</Job_Line_Discount_Amount>
+						<Job_Line_Discount_Percent>0</Job_Line_Discount_Percent>
+						<Job_Total_Price>0</Job_Total_Price>
+						<Job_Unit_Price_LCY>0</Job_Unit_Price_LCY>
+						<Job_Total_Price_LCY>0</Job_Total_Price_LCY>
+						<Job_Line_Amount_LCY>0</Job_Line_Amount_LCY>
+						<Job_Line_Disc_Amount_LCY>0</Job_Line_Disc_Amount_LCY>
+						<Blanket_Order_Line_No>0</Blanket_Order_Line_No>
+						<Depr_until_FA_Posting_Date>false</Depr_until_FA_Posting_Date>
+						<Depr_Acquisition_Cost>false</Depr_Acquisition_Cost>
+						<Use_Duplication_List>false</Use_Duplication_List>
+						<Appl_to_Item_Entry>0</Appl_to_Item_Entry>
+						<Shortcut_Dimension_1_Code>CDS</Shortcut_Dimension_1_Code>
+						<Shortcut_Dimension_2_Code>DW</Shortcut_Dimension_2_Code>
+					</Purch_Invoice_Line>
+				</PurchLines>
+			</WSPurchaseInvoicePage>
+		</Create_Result>
+	</Soap:Body>
+</Soap:Envelope>

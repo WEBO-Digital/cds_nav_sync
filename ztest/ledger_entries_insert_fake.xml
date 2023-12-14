@@ -1,0 +1,46 @@
+<Soap:Envelope
+	xmlns:Soap="http://schemas.xmlsoap.org/soap/envelope/">
+	<Soap:Body>
+		<Create_Result
+			xmlns="urn:microsoft-dynamics-schemas/page/vendorpayment">
+			<VendorPayment>
+				<Key>64;UQAAAAJ7/1AAQQBZAE0ARQBOAFQAUwAAAAJ7/0QARQBGAEEAVQBMAFQAAAAAh2Dq9;3987212030;</Key>
+				<Posting_Date>2023-12-12</Posting_Date>
+				<Document_Date>2023-12-12</Document_Date>
+				<Document_Type>Payment</Document_Type>
+				<Document_No>12</Document_No>
+				<Incoming_Document_Entry_No>0</Incoming_Document_Entry_No>
+				<Applies_to_Ext_Doc_No>DIPAK</Applies_to_Ext_Doc_No>
+				<Account_Type>Vendor</Account_Type>
+				<Account_No>V38610</Account_No>
+				<Description>Intuji vendor - F5</Description>
+				<Gen_Posting_Type>_blank_</Gen_Posting_Type>
+				<WHT_Payment>false</WHT_Payment>
+				<Skip_WHT>false</Skip_WHT>
+				<Amount>650</Amount>
+				<Amount_LCY>650</Amount_LCY>
+				<Debit_Amount>650</Debit_Amount>
+				<Credit_Amount>0</Credit_Amount>
+				<VAT_Amount>0</VAT_Amount>
+				<VAT_Difference>0</VAT_Difference>
+				<Vendor_Exchange_Rate_ACY>0</Vendor_Exchange_Rate_ACY>
+				<Bal_VAT_Amount>0</Bal_VAT_Amount>
+				<Bal_VAT_Difference>0</Bal_VAT_Difference>
+				<Bal_Account_Type>Bank_Account</Bal_Account_Type>
+				<Bal_Account_No>B01</Bal_Account_No>
+				<Bal_Gen_Posting_Type>_blank_</Bal_Gen_Posting_Type>
+				<Applied_Yes_No>true</Applied_Yes_No>
+				<Applies_to_Doc_Type>Invoice</Applies_to_Doc_Type>
+				<Applies_to_Doc_No>PI541878</Applies_to_Doc_No>
+				<GetAppliesToDocDueDate>2023-12-07</GetAppliesToDocDueDate>
+				<Bank_Payment_Type>_blank_</Bank_Payment_Type>
+				<Check_Printed>false</Check_Printed>
+				<OverdueWarningText>This posting date will cause an overdue payment.</OverdueWarningText>
+				<AccName>Intuji vendor - F5</AccName>
+				<BalAccName>Westpac Alexandria</BalAccName>
+				<Balance>0</Balance>
+				<TotalBalance>0</TotalBalance>
+			</VendorPayment>
+		</Create_Result>
+	</Soap:Body>
+</Soap:Envelope>

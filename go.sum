@@ -1,5 +1,7 @@
 github.com/azure/go-ntlmssp v0.0.0-20221128193559-754e69321358 h1:gGJIrCOpqKypxIlLTtUB7uZXRQGW91Wtkxilude6iXk=
 github.com/azure/go-ntlmssp v0.0.0-20221128193559-754e69321358/go.mod h1:toUGNZ684EkajYM3ZcTGgYR1X7csF2Qh2duf4JnJ4vU=
+github.com/robfig/cron v1.2.0 h1:ZjScXvvxeQ63Dbyxy76Fj3AT3Ut0aKsyd2/tl3DTMuQ=
+github.com/robfig/cron v1.2.0/go.mod h1:JGuDeoQd7Z6yL4zQhZ3OPEVHB7fL6Ka6skscFHfmt2k=
 golang.org/x/crypto v0.15.0 h1:frVn1TEaCEaZcn3Tmd7Y2b5KKPaZ+I32Q2OA3kYp5TA=
 golang.org/x/crypto v0.15.0/go.mod h1:4ChreQoLWfG3xLDer1WdlH5NdlQ3+mwnQq1YTKY+72g=
 golang.org/x/crypto v0.16.0 h1:mMMrFzRSCF0GvB7Ne27XVtVAaXLrPmgPC7/v0tkwHaY=

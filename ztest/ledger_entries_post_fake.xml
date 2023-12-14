@@ -1,0 +1,9 @@
+<Soap:Envelope
+	xmlns:Soap="http://schemas.xmlsoap.org/soap/envelope/">
+	<Soap:Body>
+		<PostGenJNlLine_Result
+			xmlns="urn:microsoft-dynamics-schemas/codeunit/WSPurchaseInvoice">
+			<return_value>Success</return_value>
+		</PostGenJNlLine_Result>
+	</Soap:Body>
+</Soap:Envelope>

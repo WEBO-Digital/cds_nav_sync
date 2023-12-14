@@ -3,6 +3,7 @@ package manager
 import (
 	"errors"
 	"fmt"
+	filesystem "nav_sync/mods/ahelpers/file_system"
 	navapi "nav_sync/mods/ahelpers/nav_api"
 	normalapi "nav_sync/mods/ahelpers/normal_api"
 	"nav_sync/utils"
@@ -35,4 +36,14 @@ func Sync(url string, method navapi.NavMethod, xmlPayload string, user string, p
 		err := fmt.Sprintf("%s%s", "Invalid method found: ", method)
 		return nil, errors.New(err)
 	}
+}
+
+func ApiFakeResponse(filePath string, fileName string) (bool, error, interface{}) {
+	var result interface{}
+	fakeByte, err := filesystem.ReadFile(filePath, fileName)
+	if err != nil {
+		return false, nil, result
+	}
+	result = string(fakeByte)
+	return true, nil, result
 }
