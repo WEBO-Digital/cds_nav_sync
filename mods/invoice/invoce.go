@@ -56,8 +56,7 @@ func Sync3() {
 	DONE_SUCCESS := utils.INVOICE_DONE_SUCCESS
 	HASH_FILE_PATH := utils.INVOICE_HASH_FILE_PATH
 	HASH_DB := utils.INVOICE_HASH_DB
-	FAKE_PREFIX := config.Config.Invoice.FakePrefix
-	FAKE_INSERT := config.Config.Invoice.FakeInsert
+	PREFIX := config.Config.Invoice.Prefix
 
 	//Get All the vendor pending data
 	fileNames, err := filesystem.GetAllFiles(PENDING_FILE_PATH)
@@ -98,11 +97,9 @@ func Sync3() {
 			logger.LogNavState(logger.SUCCESS, DONE_LOG_FILE_PATH, DONE_FAILURE, fileNames[i], message, jsonString)
 		}
 
-		if FAKE_INSERT {
-			for j := 0; j < len(invoices); j++ {
-				// 250500001
-				invoices[j].VendorInvoiceNo = FAKE_PREFIX + invoices[j].VendorInvoiceNo
-			}
+		for j := 0; j < len(invoices); j++ {
+			// 250500001
+			invoices[j].VendorInvoiceNo = PREFIX + invoices[j].VendorInvoiceNo
 		}
 
 		for j := 0; j < len(invoices); j++ {

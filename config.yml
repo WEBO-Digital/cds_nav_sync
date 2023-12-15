@@ -8,7 +8,7 @@ vendor:
     url:  https://cds-customers.webo.dev/api/v1/nav/vendor
     apikey: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwidXNlcl9pZCI6NX0.zl22NTtVYsoFBq7wMASpeLJY7DttcSevVhXjfaMGOpc
   fake_insert: true
-  fake_prefix: "DEV"
+  prefix: "DEV"
 
 invoice:
   fetch:
@@ -22,7 +22,7 @@ invoice:
     url: https://cds-tickets.webo.dev/api/v1/nav/refund
     apikey: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwidXNlcl9pZCI6NX0.zl22NTtVYsoFBq7wMASpeLJY7DttcSevVhXjfaMGOpc
   fake_insert: true
-  fake_prefix: "DEV"
+  prefix: "DEV"
 
 ledger_entries:
   fetch:
@@ -36,7 +36,7 @@ ledger_entries:
     url: https://cds-payments.webo.dev/api/v1/nav/payments
     apikey: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwidXNlcl9pZCI6NX0.zl22NTtVYsoFBq7wMASpeLJY7DttcSevVhXjfaMGOpc
   fake_insert: true
-  fake_prefix: "DEV"
+  prefix: "DEV"
 
 auth:
   ntlm:
