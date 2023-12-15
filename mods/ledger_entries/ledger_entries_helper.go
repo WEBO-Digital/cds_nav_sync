@@ -75,7 +75,6 @@ func InsertToNav(ledgerentrie LedgerEntriesCreate) (bool, error, interface{}) {
 		message := "Failed:Sync:4 " + err.Error()
 		return isSuccess, errors.New(message), result
 	} else {
-		utils.Console(result)
 		resultStr, ok := result.(string)
 		if !ok {
 			// The type assertion failed
@@ -134,7 +133,6 @@ func PostLedgerEntriesAfterCreation(envelope PostLedgerEntriesEnvelope) (bool, e
 		message := fmt.Sprintf("Failed:Sync:5 Could not convert to string: ", result)
 		return isSuccess, errors.New(message), result
 	} else {
-		utils.Console(result)
 		resultPostStr, ok := result.(string)
 		if !ok {
 			// The type assertion failed

@@ -3,7 +3,6 @@ package navapi
 import (
 	"bytes"
 	"io/ioutil"
-	"nav_sync/utils"
 	"net/http"
 
 	"github.com/azure/go-ntlmssp"
@@ -18,7 +17,6 @@ func Post(url string, xmlPayload string, user string, password string) (interfac
 	}
 
 	//Create the payload
-	utils.Console(xmlPayload)
 	payload := bytes.NewBuffer([]byte(xmlPayload))
 	req, err := http.NewRequest(http.MethodPost, url, payload)
 	if err != nil {
