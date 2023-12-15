@@ -3,27 +3,23 @@ package hashrecs
 import (
 	"encoding/hex"
 	"encoding/json"
+	"golang.org/x/crypto/sha3"
 	"io/ioutil"
+
 	filesystem "nav_sync/mods/ahelpers/file_system"
 	data_parser "nav_sync/mods/ahelpers/parser"
-	"nav_sync/utils"
-
-	"golang.org/x/crypto/sha3"
 )
 
 func (hashrecs *HashRecs) Load() {
 	// Get the current working directory
 	currentDir, _ := filesystem.GetCurrentWorkingDirectory()
 	filepath := currentDir + hashrecs.FilePath + hashrecs.Name + ".json"
-	utils.Console("filepath----------------------> ", filepath)
 	jsonBytes, err := ioutil.ReadFile(filepath)
 	if err != nil {
-		utils.Console("hashrecs----------------------> ", err.Error())
 		hashrecs.Recs = map[string]HashRec{}
 	} else {
 		json.Unmarshal(jsonBytes, &hashrecs.Recs)
 	}
-	utils.Console("hashrecs----------------------> ", hashrecs.Recs)
 }
 
 func (hashrecs *HashRecs) Set(key string, rec HashRec) {

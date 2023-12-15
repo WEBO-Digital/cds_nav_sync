@@ -24,7 +24,6 @@ func InsertToNav(vendor WSVendor) (bool, error, interface{}) {
 
 	if FAKE_INSERT {
 		//Fake Insert To Nav
-		utils.Console("Fake Insert Vendor----------> ", FAKE_INSERT)
 		isFakeSuccess, err, result := manager.ApiFakeResponse("/ztest/", "vendor_fake.xml")
 		return isFakeSuccess, err, result
 	}

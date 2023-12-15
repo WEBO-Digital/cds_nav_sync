@@ -4,7 +4,7 @@ package utils
 
 // 1. Vendor
 const VENDOR_PENDING_FILE_PATH = "/data/vendor/pending/"
-const VENDOR_DONE_FILE_PATH = "/data/vendor/done/"
+const VENDOR_DONE_FILE_PATH = "/data/vendor/processed/"
 const VENDOR_LOG_PATH = "/data/vendor/logs/"
 
 // c. Hash

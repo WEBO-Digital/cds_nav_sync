@@ -12,6 +12,7 @@ import (
 	data_parser "nav_sync/mods/ahelpers/parser"
 	hashrecs "nav_sync/mods/hashrecs"
 	"nav_sync/utils"
+	"strings"
 )
 
 func Fetch() {
@@ -64,7 +65,7 @@ func Sync3() {
 	utils.Console("Start sending vendors to NAV")
 
 	timestamp := utils.GetCurrentTime()
-	logFileGeneral := "sync-pre-" + timestamp + ".json"
+	logFileGeneral := "sync-pre-" + timestamp + ".log"
 
 	//Get All the vendor pending data
 	fileNames, err := filesystem.GetAllFiles(PENDING_FILE_PATH)
@@ -79,7 +80,7 @@ func Sync3() {
 	if fileNames == nil || len(fileNames) < 1 {
 		message := "No pending files found"
 		utils.Console(message)
-		logger.AddToLog(VENDOR_LOG_PATH, logFileGeneral, logger.SUCCESS, message, "")
+		logger.AddToLog(VENDOR_LOG_PATH, logFileGeneral, logger.SUCCESS, "Skipped", message)
 		return
 	}
 
@@ -98,8 +99,8 @@ func Sync3() {
 		//Get Json data from the file
 		fileName := fileNames[i]
 		jsonData, err := filesystem.ReadFile(PENDING_FILE_PATH, fileName)
-		jsonString := string(jsonData)
-		logFileName := "sync-" + fileName + ".log"
+		// jsonString := string(jsonData)
+		logFileName := "sync-" + strings.Replace(fileName, ".json", "", 1) + ".log"
 
 		// Unmarshal JSON to struct
 		var vendors []WSVendor
@@ -107,7 +108,8 @@ func Sync3() {
 		if err := json.Unmarshal([]byte(jsonData), &vendors); err != nil {
 			message := "Failed[2]: error unmarshaling JSON -> " + err.Error()
 			utils.Console(message)
-			logger.AddToLog(VENDOR_LOG_PATH, logFileName, logger.FAILURE, message, jsonString)
+			logger.AddToLog(VENDOR_LOG_PATH, logFileName, logger.FAILURE, message, DONE_FILE_PATH+fileName)
+			return
 		}
 
 		for j := 0; j < len(vendors); j++ {
@@ -158,7 +160,7 @@ func Sync3() {
 					//Add successed to an array
 					responseModel = append(responseModel, BackToCDSVendorResponse{
 						VendorNo:              parseModel.Body.CreateResult.WSVendor.No,
-						WeighbridgeSupplierID: parseModel.Body.CreateResult.WSVendor.WeighbridgeSupplierID,
+						WeighbridgeSupplierID: key,
 					})
 				}
 			}
@@ -216,8 +218,8 @@ func ReSync() {
 	var responseModel []BackToCDSVendorResponse
 	for key, value := range hashModels.Recs {
 		responseModel = append(responseModel, BackToCDSVendorResponse{
-			VendorNo:              key,
-			WeighbridgeSupplierID: value.NavID,
+			VendorNo:              value.NavID,
+			WeighbridgeSupplierID: key,
 		})
 	}
 
@@ -232,14 +234,12 @@ func sendToCDS(responseModel []BackToCDSVendorResponse) {
 	TOKEN_KEY := config.Config.Vendor.Fetch.APIKey
 
 	//Save Response vendor data to CDS
-	response, err := manager.Fetch(RESPONSE_URL, normalapi.POST, TOKEN_KEY, responseModel)
+	_, err := manager.Fetch(RESPONSE_URL, normalapi.POST, TOKEN_KEY, responseModel)
+
 	if err != nil {
-		message := "Failed:sendToCDS:Fetch:1 " + err.Error()
+		message := "Failed:sendToCDS " + err.Error()
 		utils.Console(message)
 		//logger.LogNavState(logger.SUCCESS, PENDING_LOG_FILE_PATH, PENDING_FAILURE, "", message, "")
-	}
-	if response != nil {
-		utils.Console(response)
 	}
 
 	// utils.Console("Successfully send to CDS system from nav ---> vendor: ", RESPONSE_URL)
