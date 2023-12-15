@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
-	"log"
+	"nav_sync/utils"
 	"os"
 	"path/filepath"
 )
@@ -53,7 +53,7 @@ func ReadFile(path string, fileName string) ([]byte, error) {
 	// Read your JSON data from a file
 	jsonData, err := ioutil.ReadFile(filePath)
 	if err != nil {
-		log.Fatal("Error reading JSON data:", err)
+		utils.Console("Error reading JSON data:", err)
 	}
 	return jsonData, nil
 }

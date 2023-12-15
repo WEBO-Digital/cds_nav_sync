@@ -12,17 +12,9 @@ const VENDOR_HASH_FILE_PATH = "/data/vendor/hashrecs/"
 const VENDOR_HASH_DB = "vendor.hash"
 
 // 2. Invoice
-// a. Pending
 const INVOICE_PENDING_FILE_PATH = "/data/invoice/pending/"
-const INVOICE_PENDING_LOG_FILE_PATH = "/data/alogs/invoice/pending/"
-const INVOICE_PENDING_FAILURE = "pending.failure.log"
-const INVOICE_PENDING_SUCCESS = "pending.success.log"
-
-// b. Done
-const INVOICE_DONE_FILE_PATH = "/data/invoice/done/"
-const INVOICE_DONE_LOG_FILE_PATH = "/data/alogs/invoice/done/"
-const INVOICE_DONE_FAILURE = "done.failure.log"
-const INVOICE_DONE_SUCCESS = "done.success.log"
+const INVOICE_DONE_FILE_PATH = "/data/invoice/processed/"
+const INVOICE_LOG_PATH = "/data/invoice/logs/"
 
 // c. Hash
 const INVOICE_HASH_FILE_PATH = "/data/invoice/hashrecs/"

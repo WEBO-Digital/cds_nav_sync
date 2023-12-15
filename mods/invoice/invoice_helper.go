@@ -61,7 +61,6 @@ func InsertToNav(invoice WSPurchaseInvoicePage) (bool, error, interface{}) {
 
 	if FAKE_INSERT {
 		//Fake Insert To Nav
-		utils.Console("Fake Insert Invoice----------> ", FAKE_INSERT)
 		isFakeSuccess, err, result := manager.ApiFakeResponse("/ztest/", "invoice_insert_fake.xml")
 		return isFakeSuccess, err, result
 	}
@@ -132,7 +131,6 @@ func PostToNavAfterInsert(envelope PostInvoiceEnvelope) (bool, error, interface{
 
 	if FAKE_INSERT {
 		//Fake Post To Nav
-		utils.Console("Fake Insert After Post Invoice----------> ", FAKE_INSERT)
 		isFakeSuccess, err, result := manager.ApiFakeResponse("/ztest/", "invoice_post_fake.xml")
 		return isFakeSuccess, err, result
 	}

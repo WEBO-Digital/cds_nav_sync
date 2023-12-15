@@ -20,7 +20,7 @@ func Fetch() {
 	FETCH_URL := config.Config.Vendor.Fetch.URL
 	TOKEN_KEY := config.Config.Vendor.Fetch.APIKey
 	PENDING_FILE_PATH := utils.VENDOR_PENDING_FILE_PATH
-	VENDOR_LOG_PATH := utils.VENDOR_LOG_PATH
+	LOG_PATH := utils.VENDOR_LOG_PATH
 
 	utils.Console("Start fetching vendors")
 
@@ -34,7 +34,7 @@ func Fetch() {
 	if err != nil {
 		message := "Failed[1]: " + err.Error()
 		utils.Console(message)
-		logger.AddToLog(VENDOR_LOG_PATH, logFileName, logger.FAILURE, message, FETCH_URL)
+		logger.AddToLog(LOG_PATH, logFileName, logger.FAILURE, message, FETCH_URL)
 		return
 	}
 
@@ -44,11 +44,11 @@ func Fetch() {
 	if err != nil {
 		message := "Failed[2]: " + err.Error()
 		utils.Console(message)
-		logger.AddToLog(VENDOR_LOG_PATH, logFileName, logger.FAILURE, message, "")
+		logger.AddToLog(LOG_PATH, logFileName, logger.FAILURE, message, "")
 	} else {
 		message := "fetched vendors and saved to a file"
 		utils.Console(message)
-		logger.AddToLog(VENDOR_LOG_PATH, logFileName, logger.SUCCESS, message, PENDING_FILE_PATH+timestamp+".json")
+		logger.AddToLog(LOG_PATH, logFileName, logger.SUCCESS, message, PENDING_FILE_PATH+timestamp+".json")
 	}
 
 }
@@ -57,7 +57,7 @@ func Sync3() {
 	//Path
 	PENDING_FILE_PATH := utils.VENDOR_PENDING_FILE_PATH
 	DONE_FILE_PATH := utils.VENDOR_DONE_FILE_PATH
-	VENDOR_LOG_PATH := utils.VENDOR_LOG_PATH
+	LOG_PATH := utils.VENDOR_LOG_PATH
 	HASH_FILE_PATH := utils.VENDOR_HASH_FILE_PATH
 	HASH_DB := utils.VENDOR_HASH_DB
 	PREFIX := config.Config.Vendor.Prefix
@@ -73,14 +73,14 @@ func Sync3() {
 	if err != nil {
 		message := "Failed[1]: " + err.Error()
 		utils.Console(message)
-		logger.AddToLog(VENDOR_LOG_PATH, logFileGeneral, logger.FAILURE, message, "")
+		logger.AddToLog(LOG_PATH, logFileGeneral, logger.FAILURE, message, "")
 		return
 	}
 
 	if fileNames == nil || len(fileNames) < 1 {
 		message := "No pending files found"
 		utils.Console(message)
-		logger.AddToLog(VENDOR_LOG_PATH, logFileGeneral, logger.SUCCESS, "Skipped", message)
+		logger.AddToLog(LOG_PATH, logFileGeneral, logger.SUCCESS, "Skipped", message)
 		return
 	}
 
@@ -108,8 +108,8 @@ func Sync3() {
 		if err := json.Unmarshal([]byte(jsonData), &vendors); err != nil {
 			message := "Failed[2]: error unmarshaling JSON -> " + err.Error()
 			utils.Console(message)
-			logger.AddToLog(VENDOR_LOG_PATH, logFileName, logger.FAILURE, message, DONE_FILE_PATH+fileName)
-			return
+			logger.AddToLog(LOG_PATH, logFileName, logger.FAILURE, message, DONE_FILE_PATH+fileName)
+			continue
 		}
 
 		for j := 0; j < len(vendors); j++ {
@@ -132,7 +132,8 @@ func Sync3() {
 					message := err.Error()
 					utils.Console(message)
 					payloads := fmt.Sprintf(`Request:\n %s`, reqPayload)
-					logger.AddToLog(VENDOR_LOG_PATH, logFileName, logger.FAILURE, message, payloads)
+					logger.AddToLog(LOG_PATH, logFileName, logger.FAILURE, message, payloads)
+					continue
 				}
 
 				if isSuccess {
@@ -147,7 +148,7 @@ func Sync3() {
 						message := "Failed[6]: " + err.Error()
 						utils.Console(message)
 						payloads := fmt.Sprintf(`Request:\n %s \n\n Response:\n %s`, reqPayload, xmlData)
-						logger.AddToLog(VENDOR_LOG_PATH, logFileName, logger.FAILURE, message, payloads)
+						logger.AddToLog(LOG_PATH, logFileName, logger.FAILURE, message, payloads)
 					}
 
 					// append success hash map and save hash map
@@ -181,12 +182,12 @@ func Sync3() {
 		if err != nil {
 			message := "Failed[5]: " + err.Error()
 			utils.Console(message)
-			logger.AddToLog(VENDOR_LOG_PATH, logFileName, logger.FAILURE, message, "")
+			logger.AddToLog(LOG_PATH, logFileName, logger.FAILURE, message, "")
 		} else {
 			//isSuccessfullySavedToFile = true
 			message := "File successfully moved to the proccessed folder"
 			utils.Console(message)
-			logger.AddToLog(VENDOR_LOG_PATH, logFileName, logger.SUCCESS, message, fileName)
+			logger.AddToLog(LOG_PATH, logFileName, logger.SUCCESS, message, fileName)
 		}
 	}
 
