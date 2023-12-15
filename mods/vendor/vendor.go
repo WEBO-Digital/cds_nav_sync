@@ -18,11 +18,13 @@ func Fetch() {
 	FETCH_URL := config.Config.Vendor.Fetch.URL
 	TOKEN_KEY := config.Config.Vendor.Fetch.APIKey
 	PENDING_FILE_PATH := utils.VENDOR_PENDING_FILE_PATH
-	PENDING_LOG_FILE_PATH := utils.VENDOR_DONE_LOG_FILE_PATH
-	PENDING_FAILURE := utils.VENDOR_PENDING_FAILURE
-	PENDING_SUCCESS := utils.VENDOR_PENDING_SUCCESS
+	VENDOR_LOG_PATH := utils.VENDOR_LOG_PATH
 
 	utils.Console("Start fetching vendors")
+
+	//get current timestamp
+	timestamp := utils.GetCurrentTime()
+	logFileName := "fetch-" + timestamp + ".log"
 
 	//Fetch vendor data
 	response, err := manager.Fetch(FETCH_URL, normalapi.GET, TOKEN_KEY, nil)
@@ -30,12 +32,9 @@ func Fetch() {
 	if err != nil {
 		message := "Failed[1]: " + err.Error()
 		utils.Console(message)
-		logger.LogNavState(logger.SUCCESS, PENDING_LOG_FILE_PATH, PENDING_FAILURE, "", message, "")
+		logger.AddToLog(VENDOR_LOG_PATH, logFileName, logger.FAILURE, message, "")
 		return
 	}
-
-	//get current timestamp
-	timestamp := utils.GetCurrentTime()
 
 	//Save to pending file
 	err = filesystem.Save(PENDING_FILE_PATH, timestamp, response)
@@ -43,11 +42,11 @@ func Fetch() {
 	if err != nil {
 		message := "Failed[2]: " + err.Error()
 		utils.Console(message)
-		logger.LogNavState(logger.SUCCESS, PENDING_LOG_FILE_PATH, PENDING_FAILURE, timestamp+".json", message, "")
+		logger.AddToLog(VENDOR_LOG_PATH, logFileName, logger.FAILURE, message, "")
 	} else {
 		message := "Success: fetched vendors and saved to a file"
 		utils.Console(message)
-		logger.LogNavState(logger.SUCCESS, PENDING_LOG_FILE_PATH, PENDING_SUCCESS, timestamp+".json", message, "")
+		logger.AddToLog(VENDOR_LOG_PATH, logFileName, logger.SUCCESS, message, "")
 	}
 
 }
@@ -56,24 +55,30 @@ func Sync3() {
 	//Path
 	PENDING_FILE_PATH := utils.VENDOR_PENDING_FILE_PATH
 	DONE_FILE_PATH := utils.VENDOR_DONE_FILE_PATH
-	DONE_LOG_FILE_PATH := utils.VENDOR_DONE_LOG_FILE_PATH
-	DONE_FAILURE := utils.INVOICE_DONE_FAILURE
-	DONE_SUCCESS := utils.INVOICE_DONE_SUCCESS
+	VENDOR_LOG_PATH := utils.VENDOR_LOG_PATH
 	HASH_FILE_PATH := utils.VENDOR_HASH_FILE_PATH
 	HASH_DB := utils.VENDOR_HASH_DB
 	PREFIX := config.Config.Vendor.Prefix
 
+	utils.Console("Start sending vendors to NAV")
+
+	timestamp := utils.GetCurrentTime()
+	logFileGeneral := "sync-pre-" + timestamp + ".json"
+
 	//Get All the vendor pending data
 	fileNames, err := filesystem.GetAllFiles(PENDING_FILE_PATH)
+
 	if err != nil {
-		message := "Failed:Sync:1 " + err.Error()
+		message := "Failed[1]: " + err.Error()
 		utils.Console(message)
-		logger.LogNavState(logger.SUCCESS, DONE_LOG_FILE_PATH, DONE_FAILURE, "", message, "")
+		logger.AddToLog(VENDOR_LOG_PATH, logFileGeneral, logger.FAILURE, message, "")
+		return
 	}
 
-	utils.Console(fileNames)
-
 	if fileNames == nil || len(fileNames) < 1 {
+		message := "No pending files found"
+		utils.Console(message)
+		logger.AddToLog(VENDOR_LOG_PATH, logFileGeneral, logger.SUCCESS, message, "")
 		return
 	}
 
@@ -82,25 +87,29 @@ func Sync3() {
 		FilePath: HASH_FILE_PATH,
 		Name:     HASH_DB,
 	}
+
 	hashModels.Load()
 
 	//Syncing
 	var responseModel []BackToCDSVendorResponse
+
 	for i := 0; i < len(fileNames); i++ {
 		//Get Json data from the file
-		jsonData, err := filesystem.ReadFile(PENDING_FILE_PATH, fileNames[i])
+		fileName := fileNames[i]
+		jsonData, err := filesystem.ReadFile(PENDING_FILE_PATH, fileName)
 		jsonString := string(jsonData)
+		logFileName := "sync-" + fileName + ".log"
 
 		// Unmarshal JSON to struct
 		var vendors []WSVendor
+
 		if err := json.Unmarshal([]byte(jsonData), &vendors); err != nil {
-			message := "Failed:Sync:2 Error unmarshaling JSON -> " + err.Error()
+			message := "Failed[2]: error unmarshaling JSON -> " + err.Error()
 			utils.Console(message)
-			logger.LogNavState(logger.SUCCESS, DONE_LOG_FILE_PATH, DONE_FAILURE, fileNames[i], message, jsonString)
+			logger.AddToLog(VENDOR_LOG_PATH, logFileName, logger.FAILURE, message, jsonString)
 		}
 
 		for j := 0; j < len(vendors); j++ {
-			// 250500001
 			vendors[j].WeighbridgeSupplierID = PREFIX + vendors[j].WeighbridgeSupplierID
 		}
 
@@ -111,12 +120,16 @@ func Sync3() {
 			preHash := hashModels.GetHash(key)
 
 			if preHash == "" {
+				utils.Console(fmt.Sprintf("Insert vendor: %s", key))
+
 				isSuccess, err, result := InsertToNav(vendors[j])
+				reqPayload, _ := data_parser.ParseJsonToXml(vendors[j])
 
 				if err != nil {
 					message := err.Error()
 					utils.Console(message)
-					logger.LogNavState(logger.SUCCESS, DONE_LOG_FILE_PATH, DONE_FAILURE, fileNames[i], message, jsonString)
+					payloads := fmt.Sprintf(`Request:\n %s`, reqPayload)
+					logger.AddToLog(VENDOR_LOG_PATH, logFileName, logger.FAILURE, message, payloads)
 				}
 
 				if isSuccess {
@@ -128,9 +141,10 @@ func Sync3() {
 					err = xml.Unmarshal(xmlData, &parseModel)
 
 					if err != nil {
-						message := "Failed:Sync:6 " + err.Error()
+						message := "Failed[6]: " + err.Error()
 						utils.Console(message)
-						logger.LogNavState(logger.FAILURE, DONE_LOG_FILE_PATH, DONE_FAILURE, fileNames[i], message, result.(string))
+						payloads := fmt.Sprintf(`Request:\n %s \n\n Response:\n %s`, reqPayload, xmlData)
+						logger.AddToLog(VENDOR_LOG_PATH, logFileName, logger.FAILURE, message, payloads)
 					}
 
 					// append success hash map and save hash map
@@ -139,10 +153,6 @@ func Sync3() {
 						Hash:  hash,
 						NavID: parseModel.Body.CreateResult.WSVendor.No,
 					})
-					if err != nil {
-						utils.Console("UpdateHashInModel::Error:", err)
-					}
-					utils.Console("hashMaps", hashModels)
 
 					//Add successed to an array
 					responseModel = append(responseModel, BackToCDSVendorResponse{
@@ -153,21 +163,27 @@ func Sync3() {
 			}
 
 			if preHash != "" && preHash != hash {
+				utils.Console(fmt.Sprintf("Update vendor: %s", key))
 				// @TODO: Update the vendor
+			}
+
+			if preHash != "" && preHash == hash {
+				utils.Console(fmt.Sprintf("Skip vendor: %s", key))
 			}
 		}
 
 		//Move to done file
-		err = filesystem.MoveFile(fileNames[i], PENDING_FILE_PATH, DONE_FILE_PATH)
+		err = filesystem.MoveFile(fileName, PENDING_FILE_PATH, DONE_FILE_PATH)
+
 		if err != nil {
-			message := "Failed:Sync:5 " + err.Error()
+			message := "Failed[5]: " + err.Error()
 			utils.Console(message)
-			logger.LogNavState(logger.FAILURE, DONE_LOG_FILE_PATH, DONE_FAILURE, fileNames[i], message, jsonString)
+			logger.AddToLog(VENDOR_LOG_PATH, logFileName, logger.FAILURE, message, "")
 		} else {
 			//isSuccessfullySavedToFile = true
-			message := "File moved successfully"
+			message := "File successfully moved to the proccessed folder"
 			utils.Console(message)
-			logger.LogNavState(logger.SUCCESS, DONE_LOG_FILE_PATH, DONE_SUCCESS, fileNames[i], message, "")
+			logger.AddToLog(VENDOR_LOG_PATH, logFileName, logger.SUCCESS, message, fileName)
 		}
 	}
 
@@ -176,7 +192,7 @@ func Sync3() {
 
 	//Bulk save
 	//After syncing all files then send response back to CDS
-	utils.Console("responseModel------> ", len(responseModel))
+	//utils.Console("responseModel------> ", len(responseModel))
 
 	if len(responseModel) > 0 {
 		sendToCDS(responseModel)

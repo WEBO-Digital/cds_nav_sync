@@ -39,3 +39,26 @@ Data: %s
 		utils.Console(err.Error())
 	}
 }
+
+func AddToLog(filePath string, fileName string, rType ResponseType, message string, data string) {
+	timestamp := utils.GetCurrentTime()
+
+	appendStr := fmt.Sprintf(
+		`
+
+**********************************START*************************************
+[%s]
+Type: %s
+Message: %s
+Data: %s
+**********************************END***************************************
+
+		`, timestamp, rType, message, data,
+	)
+
+	err := filesystem.Append(filePath, fileName, appendStr)
+
+	if err != nil {
+		utils.Console(err.Error())
+	}
+}
