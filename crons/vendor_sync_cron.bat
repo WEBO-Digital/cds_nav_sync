@@ -12,5 +12,5 @@ rem Move console to the source directory
 rem And Then execute the command
 set "exePath=%sourceFolderPath%"
 cd "%exePath%"
-nav_sync_test.exe -action vendor_sync
+cds_sync.exe -action vendor_sync
 cd %SystemDrive%
