@@ -44,16 +44,14 @@ func AddToLog(filePath string, fileName string, rType ResponseType, message stri
 	timestamp := utils.GetCurrentTime()
 
 	appendStr := fmt.Sprintf(
-		`
-
-**********************************START*************************************
+		`**********************************START*************************************
 [%s]
 Type: %s
 Message: %s
 Data: %s
 **********************************END***************************************
 
-		`, timestamp, rType, message, data,
+`, timestamp, rType, message, data,
 	)
 
 	err := filesystem.Append(filePath, fileName, appendStr)

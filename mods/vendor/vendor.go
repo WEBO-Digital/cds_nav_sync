@@ -3,6 +3,7 @@ package vendor
 import (
 	"encoding/json"
 	"encoding/xml"
+	"fmt"
 	"nav_sync/config"
 	"nav_sync/logger"
 	filesystem "nav_sync/mods/ahelpers/file_system"
@@ -32,7 +33,7 @@ func Fetch() {
 	if err != nil {
 		message := "Failed[1]: " + err.Error()
 		utils.Console(message)
-		logger.AddToLog(VENDOR_LOG_PATH, logFileName, logger.FAILURE, message, "")
+		logger.AddToLog(VENDOR_LOG_PATH, logFileName, logger.FAILURE, message, FETCH_URL)
 		return
 	}
 
@@ -44,9 +45,9 @@ func Fetch() {
 		utils.Console(message)
 		logger.AddToLog(VENDOR_LOG_PATH, logFileName, logger.FAILURE, message, "")
 	} else {
-		message := "Success: fetched vendors and saved to a file"
+		message := "fetched vendors and saved to a file"
 		utils.Console(message)
-		logger.AddToLog(VENDOR_LOG_PATH, logFileName, logger.SUCCESS, message, "")
+		logger.AddToLog(VENDOR_LOG_PATH, logFileName, logger.SUCCESS, message, PENDING_FILE_PATH+timestamp+".json")
 	}
 
 }

@@ -6,7 +6,6 @@ import (
 	filesystem "nav_sync/mods/ahelpers/file_system"
 	navapi "nav_sync/mods/ahelpers/nav_api"
 	normalapi "nav_sync/mods/ahelpers/normal_api"
-	"nav_sync/utils"
 )
 
 func Fetch(url string, method normalapi.APIMethod, tokenKey string, data interface{}) (interface{}, error) {

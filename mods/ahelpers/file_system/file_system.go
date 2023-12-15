@@ -122,8 +122,6 @@ func Append(path string, fileName string, data string) error {
 	//Specify the file path
 	destinationPath := fmt.Sprintf("%s%s", *filePath, fileName)
 
-	utils.Console(destinationPath)
-
 	//Create File if it does not exists
 	if _, err := os.Stat(destinationPath); os.IsNotExist(err) {
 		//Create file
@@ -139,11 +137,9 @@ func Append(path string, fileName string, data string) error {
 	}
 
 	// Append data to the file
-	res, err := file.WriteString(data)
+	_, err = file.WriteString(data)
 	if err != nil {
 		return err
-	} else {
-		utils.Console(res)
 	}
 
 	return nil
@@ -158,8 +154,6 @@ func CleanAndSave(path string, fileName string, data string) error {
 
 	//Specify the file path
 	destinationPath := fmt.Sprintf("%s%s", *filePath, fileName)
-
-	utils.Console(destinationPath)
 
 	//Create File if it does not exists
 	if _, err := os.Stat(destinationPath); os.IsNotExist(err) {
@@ -176,11 +170,9 @@ func CleanAndSave(path string, fileName string, data string) error {
 	}
 
 	// Append data to the file
-	res, err := file.WriteString(data)
+	_, err = file.WriteString(data)
 	if err != nil {
 		return err
-	} else {
-		utils.Console(res)
 	}
 
 	return nil
@@ -203,5 +195,6 @@ func createDirectoryIfNotExists(path string) (*string, error) {
 	if err := os.MkdirAll(filePath, 0755); err != nil {
 		return nil, err
 	}
+
 	return &filePath, nil
 }
