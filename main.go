@@ -41,14 +41,14 @@ func RuncFunctionFromCommandArgument() {
 		invoice.Sync3()
 	case "invoice_resync":
 		invoice.ReSync()
-	case "ledger_entries_fetch":
+	case "payment_fetch":
 		ledgerentries.Fetch()
-	case "ledger_entries_sync":
+	case "payment_sync":
 		ledgerentries.Sync3()
-	case "ledger_entries_resync":
+	case "payment_resync":
 		ledgerentries.ReSync()
 	default:
-		utils.Console("Invalid action. Available actions: vendor_fetch, vendor_sync, vendor_resync, invoice_fetch, invoice_sync, invoice_resync, ledger_entries_fetch, ledger_entries_sync, ledger_entries_resync")
+		utils.Console("Invalid action!\n\nAvailable actions: vendor_fetch, vendor_sync, vendor_resync, invoice_fetch, invoice_sync, invoice_resync, payment_fetch, payment_sync, payment_resync")
 		os.Exit(1)
 	}
 }

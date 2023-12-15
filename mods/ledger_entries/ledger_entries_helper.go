@@ -42,7 +42,6 @@ func InsertToNav(ledgerentrie LedgerEntriesCreate) (bool, error, interface{}) {
 
 	if FAKE_INSERT {
 		//Fake Post To Nav
-		utils.Console("Fake Insert Ledger Entry----------> ", FAKE_INSERT)
 		isFakeSuccess, err, result := manager.ApiFakeResponse("/ztest/", "ledger_entries_insert_fake.xml")
 		return isFakeSuccess, err, result
 	}
@@ -68,12 +67,6 @@ func InsertToNav(ledgerentrie LedgerEntriesCreate) (bool, error, interface{}) {
 		ledgerentrie.CurrentJnlBatchName,
 		string(xmlData),
 	)
-
-	//Return the result
-	utils.Console(xmlPayload)
-	utils.Console("username: ", NTLM_USERNAME)
-	utils.Console("username: ", NTLM_PASSWORD)
-	utils.Console("URL: ", url)
 
 	//Sync to Nav
 	isSuccess := false
@@ -115,7 +108,6 @@ func PostLedgerEntriesAfterCreation(envelope PostLedgerEntriesEnvelope) (bool, e
 
 	if FAKE_INSERT {
 		//Fake Post To Nav
-		utils.Console("Fake Insert After Post Ledger Entry----------> ", FAKE_INSERT)
 		isFakeSuccess, err, result := manager.ApiFakeResponse("/ztest/", "ledger_entries_post_fake.xml")
 		return isFakeSuccess, err, result
 	}
@@ -134,12 +126,6 @@ func PostLedgerEntriesAfterCreation(envelope PostLedgerEntriesEnvelope) (bool, e
 		`,
 		envelope.Body.CreateResult.VendorPayment.DocumentNo,
 	)
-
-	//Return the result
-	utils.Console(xmlPayload)
-	utils.Console("username: ", NTLM_USERNAME)
-	utils.Console("username: ", NTLM_PASSWORD)
-	utils.Console("URL: ", url)
 
 	//Sync to Nav
 	result, err := manager.Sync(url, navapi.POST, xmlPayload, NTLM_USERNAME, NTLM_PASSWORD)
