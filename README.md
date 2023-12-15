@@ -121,3 +121,13 @@ loop: vendoers.json -> vender:
     saveHashRecords(hash_records)
 
 ```
+
+```
+CGO_ENABLED=0 GOOS=linux go build -buildvcs=false
+```
+
+```sql
+UPDATE refunds SET document_id=NULL, purchase_invoice_no=NULL
+UPDATE customers SET nav_id=NULL
+UPDATE payments SET nav_id=NULL
+```

@@ -33,13 +33,15 @@ type PurchLines2 struct {
 }
 
 type PurchInvoiceLine struct {
-	Type               string  `xml:"Type,omitempty" json:"type,omitempty"`
-	No                 string  `xml:"No,omitempty" json:"no,omitempty"`
-	Quantity           int     `xml:"Quantity,omitempty" json:"quantity,omitempty"`
-	ShortcutDimension1 string  `xml:"Shortcut_Dimension_1_Code,omitempty" json:"shortcut_dimension_1_code,omitempty"`
-	ShortcutDimension2 string  `xml:"Shortcut_Dimension_2_Code,omitempty" json:"shortcut_dimension_2_code,omitempty"`
-	UnitPriceLCY       float32 `xml:"Unit_Price_LCY,omitempty" json:"unit_price_lcy,omitempty"`
-	LocationCode       string  `xml:"Location_Code,omitempty" json:"location_code,omitempty"`
+	Type               string `xml:"Type,omitempty" json:"type,omitempty"`
+	No                 string `xml:"No,omitempty" json:"no,omitempty"`
+	Quantity           int    `xml:"Quantity,omitempty" json:"quantity,omitempty"`
+	ShortcutDimension1 string `xml:"Shortcut_Dimension_1_Code,omitempty" json:"shortcut_dimension_1_code,omitempty"`
+	ShortcutDimension2 string `xml:"Shortcut_Dimension_2_Code,omitempty" json:"shortcut_dimension_2_code,omitempty"`
+	// UnitPriceLCY       float32 `xml:"Unit_Price_LCY,omitempty" json:"unit_price_lcy,omitempty"`
+	LocationCode        string  `xml:"Location_Code,omitempty" json:"location_code,omitempty"`
+	DirectUnitCost      float32 `xml:"Direct_Unit_Cost,omitempty" json:"direct_unit_cost,omitempty"`
+	VATProdPostingGroup string  `xml:"VAT_Prod_Posting_Group,omitempty" json:"vat_prod_posting_group,omitempty"`
 }
 
 type BackToCDSInvoiceResponse struct {
