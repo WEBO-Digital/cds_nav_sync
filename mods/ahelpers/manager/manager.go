@@ -24,8 +24,6 @@ func Fetch(url string, method normalapi.APIMethod, tokenKey string, data interfa
 }
 
 func Sync(url string, method navapi.NavMethod, xmlPayload string, user string, password string) (interface{}, error) {
-	//Make response call
-	utils.Console("method: ", method)
 	if method == navapi.POST {
 		return navapi.Post(url, xmlPayload, user, password)
 	} else if method == navapi.GET {

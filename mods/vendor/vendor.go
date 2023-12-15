@@ -22,26 +22,30 @@ func Fetch() {
 	PENDING_FAILURE := utils.VENDOR_PENDING_FAILURE
 	PENDING_SUCCESS := utils.VENDOR_PENDING_SUCCESS
 
+	utils.Console("Start fetching vendors")
+
 	//Fetch vendor data
 	response, err := manager.Fetch(FETCH_URL, normalapi.GET, TOKEN_KEY, nil)
+
 	if err != nil {
-		message := "Failed:Fetch:1 " + err.Error()
+		message := "Failed[1]: " + err.Error()
 		utils.Console(message)
 		logger.LogNavState(logger.SUCCESS, PENDING_LOG_FILE_PATH, PENDING_FAILURE, "", message, "")
+		return
 	}
-	utils.Console(response)
 
 	//get current timestamp
 	timestamp := utils.GetCurrentTime()
 
 	//Save to pending file
 	err = filesystem.Save(PENDING_FILE_PATH, timestamp, response)
+
 	if err != nil {
-		message := "Failed:Fetch:2 " + err.Error()
+		message := "Failed[2]: " + err.Error()
 		utils.Console(message)
 		logger.LogNavState(logger.SUCCESS, PENDING_LOG_FILE_PATH, PENDING_FAILURE, timestamp+".json", message, "")
 	} else {
-		message := "Fetch: Successfully saved vendor to pending file"
+		message := "Success: fetched vendors and saved to a file"
 		utils.Console(message)
 		logger.LogNavState(logger.SUCCESS, PENDING_LOG_FILE_PATH, PENDING_SUCCESS, timestamp+".json", message, "")
 	}
