@@ -10,7 +10,6 @@ import (
 	data_parser "nav_sync/mods/ahelpers/parser"
 	"nav_sync/mods/hashrecs"
 	"nav_sync/utils"
-	"strconv"
 )
 
 func Fetch() {
@@ -57,6 +56,8 @@ func Sync3() {
 	DONE_SUCCESS := utils.INVOICE_DONE_SUCCESS
 	HASH_FILE_PATH := utils.INVOICE_HASH_FILE_PATH
 	HASH_DB := utils.INVOICE_HASH_DB
+	FAKE_PREFIX := config.Config.Invoice.FakePrefix
+	FAKE_INSERT := config.Config.Invoice.FakeInsert
 
 	//Get All the vendor pending data
 	fileNames, err := filesystem.GetAllFiles(PENDING_FILE_PATH)
@@ -97,14 +98,16 @@ func Sync3() {
 			logger.LogNavState(logger.SUCCESS, DONE_LOG_FILE_PATH, DONE_FAILURE, fileNames[i], message, jsonString)
 		}
 
-		// for j := 0; j < len(invoices); j++ {
-		// 	// 250500001
-		// 	invoices[j].VendorInvoiceNo = 96959000 + j + 1
-		// }
+		if FAKE_INSERT {
+			for j := 0; j < len(invoices); j++ {
+				// 250500001
+				invoices[j].VendorInvoiceNo = FAKE_PREFIX + invoices[j].VendorInvoiceNo
+			}
+		}
 
 		for j := 0; j < len(invoices); j++ {
 			if invoices[j].BuyFromVendorNo != nil {
-				VendorInvoiceNoStr := strconv.Itoa(invoices[j].VendorInvoiceNo)
+				VendorInvoiceNoStr := invoices[j].VendorInvoiceNo //strconv.Itoa(invoices[j].VendorInvoiceNo)
 				key := VendorInvoiceNoStr
 				refundId := invoices[j].RefundId
 				modelStr, _ := data_parser.ParseModelToString(invoices[j])

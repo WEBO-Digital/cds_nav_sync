@@ -57,6 +57,8 @@ func Sync3() {
 	DONE_SUCCESS := utils.INVOICE_DONE_SUCCESS
 	HASH_FILE_PATH := utils.VENDOR_HASH_FILE_PATH
 	HASH_DB := utils.VENDOR_HASH_DB
+	FAKE_PREFIX := config.Config.Vendor.FakePrefix
+	FAKE_INSERT := config.Config.Vendor.FakeInsert
 
 	//Get All the vendor pending data
 	fileNames, err := filesystem.GetAllFiles(PENDING_FILE_PATH)
@@ -92,6 +94,13 @@ func Sync3() {
 			message := "Failed:Sync:2 Error unmarshaling JSON -> " + err.Error()
 			utils.Console(message)
 			logger.LogNavState(logger.SUCCESS, DONE_LOG_FILE_PATH, DONE_FAILURE, fileNames[i], message, jsonString)
+		}
+
+		if FAKE_INSERT {
+			for j := 0; j < len(vendors); j++ {
+				// 250500001
+				vendors[j].WeighbridgeSupplierID = FAKE_PREFIX + vendors[j].WeighbridgeSupplierID
+			}
 		}
 
 		for j := 0; j < len(vendors); j++ {

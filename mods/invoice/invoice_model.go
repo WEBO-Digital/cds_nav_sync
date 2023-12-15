@@ -9,7 +9,7 @@ type WSPurchaseInvoicePage struct {
 	BuyFromCountryRegionCode string        `xml:"Buy_from_Country_Region_Code,omitempty" json:"buy_from_country_region_code,omitempty"`
 	PostingDate              string        `xml:"Posting_Date,omitempty" json:"posting_date,omitempty"`
 	DocumentDate             string        `xml:"Document_Date,omitempty" json:"document_date,omitempty"`
-	VendorInvoiceNo          int           `xml:"Vendor_Invoice_No,omitempty" json:"vendor_invoice_no,omitempty"`
+	VendorInvoiceNo          string        `xml:"Vendor_Invoice_No,omitempty" json:"vendor_invoice_no,omitempty"`
 	PayToVendorNo            *string       `xml:"Pay_to_Vendor_No,omitempty" json:"pay_to_vendor_no,omitempty"`
 	PayToName                string        `xml:"Pay_to_Name,omitempty" json:"pay_to_name,omitempty"`
 	PayToCity                string        `xml:"Pay_to_City,omitempty" json:"pay_to_city,omitempty"`
