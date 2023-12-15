@@ -1,39 +1,42 @@
 vendor:
   fetch:
-    url: https://cds-customers.webo.dev/api/v1/nav/vendor
+    url: https://cds-customersuat.webo.dev/api/v1/nav/vendor
     apikey: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwidXNlcl9pZCI6NX0.zl22NTtVYsoFBq7wMASpeLJY7DttcSevVhXjfaMGOpc
   sync:
     url: http://spnav.sellparker.local:7047/SP_NAV2013R2Test/WS/Sell%20%26%20Parker/Page/WSVendor
   save:
-    url:  https://cds-customers.webo.dev/api/v1/nav/vendor
+    urlx: http://localhost/log/log.php
+    url: https://cds-customersuat.webo.dev/api/v1/nav/vendor
     apikey: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwidXNlcl9pZCI6NX0.zl22NTtVYsoFBq7wMASpeLJY7DttcSevVhXjfaMGOpc
   fake_insert: true
   prefix: "DEV"
 
 invoice:
   fetch:
-    url: https://cds-tickets.webo.dev/api/v1/nav/refund
+    url: https://cds-tickets-uat.webo.dev/api/v1/nav/refund
     apikey: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwidXNlcl9pZCI6NX0.zl22NTtVYsoFBq7wMASpeLJY7DttcSevVhXjfaMGOpc
   sync:
     url: http://SPNAV.sellparker.local:7047/SP_NAV2013R2Test/WS/Sell%20%26%20Parker/Page/WSPurchaseInvoicePage
   post:
     url: http://spnav.sellparker.local:7047/SP_NAV2013R2Test/WS/Sell%20%26%20Parker/Codeunit/WSPurchaseInvoice
   save:
-    url: https://cds-tickets.webo.dev/api/v1/nav/refund
+    urlx: http://localhost/log/log.php
+    url: https://cds-tickets-uat.webo.dev/api/v1/nav/refund
     apikey: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwidXNlcl9pZCI6NX0.zl22NTtVYsoFBq7wMASpeLJY7DttcSevVhXjfaMGOpc
   fake_insert: true
   prefix: "DEV"
 
 ledger_entries:
   fetch:
-    url:  https://cds-payments-uat.webo.dev/api/v1/payments
+    url:  https://cds-payments-uat.webo.dev/api/v1/nav/payments
     apikey: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwidXNlcl9pZCI6NX0.zl22NTtVYsoFBq7wMASpeLJY7DttcSevVhXjfaMGOpc
   sync:
     url: http://spnav.sellparker.local:7047/SP_NAV2013R2Test/WS/Sell%20%26%20Parker/Page/VendorPayment
   post:
     url: http://spnav.sellparker.local:7047/SP_NAV2013R2Test/WS/Sell%20%26%20Parker/Codeunit/WSPurchaseInvoice
   save:
-    url: https://cds-payments-uat.webo.dev/api/v1/payments
+    urlx: http://localhost/log/log.php
+    url:  https://cds-payments-uat.webo.dev/api/v1/nav/payments
     apikey: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwidXNlcl9pZCI6NX0.zl22NTtVYsoFBq7wMASpeLJY7DttcSevVhXjfaMGOpc
   fake_insert: true
 
