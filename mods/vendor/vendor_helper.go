@@ -3,7 +3,6 @@ package vendor
 import (
 	"errors"
 	"fmt"
-	"log"
 	"nav_sync/config"
 	"nav_sync/mods/ahelpers/manager"
 	navapi "nav_sync/mods/ahelpers/nav_api"
@@ -48,12 +47,6 @@ func InsertToNav(vendor WSVendor) (bool, error, interface{}) {
 `,
 		string(xmlData),
 	)
-
-	//Return the result
-	log.Println(xmlPayload)
-	utils.Console("username: ", NTLM_USERNAME)
-	utils.Console("username: ", NTLM_PASSWORD)
-	utils.Console("URL: ", url)
 
 	//Sync to Nav
 	isSuccess := false

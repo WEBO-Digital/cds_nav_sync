@@ -86,12 +86,6 @@ func InsertToNav(invoice WSPurchaseInvoicePage) (bool, error, interface{}) {
 		string(xmlData),
 	)
 
-	//Return the result
-	utils.Console(xmlPayload)
-	utils.Console("username: ", NTLM_USERNAME)
-	utils.Console("username: ", NTLM_PASSWORD)
-	utils.Console("URL: ", url)
-
 	//Sync to Nav
 	isSuccess := false
 	result, err = manager.Sync(url, navapi.POST, xmlPayload, NTLM_USERNAME, NTLM_PASSWORD)
@@ -153,12 +147,6 @@ func PostToNavAfterInsert(envelope PostInvoiceEnvelope) (bool, error, interface{
 		envelope.Body.CreateResult.WSPurchaseInvoicePage.No,
 		"2",
 	)
-
-	//Return the result
-	utils.Console(xmlPayload)
-	utils.Console("username: ", NTLM_USERNAME)
-	utils.Console("username: ", NTLM_PASSWORD)
-	utils.Console("URL: ", url)
 
 	//Sync to Nav
 	result, err := manager.Sync(url, navapi.POST, xmlPayload, NTLM_USERNAME, NTLM_PASSWORD)

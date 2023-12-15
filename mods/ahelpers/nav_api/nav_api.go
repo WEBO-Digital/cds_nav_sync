@@ -10,8 +10,6 @@ import (
 )
 
 func Post(url string, xmlPayload string, user string, password string) (interface{}, error) {
-	utils.Console("Here")
-
 	//Make response call
 	client := &http.Client{
 		Transport: ntlmssp.Negotiator{

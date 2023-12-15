@@ -243,6 +243,8 @@ func sendToCDS(responseModel []BackToCDSVendorResponse) {
 		//logger.LogNavState(logger.SUCCESS, PENDING_LOG_FILE_PATH, PENDING_FAILURE, "", message, "")
 	}
 
+	// fmt.Println(res)
+
 	// utils.Console("Successfully send to CDS system from nav ---> vendor: ", RESPONSE_URL)
 	// utils.Console(responseModel)
 }
