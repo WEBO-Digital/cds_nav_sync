@@ -36,7 +36,6 @@ ledger_entries:
     url: https://cds-payments.webo.dev/api/v1/nav/payments
     apikey: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwidXNlcl9pZCI6NX0.zl22NTtVYsoFBq7wMASpeLJY7DttcSevVhXjfaMGOpc
   fake_insert: true
-  prefix: "DEV"
 
 auth:
   ntlm:
