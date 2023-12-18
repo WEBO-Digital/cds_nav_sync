@@ -19,8 +19,11 @@ func Fetch() {
 	//Path
 	FETCH_URL := config.Config.LedgerEntries.Fetch.URL
 	TOKEN_KEY := config.Config.Invoice.Fetch.APIKey
+	IS_EMPTY := config.Config.LedgerEntries.EmptyLogs
 	PENDING_FILE_PATH := utils.LEDGER_ENTRIES_PENDING_FILE_PATH
 	LOG_PATH := utils.LEDGER_ENTRIES_LOG_PATH
+	EMPTY_LOG_PATH := utils.LEDGER_ENTRIES_EMPTY_LOG_PATH
+	EMPTY_LOG_DB := utils.EMPTY_LOG_DB
 
 	utils.Console("Start fetching payments")
 
@@ -30,11 +33,19 @@ func Fetch() {
 
 	//Fetch payment data
 	response, err := manager.Fetch(FETCH_URL, normalapi.GET, TOKEN_KEY, nil)
-
 	if err != nil {
 		message := "Failed[1]: " + err.Error()
 		utils.Console(message)
 		logger.AddToLog(LOG_PATH, logFileName, logger.FAILURE, message, FETCH_URL)
+		return
+	}
+
+	//Checking if cointains data
+	var ledgers []LedgerEntriesCreate
+	ledgers, _ = UnmarshalStringToLedgerEntries(response)
+	if IS_EMPTY && len(ledgers) < 1 {
+		//Save logs
+		logger.AddToLog(EMPTY_LOG_PATH, EMPTY_LOG_DB+".log", logger.EMPTY, "Fetched ledgers with empty", "")
 		return
 	}
 

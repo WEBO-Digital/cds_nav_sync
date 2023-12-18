@@ -22,6 +22,7 @@ type UrlConfig struct {
 	Save       SyncConfig  `yaml:"save"`
 	FakeInsert bool        `yaml:"fake_insert"`
 	Prefix     string      `yaml:"prefix"`
+	EmptyLogs  bool        `yaml:"empty_logs"`
 }
 
 type AuthConfig struct {

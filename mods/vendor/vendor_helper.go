@@ -1,6 +1,8 @@
 package vendor
 
 import (
+	"encoding/json"
+	"encoding/xml"
 	"errors"
 	"fmt"
 	"nav_sync/config"
@@ -74,4 +76,34 @@ func InsertToNav(vendor WSVendor) (bool, error, interface{}) {
 	}
 
 	return isSuccess, nil, result
+}
+
+func UnmarshelByteToVendor(jsonData []byte) ([]WSVendor, error) {
+	// Unmarshal JSON to struct
+	var vendors []WSVendor
+
+	if err := json.Unmarshal([]byte(jsonData), &vendors); err != nil {
+		return vendors, err
+	}
+
+	return vendors, nil
+}
+
+func UnmarshalStringToVendor(stringData interface{}) ([]WSVendor, error) {
+	var vendors []WSVendor
+	// Type assertion to get the underlying string
+	str, ok := stringData.(string)
+	if !ok {
+		return vendors, errors.New("unmarshelCreateInvoiceResponse: Conversion failed: not a string")
+	}
+
+	// Convert the string to a byte slice
+	xmlData := []byte(str)
+
+	// Map Go struct to XML
+	err := xml.Unmarshal(xmlData, &vendors)
+	if err != nil {
+		return vendors, errors.New("unmarshelCreateInvoiceResponse: Error decoding XML: " + err.Error())
+	}
+	return vendors, nil
 }

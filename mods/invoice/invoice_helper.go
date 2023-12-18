@@ -11,6 +11,25 @@ import (
 	"nav_sync/utils"
 )
 
+func UnmarshalStringToInvoice(stringData interface{}) ([]WSPurchaseInvoicePage, error) {
+	var invoices []WSPurchaseInvoicePage
+	// Type assertion to get the underlying string
+	str, ok := stringData.(string)
+	if !ok {
+		return invoices, errors.New("UnmarshalStringToInvoice: Conversion failed: not a string")
+	}
+
+	// Convert the string to a byte slice
+	xmlData := []byte(str)
+
+	// Map Go struct to XML
+	err := xml.Unmarshal(xmlData, &invoices)
+	if err != nil {
+		return invoices, errors.New("UnmarshalStringToInvoice: Error decoding XML: " + err.Error())
+	}
+	return invoices, nil
+}
+
 func UnmarshelCreateInvoiceResponse(stringData interface{}) (PostInvoiceEnvelope, error) {
 	var envelope PostInvoiceEnvelope
 	// Type assertion to get the underlying string

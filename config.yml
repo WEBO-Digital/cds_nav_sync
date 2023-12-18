@@ -10,6 +10,7 @@ vendor:
     apikey: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwidXNlcl9pZCI6NX0.zl22NTtVYsoFBq7wMASpeLJY7DttcSevVhXjfaMGOpc
   fake_insert: true
   prefix: "DEV"
+  empty_logs: false
 
 invoice:
   fetch:
@@ -25,6 +26,7 @@ invoice:
     apikey: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwidXNlcl9pZCI6NX0.zl22NTtVYsoFBq7wMASpeLJY7DttcSevVhXjfaMGOpc
   fake_insert: true
   prefix: "DEV"
+  empty_logs: true
 
 ledger_entries:
   fetch:
@@ -39,6 +41,7 @@ ledger_entries:
     url:  https://cds-payments-uat.webo.dev/api/v1/nav/payments
     apikey: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwidXNlcl9pZCI6NX0.zl22NTtVYsoFBq7wMASpeLJY7DttcSevVhXjfaMGOpc
   fake_insert: true
+  empty_logs: false
 
 auth:
   ntlm:

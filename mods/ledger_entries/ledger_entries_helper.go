@@ -11,6 +11,25 @@ import (
 	"nav_sync/utils"
 )
 
+func UnmarshalStringToLedgerEntries(stringData interface{}) ([]LedgerEntriesCreate, error) {
+	var ledgers []LedgerEntriesCreate
+	// Type assertion to get the underlying string
+	str, ok := stringData.(string)
+	if !ok {
+		return ledgers, errors.New("UnmarshalStringToLedgerEntries: Conversion failed: not a string")
+	}
+
+	// Convert the string to a byte slice
+	xmlData := []byte(str)
+
+	// Map Go struct to XML
+	err := xml.Unmarshal(xmlData, &ledgers)
+	if err != nil {
+		return ledgers, errors.New("UnmarshalStringToLedgerEntries: Error decoding XML: " + err.Error())
+	}
+	return ledgers, nil
+}
+
 func UnmarshelCreateLedgerEntryResponse(stringData interface{}) (PostLedgerEntriesEnvelope, error) {
 	var envelope PostLedgerEntriesEnvelope
 	// Type assertion to get the underlying string

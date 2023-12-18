@@ -18,8 +18,11 @@ func Fetch() {
 	//Path
 	FETCH_URL := config.Config.Invoice.Fetch.URL
 	TOKEN_KEY := config.Config.Invoice.Fetch.APIKey
+	IS_EMPTY := config.Config.Invoice.EmptyLogs
 	PENDING_FILE_PATH := utils.INVOICE_PENDING_FILE_PATH
 	LOG_PATH := utils.INVOICE_LOG_PATH
+	EMPTY_LOG_PATH := utils.INVOICE_EMPTY_LOG_PATH
+	EMPTY_LOG_DB := utils.EMPTY_LOG_DB
 
 	utils.Console("Start fetching invoices")
 
@@ -29,11 +32,19 @@ func Fetch() {
 
 	//Fetch invoice data
 	response, err := manager.Fetch(FETCH_URL, normalapi.GET, TOKEN_KEY, nil)
-
 	if err != nil {
 		message := "Failed[1]: " + err.Error()
 		utils.Console(message)
 		logger.AddToLog(LOG_PATH, logFileName, logger.FAILURE, message, FETCH_URL)
+		return
+	}
+
+	//Checking if cointains data
+	var invoices []WSPurchaseInvoicePage
+	invoices, _ = UnmarshalStringToInvoice(response)
+	if IS_EMPTY && len(invoices) < 1 {
+		//Save logs
+		logger.AddToLog(EMPTY_LOG_PATH, EMPTY_LOG_DB+".log", logger.EMPTY, "Fetched invoices with empty", "")
 		return
 	}
 

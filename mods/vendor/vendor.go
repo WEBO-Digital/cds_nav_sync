@@ -1,7 +1,6 @@
 package vendor
 
 import (
-	"encoding/json"
 	"encoding/xml"
 	"fmt"
 	"nav_sync/config"
@@ -19,8 +18,11 @@ func Fetch() {
 	//Path
 	FETCH_URL := config.Config.Vendor.Fetch.URL
 	TOKEN_KEY := config.Config.Vendor.Fetch.APIKey
+	IS_EMPTY := config.Config.Vendor.EmptyLogs
 	PENDING_FILE_PATH := utils.VENDOR_PENDING_FILE_PATH
 	LOG_PATH := utils.VENDOR_LOG_PATH
+	EMPTY_LOG_PATH := utils.VENDOR_EMPTY_LOG_PATH
+	EMPTY_LOG_DB := utils.EMPTY_LOG_DB
 
 	utils.Console("Start fetching vendors")
 
@@ -30,11 +32,19 @@ func Fetch() {
 
 	//Fetch vendor data
 	response, err := manager.Fetch(FETCH_URL, normalapi.GET, TOKEN_KEY, nil)
-
 	if err != nil {
 		message := "Failed[1]: " + err.Error()
 		utils.Console(message)
 		logger.AddToLog(LOG_PATH, logFileName, logger.FAILURE, message, FETCH_URL)
+		return
+	}
+
+	//Checking if cointains data
+	var vendors []WSVendor
+	vendors, _ = UnmarshalStringToVendor(response)
+	if IS_EMPTY && len(vendors) < 1 {
+		//Save logs
+		logger.AddToLog(EMPTY_LOG_PATH, EMPTY_LOG_DB+".log", logger.EMPTY, "Fetched vendors with empty", "")
 		return
 	}
 
@@ -104,8 +114,9 @@ func Sync3() {
 
 		// Unmarshal JSON to struct
 		var vendors []WSVendor
+		vendors, err = UnmarshelByteToVendor(jsonData)
 
-		if err := json.Unmarshal([]byte(jsonData), &vendors); err != nil {
+		if err != nil {
 			message := "Failed[2]: error unmarshaling JSON -> " + err.Error()
 			utils.Console(message)
 			logger.AddToLog(LOG_PATH, logFileName, logger.FAILURE, message, DONE_FILE_PATH+fileName)

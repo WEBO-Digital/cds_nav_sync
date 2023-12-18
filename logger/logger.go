@@ -10,6 +10,7 @@ import (
 type ResponseType string
 
 const (
+	EMPTY   ResponseType = "EMPTY"
 	SUCCESS ResponseType = "SUCCESS"
 	FAILURE ResponseType = "FAILURE"
 )
