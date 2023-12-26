@@ -1,6 +1,7 @@
 package invoice
 
 import (
+	"encoding/json"
 	"encoding/xml"
 	"errors"
 	"fmt"
@@ -13,17 +14,14 @@ import (
 
 func UnmarshalStringToInvoice(stringData interface{}) ([]WSPurchaseInvoicePage, error) {
 	var invoices []WSPurchaseInvoicePage
-	// Type assertion to get the underlying string
-	str, ok := stringData.(string)
-	if !ok {
-		return invoices, errors.New("UnmarshalStringToInvoice: Conversion failed: not a string")
+
+	jsonData, err := json.Marshal(stringData)
+	if err != nil {
+		return invoices, errors.New("Conversion failed: " + err.Error())
 	}
 
-	// Convert the string to a byte slice
-	xmlData := []byte(str)
-
 	// Map Go struct to XML
-	err := xml.Unmarshal(xmlData, &invoices)
+	err = json.Unmarshal(jsonData, &invoices)
 	if err != nil {
 		return invoices, errors.New("UnmarshalStringToInvoice: Error decoding XML: " + err.Error())
 	}

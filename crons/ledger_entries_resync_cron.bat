@@ -12,5 +12,5 @@ rem Move console to the source directory
 rem And Then execute the command
 set "exePath=%sourceFolderPath%"
 cd "%exePath%"
-cds_sync.exe -action ledger_entries_resync 
+cds_sync.exe -action payment_resync 
 cd %SystemDrive%

@@ -45,7 +45,7 @@ func Fetch() {
 	ledgers, _ = UnmarshalStringToLedgerEntries(response)
 	if IS_EMPTY && len(ledgers) < 1 {
 		//Save logs
-		logger.AddToLog(EMPTY_LOG_PATH, EMPTY_LOG_DB+".log", logger.EMPTY, "Fetched ledgers with empty", "")
+		logger.AddToLog(EMPTY_LOG_PATH, EMPTY_LOG_DB+".log", logger.EMPTY, "Fetched payments", "")
 		return
 	}
 

@@ -44,7 +44,7 @@ func Fetch() {
 	invoices, _ = UnmarshalStringToInvoice(response)
 	if IS_EMPTY && len(invoices) < 1 {
 		//Save logs
-		logger.AddToLog(EMPTY_LOG_PATH, EMPTY_LOG_DB+".log", logger.EMPTY, "Fetched invoices with empty", "")
+		logger.AddToLog(EMPTY_LOG_PATH, EMPTY_LOG_DB+".log", logger.EMPTY, "Fetched invoices", "")
 		return
 	}
 

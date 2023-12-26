@@ -1,6 +1,7 @@
 package ledgerentries
 
 import (
+	"encoding/json"
 	"encoding/xml"
 	"errors"
 	"fmt"
@@ -13,17 +14,13 @@ import (
 
 func UnmarshalStringToLedgerEntries(stringData interface{}) ([]LedgerEntriesCreate, error) {
 	var ledgers []LedgerEntriesCreate
-	// Type assertion to get the underlying string
-	str, ok := stringData.(string)
-	if !ok {
-		return ledgers, errors.New("UnmarshalStringToLedgerEntries: Conversion failed: not a string")
+	jsonData, err := json.Marshal(stringData)
+	if err != nil {
+		return ledgers, errors.New("Conversion failed: " + err.Error())
 	}
 
-	// Convert the string to a byte slice
-	xmlData := []byte(str)
-
 	// Map Go struct to XML
-	err := xml.Unmarshal(xmlData, &ledgers)
+	err = json.Unmarshal(jsonData, &ledgers)
 	if err != nil {
 		return ledgers, errors.New("UnmarshalStringToLedgerEntries: Error decoding XML: " + err.Error())
 	}

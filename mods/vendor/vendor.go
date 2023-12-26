@@ -42,9 +42,10 @@ func Fetch() {
 	//Checking if cointains data
 	var vendors []WSVendor
 	vendors, _ = UnmarshalStringToVendor(response)
+
 	if IS_EMPTY && len(vendors) < 1 {
 		//Save logs
-		logger.AddToLog(EMPTY_LOG_PATH, EMPTY_LOG_DB+".log", logger.EMPTY, "Fetched vendors with empty", "")
+		logger.AddToLog(EMPTY_LOG_PATH, EMPTY_LOG_DB+".log", logger.EMPTY, "Fetched vendors", "")
 		return
 	}
 
@@ -164,14 +165,15 @@ func Sync3() {
 
 					// append success hash map and save hash map
 					// Update the Hash field for a specific key
+					navId := parseModel.Body.CreateResult.WSVendor.No
 					hashModels.Set(key, hashrecs.HashRec{
 						Hash:  hash,
-						NavID: parseModel.Body.CreateResult.WSVendor.No,
+						NavID: *navId,
 					})
 
 					//Add successed to an array
 					responseModel = append(responseModel, BackToCDSVendorResponse{
-						VendorNo:              parseModel.Body.CreateResult.WSVendor.No,
+						VendorNo:              *navId,
 						WeighbridgeSupplierID: key,
 					})
 				}
