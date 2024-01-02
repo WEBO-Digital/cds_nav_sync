@@ -48,7 +48,7 @@ func LoadYamlFile() Configuration {
 	//Reading config.yml file
 	data, err := ioutil.ReadFile("config.yml")
 	if err != nil {
-		utils.Fatal("Error loading config.yml file")
+		utils.Fatal("Error loading config.yml file", err.Error())
 	}
 
 	//Unmarshal config data

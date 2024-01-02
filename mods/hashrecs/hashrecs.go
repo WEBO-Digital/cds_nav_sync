@@ -3,8 +3,9 @@ package hashrecs
 import (
 	"encoding/hex"
 	"encoding/json"
-	"golang.org/x/crypto/sha3"
 	"io/ioutil"
+
+	"golang.org/x/crypto/sha3"
 
 	filesystem "nav_sync/mods/ahelpers/file_system"
 	data_parser "nav_sync/mods/ahelpers/parser"
@@ -38,6 +39,10 @@ func (hashrecs *HashRecs) Save() bool {
 
 func (hashrecs *HashRecs) GetHash(key string) string {
 	return hashrecs.Recs[key].Hash
+}
+
+func (hashrecs *HashRecs) GetNavId(key string) string {
+	return hashrecs.Recs[key].NavID
 }
 
 func Hash(content string) string {

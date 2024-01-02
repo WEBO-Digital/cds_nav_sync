@@ -133,12 +133,12 @@ func Sync3() {
 			modelStr, _ := data_parser.ParseModelToString(vendors[j])
 			hash := hashrecs.Hash(modelStr)
 			preHash := hashModels.GetHash(key)
+			reqPayload, _ := data_parser.ParseJsonToXml(vendors[j])
 
 			if preHash == "" {
 				utils.Console(fmt.Sprintf("Insert vendor: %s", key))
 
 				isSuccess, err, result := InsertToNav(vendors[j])
-				reqPayload, _ := data_parser.ParseJsonToXml(vendors[j])
 
 				if err != nil {
 					message := err.Error()
@@ -181,7 +181,74 @@ func Sync3() {
 
 			if preHash != "" && preHash != hash {
 				utils.Console(fmt.Sprintf("Update vendor: %s", key))
-				// @TODO: Update the vendor
+
+				navId := hashModels.GetNavId(key)
+				weighbridgeSupplierID := vendors[j].WeighbridgeSupplierID
+
+				//Get Vendor key
+				isSuccessGetKey, err, resultGetKey := GetKeyFromVendorId(navId, weighbridgeSupplierID)
+				if err != nil {
+					message := err.Error()
+					utils.Console(message)
+					payloads := fmt.Sprintf(`Request:\n %s`, reqPayload)
+					logger.AddToLog(LOG_PATH, logFileName, logger.FAILURE, message, payloads)
+					continue
+				}
+
+				if isSuccessGetKey {
+					// Convert the string to a byte slice
+					xmlData := []byte(resultGetKey.(string))
+
+					// Map Go struct to XML
+					var getKeyParseModel ReadResultVendor
+					err = xml.Unmarshal(xmlData, &getKeyParseModel)
+
+					if err != nil {
+						message := "Failed[6]: " + err.Error()
+						utils.Console(message)
+						payloads := fmt.Sprintf(`Request:\n %s \n\n Response:\n %s`, reqPayload, xmlData)
+						logger.AddToLog(LOG_PATH, logFileName, logger.FAILURE, message, payloads)
+					}
+
+					//utils.Console("Data----------> ", resultGetKey.(string))
+					//utils.Console("key-----------> ", getKeyParseModel.Body.ReadResult.ReadVendor.Key)
+					//utils.Console("no-----------> ", getKeyParseModel.Body.ReadResult.ReadVendor.No)
+
+					vendors[j].Key = &getKeyParseModel.Body.ReadResult.ReadVendor.Key
+					vendors[j].No = &getKeyParseModel.Body.ReadResult.ReadVendor.No
+
+					//Update Vendor
+					isSuccessUpdate, err, resultUpdate := UpdateToNav(vendors[j])
+					// Convert the string to a byte slice
+					xmlDataUpdate := []byte(resultUpdate.(string))
+
+					// // Map Go struct to XML
+					// var parseModelUpdate CreateResultVendor
+					// err = xml.Unmarshal(xmlDataUpdate, &parseModelUpdate)
+
+					if err != nil {
+						message := "Failed[6]: " + err.Error()
+						utils.Console(message)
+						payloads := fmt.Sprintf(`Request:\n %s \n\n Response:\n %s`, reqPayload, xmlDataUpdate)
+						logger.AddToLog(LOG_PATH, logFileName, logger.FAILURE, message, payloads)
+					}
+
+					if isSuccessUpdate {
+						// append success hash map and save hash map
+						// Update the Hash field for a specific key
+						navId := vendors[j].No
+						hashModels.Set(key, hashrecs.HashRec{
+							Hash:  hash,
+							NavID: *navId,
+						})
+
+						//Add successed to an array
+						responseModel = append(responseModel, BackToCDSVendorResponse{
+							VendorNo:              *navId,
+							WeighbridgeSupplierID: key,
+						})
+					}
+				}
 			}
 
 			if preHash != "" && preHash == hash {

@@ -1,29 +1,29 @@
 vendor:
   fetch:
     url: https://cds-customers.webo.dev/api/v1/nav/vendor
-    apikey: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwidXNlcl9pZCI6NX0.zl22NTtVYsoFBq7wMASpeLJY7DttcSevVhXjfaMGOpc
-  sync:
-    url: http://spnav.sellparker.local:7047/SP_NAV2013R2Test/WS/Sell%20%26%20Parker/Page/WSVendor
+    apikey: eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiI3MyIsInBydiI6IjIzYmQ1Yzg5NDlmNjAwYWRiMzllNzAxYzQwMDg3MmRiN2E1OTc2ZjciLCJ1c2VyX2lkIjo3MywidXVpZCI6IjNmZTNiMTY3LTEyZWQtNDlmYS04OTE4LWM4MzM0OGRiODkzZSIsInJvbGVfaWQiOjJ9.yD6Mm-iFjxj_5kYo6b_G7_oJ8A69cAOOf9NQSqi8nCE
   save:
     urlx: http://localhost/log/log.php
-    url: https://cds-customersuat.webo.dev/api/v1/nav/vendor
-    apikey: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwidXNlcl9pZCI6NX0.zl22NTtVYsoFBq7wMASpeLJY7DttcSevVhXjfaMGOpc
-  fake_insert: false
+    url: https://cds-customers.webo.dev/api/v1/nav/vendor
+    apikey: eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiI3MyIsInBydiI6IjIzYmQ1Yzg5NDlmNjAwYWRiMzllNzAxYzQwMDg3MmRiN2E1OTc2ZjciLCJ1c2VyX2lkIjo3MywidXVpZCI6IjNmZTNiMTY3LTEyZWQtNDlmYS04OTE4LWM4MzM0OGRiODkzZSIsInJvbGVfaWQiOjJ9.yD6Mm-iFjxj_5kYo6b_G7_oJ8A69cAOOf9NQSqi8nCE
+  sync:
+    url: http://spnav.sellparker.local:7047/SP_NAV2013R2Test/WS/Sell%20%26%20Parker/Page/WSVendor
+  fake_insert: true
   prefix: "DEV"
   empty_logs: true
 
 invoice:
   fetch:
     url: https://cds-tickets.webo.dev/api/v1/nav/refund
-    apikey: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwidXNlcl9pZCI6NX0.zl22NTtVYsoFBq7wMASpeLJY7DttcSevVhXjfaMGOpc
+    apikey: eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiI3MyIsInBydiI6IjIzYmQ1Yzg5NDlmNjAwYWRiMzllNzAxYzQwMDg3MmRiN2E1OTc2ZjciLCJ1c2VyX2lkIjo3MywidXVpZCI6IjNmZTNiMTY3LTEyZWQtNDlmYS04OTE4LWM4MzM0OGRiODkzZSIsInJvbGVfaWQiOjJ9.yD6Mm-iFjxj_5kYo6b_G7_oJ8A69cAOOf9NQSqi8nCE
+  save:
+    urlx: http://localhost/log/log.php
+    url: https://cds-tickets.webo.dev/api/v1/nav/refund
+    apikey: eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiI3MyIsInBydiI6IjIzYmQ1Yzg5NDlmNjAwYWRiMzllNzAxYzQwMDg3MmRiN2E1OTc2ZjciLCJ1c2VyX2lkIjo3MywidXVpZCI6IjNmZTNiMTY3LTEyZWQtNDlmYS04OTE4LWM4MzM0OGRiODkzZSIsInJvbGVfaWQiOjJ9.yD6Mm-iFjxj_5kYo6b_G7_oJ8A69cAOOf9NQSqi8nCE
   sync:
     url: http://SPNAV.sellparker.local:7047/SP_NAV2013R2Test/WS/Sell%20%26%20Parker/Page/WSPurchaseInvoicePage
   post:
     url: http://spnav.sellparker.local:7047/SP_NAV2013R2Test/WS/Sell%20%26%20Parker/Codeunit/WSPurchaseInvoice
-  save:
-    urlx: http://localhost/log/log.php
-    url: https://cds-tickets-uat.webo.dev/api/v1/nav/refund
-    apikey: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwidXNlcl9pZCI6NX0.zl22NTtVYsoFBq7wMASpeLJY7DttcSevVhXjfaMGOpc
   fake_insert: false
   prefix: "DEV"
   empty_logs: true
@@ -31,15 +31,15 @@ invoice:
 ledger_entries:
   fetch:
     url: https://cds-payments.webo.dev/api/v1/nav/payments
-    apikey: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwidXNlcl9pZCI6NX0.zl22NTtVYsoFBq7wMASpeLJY7DttcSevVhXjfaMGOpc
+    apikey: eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiI3MyIsInBydiI6IjIzYmQ1Yzg5NDlmNjAwYWRiMzllNzAxYzQwMDg3MmRiN2E1OTc2ZjciLCJ1c2VyX2lkIjo3MywidXVpZCI6IjNmZTNiMTY3LTEyZWQtNDlmYS04OTE4LWM4MzM0OGRiODkzZSIsInJvbGVfaWQiOjJ9.yD6Mm-iFjxj_5kYo6b_G7_oJ8A69cAOOf9NQSqi8nCE
+  save:
+    urlx: http://localhost/log/log.php
+    url: https://cds-payments.webo.dev/api/v1/nav/payments
+    apikey: eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiI3MyIsInBydiI6IjIzYmQ1Yzg5NDlmNjAwYWRiMzllNzAxYzQwMDg3MmRiN2E1OTc2ZjciLCJ1c2VyX2lkIjo3MywidXVpZCI6IjNmZTNiMTY3LTEyZWQtNDlmYS04OTE4LWM4MzM0OGRiODkzZSIsInJvbGVfaWQiOjJ9.yD6Mm-iFjxj_5kYo6b_G7_oJ8A69cAOOf9NQSqi8nCE
   sync:
     url: http://spnav.sellparker.local:7047/SP_NAV2013R2Test/WS/Sell%20%26%20Parker/Page/VendorPayment
   post:
     url: http://spnav.sellparker.local:7047/SP_NAV2013R2Test/WS/Sell%20%26%20Parker/Codeunit/WSPurchaseInvoice
-  save:
-    urlx: http://localhost/log/log.php
-    url:  https://cds-payments-uat.webo.dev/api/v1/nav/payments
-    apikey: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwidXNlcl9pZCI6NX0.zl22NTtVYsoFBq7wMASpeLJY7DttcSevVhXjfaMGOpc
   fake_insert: false
   empty_logs: true
 
