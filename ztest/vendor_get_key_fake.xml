@@ -5,7 +5,7 @@
 			xmlns="urn:microsoft-dynamics-schemas/page/wsvendor">
 			<WSVendor>
 				<Key>24;FwAAAAJ7/1YAMwA4ADcAMAA59;3992572900;</Key>
-				<No>V38698</No>
+				<No>V38610</No>
 				<Name>Intuji vendor - F5</Name>
 				<Address>Western Aus</Address>
 				<Address_2>Perth</Address_2>
@@ -28,7 +28,7 @@
 				<Gen_Bus_Posting_Group>SPL</Gen_Bus_Posting_Group>
 				<VAT_Bus_Posting_Group>LOCAL</VAT_Bus_Posting_Group>
 				<Vendor_Posting_Group>DOMESTIC</Vendor_Posting_Group>
-				<Invoice_Disc_Code>V38698</Invoice_Disc_Code>
+				<Invoice_Disc_Code>V38610</Invoice_Disc_Code>
 				<Prices_Including_VAT>false</Prices_Including_VAT>
 				<Prepayment_Percent>0</Prepayment_Percent>
 				<Application_Method>Manual</Application_Method>
