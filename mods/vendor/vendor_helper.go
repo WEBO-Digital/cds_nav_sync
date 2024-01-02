@@ -89,7 +89,7 @@ func UpdateToNav(vendor WSVendor) (bool, error, interface{}) {
 
 	if FAKE_INSERT {
 		//Fake Insert To Nav
-		isFakeSuccess, err, result := manager.ApiFakeResponse("/ztest/", "vendor_get_key_fake.xml")
+		isFakeSuccess, err, result := manager.ApiFakeResponse("/ztest/", "vendor_fake.xml")
 		return isFakeSuccess, err, result
 	}
 
