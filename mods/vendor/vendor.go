@@ -209,22 +209,14 @@ func Sync3() {
 						payloads := fmt.Sprintf(`Request:\n %s \n\n Response:\n %s`, reqPayload, xmlData)
 						logger.AddToLog(LOG_PATH, logFileName, logger.FAILURE, message, payloads)
 					}
-
-					//utils.Console("Data----------> ", resultGetKey.(string))
-					//utils.Console("key-----------> ", getKeyParseModel.Body.ReadResult.ReadVendor.Key)
-					//utils.Console("no-----------> ", getKeyParseModel.Body.ReadResult.ReadVendor.No)
-
 					vendors[j].Key = &getKeyParseModel.Body.ReadResult.ReadVendor.Key
 					vendors[j].No = &getKeyParseModel.Body.ReadResult.ReadVendor.No
 
 					//Update Vendor
 					isSuccessUpdate, err, resultUpdate := UpdateToNav(vendors[j])
+
 					// Convert the string to a byte slice
 					xmlDataUpdate := []byte(resultUpdate.(string))
-
-					// // Map Go struct to XML
-					// var parseModelUpdate CreateResultVendor
-					// err = xml.Unmarshal(xmlDataUpdate, &parseModelUpdate)
 
 					if err != nil {
 						message := "Failed[6]: " + err.Error()
