@@ -69,32 +69,3 @@ type ReadWSVendor struct {
 	Key string `xml:"Key,omitempty" json:"key,omitempty"`
 	No  string `xml:"No,omitempty" json:"no,omitempty"`
 }
-
-// type KeyInfo struct {
-// 	ID       string `xml:"ID"`
-// 	Username string `xml:"Username"`
-// 	Number   string `xml:"Number"`
-// }
-
-// func (k *KeyInfo) UnmarshalXML(d *xml.Decoder, start xml.StartElement) error {
-// 	type Alias KeyInfo
-// 	aux := &struct {
-// 		*Alias
-// 		Key string `xml:",chardata"`
-// 	}{
-// 		Alias: (*Alias)(k),
-// 	}
-// 	if err := d.DecodeElement(&aux, &start); err != nil {
-// 		return err
-// 	}
-
-// 	// Splitting the Key field into separate parts
-// 	keyParts := strings.Split(aux.Key, ";")
-// 	if len(keyParts) >= 3 {
-// 		k.ID = keyParts[0]
-// 		k.Username = keyParts[1]
-// 		k.Number = keyParts[2]
-// 	}
-
-// 	return nil
-// }
