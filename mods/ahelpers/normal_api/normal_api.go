@@ -42,7 +42,13 @@ func Post(url string, token string, payloadData interface{}) (interface{}, error
 
 	// Check the response status code
 	if response.StatusCode != http.StatusOK {
-		return nil, errors.New("unexpected status code: " + response.Status)
+		// Convert to JSON
+		body, err := ioutil.ReadAll(response.Body)
+		if err != nil {
+			return nil, errors.New("unexpected status code: " + response.Status)
+		}
+		bodyString := string(body)
+		return nil, errors.New(bodyString)
 	}
 
 	// Read the response body
@@ -50,13 +56,6 @@ func Post(url string, token string, payloadData interface{}) (interface{}, error
 	if err != nil {
 		return nil, err
 	}
-
-	// // Convert to JSON
-	// var responseData interface{}
-	// err = json.Unmarshal(body, &responseData)
-	// if err != nil {
-	// 	return nil, err
-	// }
 
 	// Convert to JSON
 	data, err := data_parser.ParseByteToJson(body)
@@ -70,12 +69,6 @@ func Post(url string, token string, payloadData interface{}) (interface{}, error
 
 func Get(url string, token string) (interface{}, error) {
 	// //Make response call
-	// response, err := http.Get(url)
-	// if err != nil {
-	// 	return nil, err
-	// }
-	// defer response.Body.Close()
-
 	// Create a new request with the GET method
 	request, err := http.NewRequest("GET", url, nil)
 	if err != nil {

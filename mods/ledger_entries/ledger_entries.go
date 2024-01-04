@@ -272,16 +272,18 @@ func sendToCDS(responseModel []BackToCDSLedgerEntriesResponse) {
 	//Path
 	RESPONSE_URL := config.Config.LedgerEntries.Save.URL
 	TOKEN_KEY := config.Config.Invoice.Fetch.APIKey
+	LOG_PATH := utils.LEDGER_ENTRIES_LOG_PATH
+
+	timestamp := utils.GetCurrentTime()
+	logFileGeneral := "sync-post-" + timestamp + ".log"
 
 	//Save Response vendor data to CDS
 	_, err := manager.Fetch(RESPONSE_URL, normalapi.POST, TOKEN_KEY, responseModel)
 
 	if err != nil {
-		message := "Failed:Fetch:1 " + err.Error()
-		utils.Console(message)
-		//logger.LogNavState(logger.SUCCESS, PENDING_LOG_FILE_PATH, PENDING_FAILURE, "", message, "")
+		message := "Failed:sendToCDS: "
+		data := err.Error()
+		utils.Console(message, data)
+		logger.AddToLog(LOG_PATH, logFileGeneral, logger.FAILURE, message, data)
 	}
-
-	// utils.Console("Successfully send to CDS system from nav ---> ledger entry: ", RESPONSE_URL)
-	// utils.Console(responseModel)
 }

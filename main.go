@@ -18,6 +18,7 @@ func main() {
 
 	//Specify scheduler runner
 	//cronjob.RunCron(1, 1, "vendor_fetch")
+
 }
 
 func RuncFunctionFromCommandArgument() {

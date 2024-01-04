@@ -305,18 +305,18 @@ func sendToCDS(responseModel []BackToCDSVendorResponse) {
 	//Path
 	RESPONSE_URL := config.Config.Vendor.Save.URL
 	TOKEN_KEY := config.Config.Vendor.Fetch.APIKey
+	LOG_PATH := utils.VENDOR_LOG_PATH
+
+	timestamp := utils.GetCurrentTime()
+	logFileGeneral := "sync-post-" + timestamp + ".log"
 
 	//Save Response vendor data to CDS
 	_, err := manager.Fetch(RESPONSE_URL, normalapi.POST, TOKEN_KEY, responseModel)
 
 	if err != nil {
-		message := "Failed:sendToCDS " + err.Error()
-		utils.Console(message)
-		//logger.LogNavState(logger.SUCCESS, PENDING_LOG_FILE_PATH, PENDING_FAILURE, "", message, "")
+		message := "Failed:sendToCDS: "
+		data := err.Error()
+		utils.Console(message, data)
+		logger.AddToLog(LOG_PATH, logFileGeneral, logger.FAILURE, message, data)
 	}
-
-	// fmt.Println(res)
-
-	// utils.Console("Successfully send to CDS system from nav ---> vendor: ", RESPONSE_URL)
-	// utils.Console(responseModel)
 }
