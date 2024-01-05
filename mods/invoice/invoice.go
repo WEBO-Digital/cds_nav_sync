@@ -74,7 +74,12 @@ func Sync3() {
 	utils.Console("Start sending invoices to NAV")
 
 	timestamp := utils.GetCurrentTime()
+	formattedTime := utils.StringToDate(timestamp, "2006-01-02T15-04-05.999")
 	logFileGeneral := "sync-pre-" + timestamp + ".log"
+
+	//utils.Console(formattedTime)
+
+	//return
 
 	//Get All the vendor pending data
 	fileNames, err := filesystem.GetAllFiles(PENDING_FILE_PATH)
@@ -140,6 +145,8 @@ func Sync3() {
 				modelStr, _ := data_parser.ParseModelToString(invoices[j])
 				hash := hashrecs.Hash(modelStr)
 				preHash := hashModels.GetHash(key)
+				invoices[j].DueDate = formattedTime
+				invoices[j].PostingDate = formattedTime
 
 				if preHash == "" {
 					utils.Console(fmt.Sprintf("Insert invoice: %s", key))

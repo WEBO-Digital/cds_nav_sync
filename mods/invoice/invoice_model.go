@@ -1,35 +1,36 @@
 package invoice
 
 type WSPurchaseInvoicePage struct {
-	RefundId                 int           `json:"refund_id,omitempty"`
-	BuyFromVendorNo          *string       `xml:"Buy_from_Vendor_No,omitempty" json:"buy_from_vendor_no,omitempty"`
-	BuyFromContactNo         string        `xml:"Buy_from_Contact_No,omitempty" json:"buy_from_contact_no,omitempty"`
-	BuyFromVendorName        string        `xml:"Buy_from_Vendor_Name,omitempty" json:"buy_from_vendor_name,omitempty"`
-	BuyFromCity              string        `xml:"Buy_from_City,omitempty" json:"buy_from_city,omitempty"`
-	BuyFromCountryRegionCode string        `xml:"Buy_from_Country_Region_Code,omitempty" json:"buy_from_country_region_code,omitempty"`
-	PostingDate              string        `xml:"Posting_Date,omitempty" json:"posting_date,omitempty"`
-	DocumentDate             string        `xml:"Document_Date,omitempty" json:"document_date,omitempty"`
-	VendorInvoiceNo          string        `xml:"Vendor_Invoice_No,omitempty" json:"vendor_invoice_no,omitempty"`
-	PayToVendorNo            *string       `xml:"Pay_to_Vendor_No,omitempty" json:"pay_to_vendor_no,omitempty"`
-	PayToName                string        `xml:"Pay_to_Name,omitempty" json:"pay_to_name,omitempty"`
-	PayToCity                string        `xml:"Pay_to_City,omitempty" json:"pay_to_city,omitempty"`
-	PayToCountryRegionCode   string        `xml:"Pay_to_Country_Region_Code,omitempty" json:"pay_to_country_region_code,omitempty"`
-	PaymentTermsCode         string        `xml:"Payment_Terms_Code,omitempty" json:"payment_terms_code,omitempty"`
-	DueDate                  string        `xml:"Due_Date,omitempty" json:"due_date,omitempty"`
-	VATBusPostingGroup       string        `xml:"VAT_Bus_Posting_Group,omitempty" json:"vat_bus_posting_group,omitempty"`
-	ShipToName               string        `xml:"Ship_to_Name,omitempty" json:"ship_to_name,omitempty"`
-	ShipToAddress            string        `xml:"Ship_to_Address,omitempty" json:"ship_to_address,omitempty"`
-	ShipToAddress2           string        `xml:"Ship_to_Address_2,omitempty" json:"ship_to_address_2,omitempty"`
-	ShipToPostCode           string        `xml:"Ship_to_Post_Code,omitempty" json:"ship_to_post_code,omitempty"`
-	ShipToCity               string        `xml:"Ship_to_City,omitempty" json:"ship_to_city,omitempty"`
-	ShipToCountryRegionCode  string        `xml:"Ship_to_Country_Region_Code,omitempty" json:"ship_to_country_region_code,omitempty"`
-	LocationCode             string        `xml:"Location_Code,omitempty" json:"location_code,omitempty"`
-	ExpectedReceiptDate      string        `xml:"Expected_Receipt_Date,omitempty" json:"expected_receipt_date,omitempty"`
-	PurchLines               []PurchLines2 `xml:"PurchLines,omitempty" json:"purch_lines,omitempty"`
+	RefundId                 int         `json:"refund_id,omitempty"`
+	BuyFromVendorNo          *string     `xml:"Buy_from_Vendor_No,omitempty" json:"buy_from_vendor_no,omitempty"`
+	BuyFromContactNo         string      `xml:"Buy_from_Contact_No,omitempty" json:"buy_from_contact_no,omitempty"`
+	BuyFromVendorName        string      `xml:"Buy_from_Vendor_Name,omitempty" json:"buy_from_vendor_name,omitempty"`
+	BuyFromCity              string      `xml:"Buy_from_City,omitempty" json:"buy_from_city,omitempty"`
+	BuyFromCountryRegionCode string      `xml:"Buy_from_Country_Region_Code,omitempty" json:"buy_from_country_region_code,omitempty"`
+	PostingDate              string      `xml:"Posting_Date,omitempty" json:"posting_date,omitempty"`
+	DocumentDate             string      `xml:"Document_Date,omitempty" json:"document_date,omitempty"`
+	VendorInvoiceNo          string      `xml:"Vendor_Invoice_No,omitempty" json:"vendor_invoice_no,omitempty"`
+	PayToVendorNo            *string     `xml:"Pay_to_Vendor_No,omitempty" json:"pay_to_vendor_no,omitempty"`
+	PayToName                string      `xml:"Pay_to_Name,omitempty" json:"pay_to_name,omitempty"`
+	PayToCity                string      `xml:"Pay_to_City,omitempty" json:"pay_to_city,omitempty"`
+	PayToCountryRegionCode   string      `xml:"Pay_to_Country_Region_Code,omitempty" json:"pay_to_country_region_code,omitempty"`
+	PaymentTermsCode         string      `xml:"Payment_Terms_Code,omitempty" json:"payment_terms_code,omitempty"`
+	DueDate                  string      `xml:"Due_Date,omitempty" json:"due_date,omitempty"`
+	VATBusPostingGroup       string      `xml:"VAT_Bus_Posting_Group,omitempty" json:"vat_bus_posting_group,omitempty"`
+	ShipToName               string      `xml:"Ship_to_Name,omitempty" json:"ship_to_name,omitempty"`
+	ShipToAddress            string      `xml:"Ship_to_Address,omitempty" json:"ship_to_address,omitempty"`
+	ShipToAddress2           string      `xml:"Ship_to_Address_2,omitempty" json:"ship_to_address_2,omitempty"`
+	ShipToPostCode           string      `xml:"Ship_to_Post_Code,omitempty" json:"ship_to_post_code,omitempty"`
+	ShipToCity               string      `xml:"Ship_to_City,omitempty" json:"ship_to_city,omitempty"`
+	ShipToCountryRegionCode  string      `xml:"Ship_to_Country_Region_Code,omitempty" json:"ship_to_country_region_code,omitempty"`
+	LocationCode             string      `xml:"Location_Code,omitempty" json:"location_code,omitempty"`
+	ExpectedReceiptDate      string      `xml:"Expected_Receipt_Date,omitempty" json:"expected_receipt_date,omitempty"`
+	InvoiceReceivedDate      string      `xml:"Invoice_Received_Date,omitempty" json:"invoice_received_date,omitempty"`
+	PurchLines               PurchLines2 `xml:"PurchLines,omitempty" json:"purch_lines,omitempty"`
 }
 
 type PurchLines2 struct {
-	PurchInvoiceLine PurchInvoiceLine `xml:"Purch_Invoice_Line,omitempty" json:"purch_invoice_line,omitempty"`
+	PurchInvoiceLine []PurchInvoiceLine `xml:"Purch_Invoice_Line,omitempty" json:"purch_invoice_line,omitempty"`
 }
 
 type PurchInvoiceLine struct {

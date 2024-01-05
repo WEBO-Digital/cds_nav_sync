@@ -74,6 +74,7 @@ func Sync3() {
 	utils.Console("Start sending invoices to NAV")
 
 	timestamp := utils.GetCurrentTime()
+	formattedTime := utils.StringToDate(timestamp, "2006-01-02T15-04-05.999")
 	logFileGeneral := "sync-pre-" + timestamp + ".log"
 
 	//Get All the vendor pending data
@@ -135,6 +136,7 @@ func Sync3() {
 				modelStr, _ := data_parser.ParseModelToString(ledger_entries[j])
 				hash := hashrecs.Hash(modelStr)
 				preHash := hashModels.GetHash(key)
+				ledger_entries[j].VendorPayment.PostingDate = formattedTime
 
 				if preHash == "" {
 					utils.Console(fmt.Sprintf("Insert payment: %s", key))
@@ -174,8 +176,6 @@ func Sync3() {
 
 						if isSuccessPost {
 							//map
-							// vendorNo := createInvoiceRes.Body.CreateResult.WSPurchaseInvoicePage.BuyFromVendorNo
-							// purchaseInvoiceNo := createInvoiceRes.Body.CreateResult.WSPurchaseInvoicePage.No
 							documentNo := createLedgerEntryRes.Body.CreateResult.VendorPayment.DocumentNo
 							documentNoStr := strconv.Itoa(documentNo)
 

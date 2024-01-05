@@ -22,6 +22,16 @@ func GetCurrentTime() string {
 	return timestamp
 }
 
+func StringToDate(date_time string, format string) string {
+	parsedTime, err := time.Parse(format, date_time)
+	if err != nil {
+		fmt.Println("Error parsing date:", err)
+		return ""
+	}
+	formattedTime := parsedTime.Format("2006-01-02")
+	return formattedTime
+}
+
 func MatchRegexExpression(value string, pattern string) bool {
 	// Define the regular expression pattern
 	//pattern := `<Create_Result[^>]*>`

@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"nav_sync/config"
+	filesystem "nav_sync/mods/ahelpers/file_system"
 	"nav_sync/mods/ahelpers/manager"
 	navapi "nav_sync/mods/ahelpers/nav_api"
 	data_parser "nav_sync/mods/ahelpers/parser"
@@ -103,6 +104,11 @@ func InsertToNav(invoice WSPurchaseInvoicePage) (bool, error, interface{}) {
 		string(xmlData),
 	)
 
+	err = filesystem.Save("/data/invoice/test/", utils.GetCurrentTime(), xmlPayload)
+	if err != nil {
+		utils.Console(err.Error())
+	}
+
 	//Sync to Nav
 	isSuccess := false
 	result, err = manager.Sync(url, navapi.POST, xmlPayload, NTLM_USERNAME, NTLM_PASSWORD)
@@ -172,7 +178,7 @@ func PostToNavAfterInsert(envelope PostInvoiceEnvelope) (bool, error, interface{
 		message := fmt.Sprintf("Failed:Sync:5 Could not convert to string: ", result)
 		return isSuccess, errors.New(message), result
 	} else {
-		utils.Console(result)
+		//utils.Console(result)
 		resultPostStr, ok := result.(string)
 		if !ok {
 			// The type assertion failed
